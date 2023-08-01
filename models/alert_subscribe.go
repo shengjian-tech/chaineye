@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/ormx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
@@ -14,64 +15,76 @@ import (
 	"github.com/toolkits/pkg/logger"
 )
 
+const AlertSubscribeTableName = "alert_subscribe"
+
 type AlertSubscribe struct {
-	Id                int64        `json:"id" gorm:"primaryKey"`
-	Name              string       `json:"name"`     // AlertSubscribe name
-	Disabled          int          `json:"disabled"` // 0: enabled, 1: disabled
-	GroupId           int64        `json:"group_id"`
-	Prod              string       `json:"prod"`
-	Cate              string       `json:"cate"`
-	DatasourceIds     string       `json:"-" gorm:"datasource_ids"` // datasource ids
-	DatasourceIdsJson []int64      `json:"datasource_ids" gorm:"-"` // for fe
-	Cluster           string       `json:"cluster"`                 // take effect by clusters, seperated by space
-	RuleId            int64        `json:"rule_id"`
-	Severities        string       `json:"-" gorm:"severities"` // sub severity
-	SeveritiesJson    []int        `json:"severities" gorm:"-"` // for fe
-	ForDuration       int64        `json:"for_duration"`        // for duration, unit: second
-	RuleName          string       `json:"rule_name" gorm:"-"`  // for fe
-	Tags              ormx.JSONArr `json:"tags"`
-	RedefineSeverity  int          `json:"redefine_severity"`
-	NewSeverity       int          `json:"new_severity"`
-	RedefineChannels  int          `json:"redefine_channels"`
-	NewChannels       string       `json:"new_channels"`
-	UserGroupIds      string       `json:"user_group_ids"`
-	UserGroups        []UserGroup  `json:"user_groups" gorm:"-"` // for fe
-	RedefineWebhooks  int          `json:"redefine_webhooks"`
-	Webhooks          string       `json:"-" gorm:"webhooks"`
-	WebhooksJson      []string     `json:"webhooks" gorm:"-"`
-	ExtraConfig       string       `json:"-" grom:"extra_config"`
-	ExtraConfigJson   interface{}  `json:"extra_config" gorm:"-"` // for fe
-	CreateBy          string       `json:"create_by"`
-	CreateAt          int64        `json:"create_at"`
-	UpdateBy          string       `json:"update_by"`
-	UpdateAt          int64        `json:"update_at"`
-	ITags             []TagFilter  `json:"-" gorm:"-"` // inner tags
+	zorm.EntityStruct
+	Id                int64        `json:"id" column:"id"`
+	Name              string       `json:"name" column:"name"`         // AlertSubscribe name
+	Disabled          int          `json:"disabled" column:"disabled"` // 0: enabled, 1: disabled
+	GroupId           int64        `json:"group_id" column:"group_id"`
+	Prod              string       `json:"prod" column:"prod"`
+	Cate              string       `json:"cate" column:"cate"`
+	DatasourceIds     string       `json:"-" column:"datasource_ids"` // datasource ids
+	DatasourceIdsJson []int64      `json:"datasource_ids"`            // for fe
+	Cluster           string       `json:"cluster" column:"cluster"`  // take effect by clusters, seperated by space
+	RuleId            int64        `json:"rule_id" column:"rule_id"`
+	Severities        string       `json:"-" column:"severities"`              // sub severity
+	SeveritiesJson    []int        `json:"severities"`                         // for fe
+	ForDuration       int64        `json:"for_duration" column:"for_duration"` // for duration, unit: second
+	RuleName          string       `json:"rule_name"`                          // for fe
+	Tags              ormx.JSONArr `json:"tags" column:"tags"`
+	RedefineSeverity  int          `json:"redefine_severity" column:"redefine_severity"`
+	NewSeverity       int          `json:"new_severity" column:"new_severity"`
+	RedefineChannels  int          `json:"redefine_channels" column:"redefine_channels"`
+	NewChannels       string       `json:"new_channels" column:"new_channels"`
+	UserGroupIds      string       `json:"user_group_ids" column:"user_group_ids"`
+	UserGroups        []UserGroup  `json:"user_groups"` // for fe
+	RedefineWebhooks  int          `json:"redefine_webhooks" column:"redefine_webhooks"`
+	Webhooks          string       `json:"-" column:"webhooks"`
+	WebhooksJson      []string     `json:"webhooks"`
+	ExtraConfig       string       `json:"-" column:"extra_config"`
+	ExtraConfigJson   interface{}  `json:"extra_config"` // for fe
+	CreateBy          string       `json:"create_by" column:"create_by"`
+	CreateAt          int64        `json:"create_at" column:"create_at"`
+	UpdateBy          string       `json:"update_by" column:"update_by"`
+	UpdateAt          int64        `json:"update_at" column:"update_at"`
+	ITags             []TagFilter  `json:"-"` // inner tags
 }
 
-func (s *AlertSubscribe) TableName() string {
-	return "alert_subscribe"
+func (s *AlertSubscribe) GetTableName() string {
+	return AlertSubscribeTableName
 }
 
-func AlertSubscribeGets(ctx *ctx.Context, groupId int64) (lst []AlertSubscribe, err error) {
-	err = DB(ctx).Where("group_id=?", groupId).Order("id desc").Find(&lst).Error
-	return
+func AlertSubscribeGets(ctx *ctx.Context, groupId int64) ([]AlertSubscribe, error) {
+	lst := make([]AlertSubscribe, 0)
+	finder := zorm.NewSelectFinder(AlertSubscribeTableName).Append("WHERE group_id=? order by id desc", groupId)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Where("group_id=?", groupId).Order("id desc").Find(&lst).Error
+	return lst, err
 }
 
-func AlertSubscribeGetsByService(ctx *ctx.Context) (lst []AlertSubscribe, err error) {
-	err = DB(ctx).Find(&lst).Error
+func AlertSubscribeGetsByService(ctx *ctx.Context) ([]AlertSubscribe, error) {
+	lst := make([]AlertSubscribe, 0)
+	finder := zorm.NewSelectFinder(AlertSubscribeTableName)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err = DB(ctx).Find(&lst).Error
 	if err != nil {
-		return
+		return lst, err
 	}
 
 	for i := range lst {
 		lst[i].DB2FE()
 	}
-	return
+	return lst, err
 }
 
 func AlertSubscribeGet(ctx *ctx.Context, where string, args ...interface{}) (*AlertSubscribe, error) {
-	var lst []*AlertSubscribe
-	err := DB(ctx).Where(where, args...).Find(&lst).Error
+	lst := make([]AlertSubscribe, 0)
+	finder := zorm.NewSelectFinder(AlertSubscribeTableName)
+	AppendWhere(finder, where, args...)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Where(where, args...).Find(&lst).Error
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +93,7 @@ func AlertSubscribeGet(ctx *ctx.Context, where string, args ...interface{}) (*Al
 		return nil, nil
 	}
 
-	return lst[0], nil
+	return &lst[0], nil
 }
 
 func (s *AlertSubscribe) IsDisabled() bool {
@@ -273,14 +286,15 @@ func (s *AlertSubscribe) FillUserGroups(ctx *ctx.Context, cache map[int64]*UserG
 
 	if delete {
 		// some user-group already deleted
-		DB(ctx).Model(s).Update("user_group_ids", strings.Join(exists, " "))
+		//DB(ctx).Model(s).Update("user_group_ids", strings.Join(exists, " "))
+		UpdateColumn(ctx, AlertSubscribeTableName, s.Id, "user_group_ids", strings.Join(exists, " "))
 		s.UserGroupIds = strings.Join(exists, " ")
 	}
 
 	return nil
 }
 
-func (s *AlertSubscribe) Update(ctx *ctx.Context, selectField interface{}, selectFields ...interface{}) error {
+func (s *AlertSubscribe) Update(ctx *ctx.Context, selectFields ...string) error {
 	if err := s.Verify(); err != nil {
 		return err
 	}
@@ -289,14 +303,19 @@ func (s *AlertSubscribe) Update(ctx *ctx.Context, selectField interface{}, selec
 		return err
 	}
 
-	return DB(ctx).Model(s).Select(selectField, selectFields...).Updates(s).Error
+	return Update(ctx, s, selectFields)
+	//return DB(ctx).Model(s).Select(selectFields...).Updates(s).Error
 }
 
 func AlertSubscribeDel(ctx *ctx.Context, ids []int64) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	return DB(ctx).Where("id in ?", ids).Delete(new(AlertSubscribe)).Error
+
+	finder := zorm.NewDeleteFinder(AlertSubscribeTableName).Append("WHERE id in (?)", ids)
+	return UpdateFinder(ctx, finder)
+
+	//return DB(ctx).Where("id in ?", ids).Delete(new(AlertSubscribe)).Error
 }
 
 func AlertSubscribeStatistics(ctx *ctx.Context) (*Statistics, error) {
@@ -305,15 +324,19 @@ func AlertSubscribeStatistics(ctx *ctx.Context) (*Statistics, error) {
 		return s, err
 	}
 
-	session := DB(ctx).Model(&AlertSubscribe{}).Select("count(*) as total", "max(update_at) as last_updated")
+	return StatisticsGet(ctx, AlertSubscribeTableName)
 
-	var stats []*Statistics
-	err := session.Find(&stats).Error
-	if err != nil {
-		return nil, err
-	}
+	/*
+		session := DB(ctx).Model(&AlertSubscribe{}).Select("count(*) as total", "max(update_at) as last_updated")
 
-	return stats[0], nil
+		var stats []*Statistics
+		err := session.Find(&stats).Error
+		if err != nil {
+			return nil, err
+		}
+
+		return stats[0], nil
+	*/
 }
 
 func AlertSubscribeGetsAll(ctx *ctx.Context) ([]*AlertSubscribe, error) {
@@ -329,10 +352,12 @@ func AlertSubscribeGetsAll(ctx *ctx.Context) ([]*AlertSubscribe, error) {
 	}
 
 	// get my cluster's subscribes
-	session := DB(ctx).Model(&AlertSubscribe{})
+	//session := DB(ctx).Model(&AlertSubscribe{})
 
-	var lst []*AlertSubscribe
-	err := session.Find(&lst).Error
+	lst := make([]*AlertSubscribe, 0)
+	//err := session.Find(&lst).Error
+	finder := zorm.NewSelectFinder(AlertSubscribeTableName)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
 	return lst, err
 }
 
@@ -375,12 +400,15 @@ func (s *AlertSubscribe) ModifyEvent(event *AlertCurEvent) {
 }
 
 func (s *AlertSubscribe) UpdateFieldsMap(ctx *ctx.Context, fields map[string]interface{}) error {
-	return DB(ctx).Model(s).Updates(fields).Error
+	return UpdateFieldsMap(ctx, s, s.Id, fields)
+	//return DB(ctx).Model(s).Updates(fields).Error
 }
 
 func AlertSubscribeUpgradeToV6(ctx *ctx.Context, dsm map[string]Datasource) error {
-	var lst []*AlertSubscribe
-	err := DB(ctx).Find(&lst).Error
+	lst := make([]AlertSubscribe, 0)
+	finder := zorm.NewSelectFinder(AlertSubscribeTableName)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Find(&lst).Error
 	if err != nil {
 		return err
 	}

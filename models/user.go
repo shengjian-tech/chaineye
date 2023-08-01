@@ -1,11 +1,13 @@
 package models
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
 	"time"
 
+	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/ldapx"
 	"github.com/ccfos/nightingale/v6/pkg/ormx"
@@ -16,7 +18,6 @@ import (
 	"github.com/toolkits/pkg/logger"
 	"github.com/toolkits/pkg/slice"
 	"github.com/toolkits/pkg/str"
-	"gorm.io/gorm"
 )
 
 const (
@@ -40,27 +41,31 @@ var (
 	DefaultChannels = []string{Dingtalk, Wecom, Feishu, Mm, Telegram, Email, FeishuCard}
 )
 
+const UserTableName = "users"
+
 type User struct {
-	Id         int64        `json:"id" gorm:"primaryKey"`
-	Username   string       `json:"username"`
-	Nickname   string       `json:"nickname"`
-	Password   string       `json:"-"`
-	Phone      string       `json:"phone"`
-	Email      string       `json:"email"`
-	Portrait   string       `json:"portrait"`
-	Roles      string       `json:"-"`              // 这个字段写入数据库
-	RolesLst   []string     `json:"roles" gorm:"-"` // 这个字段和前端交互
-	Contacts   ormx.JSONObj `json:"contacts"`       // 内容为 map[string]string 结构
-	Maintainer int          `json:"maintainer"`     // 是否给管理员发消息 0:not send 1:send
-	CreateAt   int64        `json:"create_at"`
-	CreateBy   string       `json:"create_by"`
-	UpdateAt   int64        `json:"update_at"`
-	UpdateBy   string       `json:"update_by"`
-	Admin      bool         `json:"admin" gorm:"-"` // 方便前端使用
+	// 引入默认的struct,隔离IEntityStruct的方法改动
+	zorm.EntityStruct
+	Id         int64        `json:"id" column:"id"`
+	Username   string       `json:"username" column:"username"`
+	Nickname   string       `json:"nickname" column:"nickname"`
+	Password   string       `json:"-" column:"password"`
+	Phone      string       `json:"phone" column:"phone"`
+	Email      string       `json:"email" column:"email"`
+	Portrait   string       `json:"portrait" column:"portrait"`
+	Roles      string       `json:"-" column:"roles"`               // 这个字段写入数据库
+	RolesLst   []string     `json:"roles"`                          // 这个字段和前端交互
+	Contacts   ormx.JSONObj `json:"contacts" column:"contacts"`     // 内容为 map[string]string 结构
+	Maintainer int          `json:"maintainer" column:"maintainer"` // 是否给管理员发消息 0:not send 1:send
+	CreateAt   int64        `json:"create_at" column:"create_at"`
+	CreateBy   string       `json:"create_by" column:"create_by"`
+	UpdateAt   int64        `json:"update_at" column:"update_at"`
+	UpdateBy   string       `json:"update_by" column:"update_by"`
+	Admin      bool         `json:"admin"` // 方便前端使用
 }
 
-func (u *User) TableName() string {
-	return "users"
+func (u *User) GetTableName() string {
+	return UserTableName
 }
 
 func (u *User) DB2FE() error {
@@ -127,12 +132,12 @@ func (u *User) Add(ctx *ctx.Context) error {
 	return Insert(ctx, u)
 }
 
-func (u *User) Update(ctx *ctx.Context, selectField interface{}, selectFields ...interface{}) error {
+func (u *User) Update(ctx *ctx.Context, selectFields ...string) error {
 	if err := u.Verify(); err != nil {
 		return err
 	}
-
-	return DB(ctx).Model(u).Select(selectField, selectFields...).Updates(u).Error
+	return Update(ctx, u, selectFields)
+	//return DB(ctx).Model(u).Select(selectField, selectFields...).Updates(u).Error
 }
 
 func (u *User) UpdateAllFields(ctx *ctx.Context) error {
@@ -141,29 +146,45 @@ func (u *User) UpdateAllFields(ctx *ctx.Context) error {
 	}
 
 	u.UpdateAt = time.Now().Unix()
-	return DB(ctx).Model(u).Select("*").Updates(u).Error
+	return Update(ctx, u, nil)
+	//return DB(ctx).Model(u).Select("*").Updates(u).Error
 }
 
 func (u *User) UpdatePassword(ctx *ctx.Context, password, updateBy string) error {
-	return DB(ctx).Model(u).Updates(map[string]interface{}{
-		"password":  password,
-		"update_at": time.Now().Unix(),
-		"update_by": updateBy,
-	}).Error
+	finder := zorm.NewUpdateFinder(UserTableName).Append("password=?,update_at=?,update_by=? WHERE id=?", password, time.Now().Unix(), updateBy, u.Id)
+	return UpdateFinder(ctx, finder)
+	/*
+		return DB(ctx).Model(u).Updates(map[string]interface{}{
+			"password":  password,
+			"update_at": time.Now().Unix(),
+			"update_by": updateBy,
+		}).Error
+	*/
 }
 
 func (u *User) Del(ctx *ctx.Context) error {
-	return DB(ctx).Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("user_id=?", u.Id).Delete(&UserGroupMember{}).Error; err != nil {
-			return err
+	_, err := zorm.Transaction(ctx.Ctx, func(ctx context.Context) (interface{}, error) {
+		f1 := zorm.NewDeleteFinder(UserGroupMemberTableName).Append("WHERE user_id=?", u.Id)
+		_, err := zorm.UpdateFinder(ctx, f1)
+		if err != nil {
+			return nil, err
 		}
-
-		if err := tx.Where("id=?", u.Id).Delete(&User{}).Error; err != nil {
-			return err
-		}
-
-		return nil
+		return zorm.Delete(ctx, u)
 	})
+	return err
+	/*
+		return DB(ctx).Transaction(func(tx *zorm.DBDao) error {
+			if err := tx.Where("user_id=?", u.Id).Delete(&UserGroupMember{}).Error; err != nil {
+				return err
+			}
+
+			if err := tx.Where("id=?", u.Id).Delete(&User{}).Error; err != nil {
+				return err
+			}
+
+			return nil
+		})
+	*/
 }
 
 func (u *User) ChangePassword(ctx *ctx.Context, oldpass, newpass string) error {
@@ -185,8 +206,11 @@ func (u *User) ChangePassword(ctx *ctx.Context, oldpass, newpass string) error {
 }
 
 func UserGet(ctx *ctx.Context, where string, args ...interface{}) (*User, error) {
-	var lst []*User
-	err := DB(ctx).Where(where, args...).Find(&lst).Error
+	lst := make([]*User, 0)
+	finder := zorm.NewSelectFinder(UserTableName)
+	AppendWhere(finder, where, args...)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Where(where, args...).Find(&lst).Error
 	if err != nil {
 		return nil, err
 	}
@@ -230,8 +254,8 @@ func InitRoot(ctx *ctx.Context) {
 		fmt.Println("failed to crypto pass:", err)
 		os.Exit(1)
 	}
-
-	err = DB(ctx).Model(user).Update("password", newPass).Error
+	err = UpdateColumn(ctx, UserTableName, user.Id, "password", newPass)
+	//err = DB(ctx).Model(user).Update("password", newPass).Error
 	if err != nil {
 		fmt.Println("failed to update root password:", err)
 		os.Exit(1)
@@ -303,7 +327,8 @@ func LdapLogin(ctx *ctx.Context, username, pass, roles string, ldap *ldapx.SsoCl
 
 	if user.Id > 0 {
 		if coverAttributes {
-			err := DB(ctx).Updates(user).Error
+			_, err := zorm.Update(ctx.Ctx, user)
+			//err := DB(ctx).Updates(user).Error
 			if err != nil {
 				return nil, errors.WithMessage(err, "failed to update user")
 			}
@@ -321,19 +346,21 @@ func LdapLogin(ctx *ctx.Context, username, pass, roles string, ldap *ldapx.SsoCl
 	user.UpdateAt = now
 	user.CreateBy = "ldap"
 	user.UpdateBy = "ldap"
-
-	err = DB(ctx).Create(user).Error
+	_, err = zorm.Insert(ctx.Ctx, user)
+	//err = DB(ctx).Create(user).Error
 	return user, err
 }
 
 func UserTotal(ctx *ctx.Context, query string) (num int64, err error) {
+	finder := zorm.NewSelectFinder(UserTableName, "count(*)")
 	if query != "" {
 		q := "%" + query + "%"
-		num, err = Count(DB(ctx).Model(&User{}).Where("username like ? or nickname like ? or phone like ? or email like ?", q, q, q, q))
-	} else {
-		num, err = Count(DB(ctx).Model(&User{}))
-	}
-
+		finder.Append("WHERE username like ? or nickname like ? or phone like ? or email like ?", q, q, q, q)
+		//num, err = Count(DB(ctx).Model(&User{}).Where("username like ? or nickname like ? or phone like ? or email like ?", q, q, q, q))
+	} //else {
+	//	num, err = Count(DB(ctx).Model(&User{}))
+	//}
+	num, err = Count(ctx, finder)
 	if err != nil {
 		return num, errors.WithMessage(err, "failed to count user")
 	}
@@ -342,14 +369,22 @@ func UserTotal(ctx *ctx.Context, query string) (num int64, err error) {
 }
 
 func UserGets(ctx *ctx.Context, query string, limit, offset int) ([]User, error) {
-	session := DB(ctx).Limit(limit).Offset(offset).Order("username")
+	finder := zorm.NewSelectFinder(UserTableName)
+	finder.SelectTotalCount = false
+	page := zorm.NewPage()
+	page.PageSize = limit
+	page.PageNo = offset / limit
+	//session := DB(ctx).Limit(limit).Offset(offset).Order("username")
 	if query != "" {
 		q := "%" + query + "%"
-		session = session.Where("username like ? or nickname like ? or phone like ? or email like ?", q, q, q, q)
+		finder.Append("WhERE username like ? or nickname like ? or phone like ? or email like ?", q, q, q, q)
+		//session = session.Where("username like ? or nickname like ? or phone like ? or email like ?", q, q, q, q)
 	}
+	finder.Append("order by username asc ")
 
-	var users []User
-	err := session.Find(&users).Error
+	users := make([]User, 0)
+	err := zorm.Query(ctx.Ctx, finder, &users, page)
+	//err := session.Find(&users).Error
 	if err != nil {
 		return users, errors.WithMessage(err, "failed to query user")
 	}
@@ -369,8 +404,10 @@ func UserGetAll(ctx *ctx.Context) ([]*User, error) {
 		return lst, err
 	}
 
-	var lst []*User
-	err := DB(ctx).Find(&lst).Error
+	lst := make([]*User, 0)
+	finder := zorm.NewSelectFinder(UserTableName)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Find(&lst).Error
 	if err == nil {
 		for i := 0; i < len(lst); i++ {
 			lst[i].RolesLst = strings.Fields(lst[i].Roles)
@@ -385,8 +422,10 @@ func UserGetsByIds(ctx *ctx.Context, ids []int64) ([]User, error) {
 		return []User{}, nil
 	}
 
-	var lst []User
-	err := DB(ctx).Where("id in ?", ids).Order("username").Find(&lst).Error
+	lst := make([]User, 0)
+	finder := zorm.NewSelectFinder(UserTableName).Append("WHERE id in (?) order by username asc", ids)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Where("id in ?", ids).Order("username").Find(&lst).Error
 	if err == nil {
 		for i := 0; i < len(lst); i++ {
 			lst[i].RolesLst = strings.Fields(lst[i].Roles)
@@ -432,7 +471,7 @@ func (u *User) CanDoBusiGroup(ctx *ctx.Context, bg *BusiGroup, permFlag ...strin
 		return false, nil
 	}
 
-	num, err := UserGroupMemberCount(ctx, "user_id = ? and group_id in ?", u.Id, ugids)
+	num, err := UserGroupMemberCount(ctx, "user_id = ? and group_id in (?)", u.Id, ugids)
 	return num > 0, err
 }
 
@@ -449,16 +488,18 @@ func UserStatistics(ctx *ctx.Context) (*Statistics, error) {
 		s, err := poster.GetByUrls[*Statistics](ctx, "/v1/n9e/statistic?name=user")
 		return s, err
 	}
+	return StatisticsGet(ctx, UserTableName)
+	/*
+		session := DB(ctx).Model(&User{}).Select("count(*) as total", "max(update_at) as last_updated")
 
-	session := DB(ctx).Model(&User{}).Select("count(*) as total", "max(update_at) as last_updated")
+		var stats []*Statistics
+		err := session.Find(&stats).Error
+		if err != nil {
+			return nil, err
+		}
 
-	var stats []*Statistics
-	err := session.Find(&stats).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return stats[0], nil
+		return stats[0], nil
+	*/
 }
 
 func (u *User) NopriIdents(ctx *ctx.Context, idents []string) ([]string, error) {
@@ -484,8 +525,10 @@ func (u *User) NopriIdents(ctx *ctx.Context, idents []string) ([]string, error) 
 		return idents, nil
 	}
 
-	var arr []string
-	err = DB(ctx).Model(&Target{}).Where("group_id in ?", bgids).Pluck("ident", &arr).Error
+	arr := make([]string, 0)
+	finder := zorm.NewSelectFinder(TargetTableName, "ident").Append("WHERE group_id in (?)", bgids)
+	err = zorm.Query(ctx.Ctx, finder, &arr, nil)
+	//err = DB(ctx).Model(&Target{}).Where("group_id in ?", bgids).Pluck("ident", &arr).Error
 	if err != nil {
 		return []string{}, err
 	}
@@ -496,11 +539,17 @@ func (u *User) NopriIdents(ctx *ctx.Context, idents []string) ([]string, error) 
 // 我是管理员，返回所有
 // 或者我是成员
 func (u *User) BusiGroups(ctx *ctx.Context, limit int, query string, all ...bool) ([]BusiGroup, error) {
-	session := DB(ctx).Order("name").Limit(limit)
+	finder := zorm.NewSelectFinder(BusiGroupTableName).Append("WHERE 1=1 ")
+	finder.SelectTotalCount = false
+	page := zorm.NewPage()
+	page.PageSize = limit
+	//session := DB(ctx).Order("name").Limit(limit)
 
-	var lst []BusiGroup
+	lst := make([]BusiGroup, 0)
 	if u.IsAdmin() || (len(all) > 0 && all[0]) {
-		err := session.Where("name like ?", "%"+query+"%").Find(&lst).Error
+		finder.Append("and name like ? order by name asc", "%"+query+"%")
+		err := zorm.Query(ctx.Ctx, finder, &lst, page)
+		//err := session.Where("name like ?", "%"+query+"%").Find(&lst).Error
 		if err != nil {
 			return lst, err
 		}
@@ -516,8 +565,10 @@ func (u *User) BusiGroups(ctx *ctx.Context, limit int, query string, all ...bool
 			if t == nil {
 				return lst, nil
 			}
-
-			err = DB(ctx).Order("name").Limit(limit).Where("id=?", t.GroupId).Find(&lst).Error
+			finder := zorm.NewSelectFinder(BusiGroupTableName).Append("WHERE id=? order by name asc", t.GroupId)
+			finder.SelectTotalCount = false
+			err = zorm.Query(ctx.Ctx, finder, &lst, page)
+			//err = DB(ctx).Order("name").Limit(limit).Where("id=?", t.GroupId).Find(&lst).Error
 		}
 
 		return lst, err
@@ -536,8 +587,9 @@ func (u *User) BusiGroups(ctx *ctx.Context, limit int, query string, all ...bool
 	if len(busiGroupIds) == 0 {
 		return lst, nil
 	}
-
-	err = session.Where("id in ?", busiGroupIds).Where("name like ?", "%"+query+"%").Find(&lst).Error
+	finder.Append("and id in (?) and name like ? order by name asc", busiGroupIds, "%"+query+"%")
+	err = zorm.Query(ctx.Ctx, finder, &lst, page)
+	//err = session.Where("id in ?", busiGroupIds).Where("name like ?", "%"+query+"%").Find(&lst).Error
 	if err != nil {
 		return nil, err
 	}
@@ -550,7 +602,10 @@ func (u *User) BusiGroups(ctx *ctx.Context, limit int, query string, all ...bool
 		}
 
 		if slice.ContainsInt64(busiGroupIds, t.GroupId) {
-			err = DB(ctx).Order("name").Limit(limit).Where("id=?", t.GroupId).Find(&lst).Error
+			finder := zorm.NewSelectFinder(BusiGroupTableName).Append("WHERE id=? order by name asc", t.GroupId)
+			finder.SelectTotalCount = false
+			err = zorm.Query(ctx.Ctx, finder, &lst, page)
+			//err = DB(ctx).Order("name").Limit(limit).Where("id=?", t.GroupId).Find(&lst).Error
 		}
 	}
 
@@ -558,11 +613,17 @@ func (u *User) BusiGroups(ctx *ctx.Context, limit int, query string, all ...bool
 }
 
 func (u *User) UserGroups(ctx *ctx.Context, limit int, query string) ([]UserGroup, error) {
-	session := DB(ctx).Order("name").Limit(limit)
+	finder := zorm.NewSelectFinder(UserGroupTableName).Append("WHERE 1=1 ")
+	finder.SelectTotalCount = false
+	page := zorm.NewPage()
+	page.PageSize = limit
+	//session := DB(ctx).Order("name").Limit(limit)
 
-	var lst []UserGroup
+	lst := make([]UserGroup, 0)
 	if u.IsAdmin() {
-		err := session.Where("name like ?", "%"+query+"%").Find(&lst).Error
+		finder.Append("and name like ? order by name asc", "%"+query+"%")
+		err := zorm.Query(ctx.Ctx, finder, &lst, page)
+		//err := session.Where("name like ?", "%"+query+"%").Find(&lst).Error
 		if err != nil {
 			return lst, err
 		}
@@ -589,16 +650,20 @@ func (u *User) UserGroups(ctx *ctx.Context, limit int, query string) ([]UserGrou
 	}
 
 	if len(ids) > 0 {
-		session = session.Where("id in ? or create_by = ?", ids, u.Username)
+		//session = session.Where("id in ? or create_by = ?", ids, u.Username)
+		finder.Append("and (id in (?) or create_by = ?)", ids, u.Username)
 	} else {
-		session = session.Where("create_by = ?", u.Username)
+		//session = session.Where("create_by = ?", u.Username)
+		finder.Append("and create_by = ?", u.Username)
 	}
 
 	if len(query) > 0 {
-		session = session.Where("name like ?", "%"+query+"%")
+		//session = session.Where("name like ?", "%"+query+"%")
+		finder.Append("and name like ?", "%"+query+"%")
 	}
-
-	err = session.Find(&lst).Error
+	finder.Append(" order by name asc")
+	err = zorm.Query(ctx.Ctx, finder, &lst, page)
+	//err = session.Find(&lst).Error
 	return lst, err
 }
 

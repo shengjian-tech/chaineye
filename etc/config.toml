@@ -82,19 +82,22 @@ RSAPassWord = ""
 
 [DB]
 # postgres: host=%s port=%s user=%s dbname=%s password=%s sslmode=%s
-DSN="root:1234@tcp(127.0.0.1:3306)/n9e_v6?charset=utf8mb4&parseTime=True&loc=Local&allowNativePasswords=true"
+DSN="root:root@tcp(127.0.0.1:3306)/n9e_v6?charset=utf8mb4&parseTime=True&loc=Local&allowNativePasswords=true"
 # enable debug mode or not
-Debug = false
-# mysql postgres
-DBType = "mysql"
+SlowSQLMillis = -1
+# mysql,postgresql,oracle,mssql,sqlite,db2,clickhouse,dm,kingbase,shentong,tdengine
+Dialect = "mysql"
+# mysql,postgres,oracle(go-ora),sqlserver,sqlite3,go_ibm_db,clickhouse,dm,kingbase,aci,taosSql|taosRestful
+DriverName ="mysql"
 # unit: s
 MaxLifetime = 7200
 # max open connections
 MaxOpenConns = 150
 # max idle connections
 MaxIdleConns = 50
-# table prefix
-TablePrefix = ""
+DisableTransaction = false
+TDengineInsertsColumnName = false
+
 # enable auto migrate or not
 # EnableAutoMigrate = false
 

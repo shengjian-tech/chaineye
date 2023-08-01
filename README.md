@@ -72,3 +72,24 @@
 
 ## License
 [Apache License V2.0](https://github.com/didi/nightingale/blob/main/LICENSE)
+
+## 源码编译
+```shell
+##详细命令参见 Makefile
+#sql文件是 ./docker/initsql/a-n9e.sql
+#数据库和redis配置文件 ./etc/config.toml
+
+go install github.com/rakyll/statik
+##下载编译好的前端项目fe,https://github.com/n9e/fe/releases
+
+## Linux
+statik -src=./pub -dest=./front
+go build -ldflags "-w -s" -o n9e ./cmd/center/main.go
+# n9e-edge/n9e-alert等其他模块参见 Makefile
+
+## Windows
+# statik -src=pub -dest=front
+# go build -ldflags "-w -s" -o n9e.exe ./cmd/center/main.go
+
+## 前端访问 http://127.0.0.1:17000   账号:root 密码:root.2020
+```

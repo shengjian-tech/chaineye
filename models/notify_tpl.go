@@ -7,6 +7,7 @@ import (
 	"path"
 	"strings"
 
+	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
 	"github.com/ccfos/nightingale/v6/pkg/tplx"
@@ -16,16 +17,20 @@ import (
 	"github.com/toolkits/pkg/logger"
 )
 
+const NotifyTplTableName = "notify_tpl"
+
 type NotifyTpl struct {
-	Id      int64  `json:"id"`
-	Name    string `json:"name"`
-	Channel string `json:"channel"`
-	Content string `json:"content"`
-	BuiltIn bool   `json:"built_in" gorm:"-"`
+	// 引入默认的struct,隔离IEntityStruct的方法改动
+	zorm.EntityStruct
+	Id      int64  `json:"id" column:"id"`
+	Name    string `json:"name" column:"name"`
+	Channel string `json:"channel" column:"channel"`
+	Content string `json:"content" column:"content"`
+	BuiltIn bool   `json:"built_in"`
 }
 
-func (n *NotifyTpl) TableName() string {
-	return "notify_tpl"
+func (n *NotifyTpl) GetTableName() string {
+	return NotifyTplTableName
 }
 
 func (n *NotifyTpl) DB2FE() error {
@@ -37,11 +42,13 @@ func (n *NotifyTpl) Create(c *ctx.Context) error {
 }
 
 func (n *NotifyTpl) UpdateContent(c *ctx.Context) error {
-	return DB(c).Model(n).Update("content", n.Content).Error
+	return UpdateColumn(c, NotifyTplTableName, n.Id, "content", n.Content)
+	//return DB(c).Model(n).Update("content", n.Content).Error
 }
 
 func (n *NotifyTpl) Update(c *ctx.Context) error {
-	return DB(c).Model(n).Select("name").Updates(n).Error
+	return UpdateColumn(c, NotifyTplTableName, n.Id, "name", n.Name)
+	//return DB(c).Model(n).Select("name").Updates(n).Error
 }
 
 func (n *NotifyTpl) CreateIfNotExists(c *ctx.Context, channel string) error {
@@ -59,23 +66,30 @@ func (n *NotifyTpl) CreateIfNotExists(c *ctx.Context, channel string) error {
 }
 
 func (n *NotifyTpl) NotifyTplDelete(ctx *ctx.Context, id int64) error {
-	return DB(ctx).Where("channel not in (?) and id =? ", DefaultChannels, id).Delete(new(NotifyTpl)).Error
+	finder := zorm.NewDeleteFinder(NotifyTplTableName).Append("WHERE channel not in (?) and id =? ", DefaultChannels, id)
+	return UpdateFinder(ctx, finder)
+	//return DB(ctx).Where("channel not in (?) and id =? ", DefaultChannels, id).Delete(new(NotifyTpl)).Error
 }
 
-func NotifyTplCountByChannel(c *ctx.Context, channel string) (int64, error) {
-	var count int64
-	err := DB(c).Model(&NotifyTpl{}).Where("channel=?", channel).Count(&count).Error
-	return count, err
+func NotifyTplCountByChannel(ctx *ctx.Context, channel string) (int64, error) {
+	finder := zorm.NewSelectFinder(NotifyTplTableName, "count(*)").Append("WHERE channel=?", channel)
+	return Count(ctx, finder)
+	/*
+		var count int64
+		err := DB(ctx).Model(&NotifyTpl{}).Where("channel=?", channel).Count(&count).Error
+		return count, err
+	*/
 }
 
-func NotifyTplGets(c *ctx.Context) ([]*NotifyTpl, error) {
-	if !c.IsCenter {
-		lst, err := poster.GetByUrls[[]*NotifyTpl](c, "/v1/n9e/notify-tpls")
+func NotifyTplGets(ctx *ctx.Context) ([]*NotifyTpl, error) {
+	if !ctx.IsCenter {
+		lst, err := poster.GetByUrls[[]*NotifyTpl](ctx, "/v1/n9e/notify-tpls")
 		return lst, err
 	}
-
-	var lst []*NotifyTpl
-	err := DB(c).Find(&lst).Error
+	finder := zorm.NewSelectFinder(NotifyTplTableName)
+	lst := make([]*NotifyTpl, 0)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(c).Find(&lst).Error
 	return lst, err
 }
 

@@ -1,12 +1,14 @@
 package models
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
+	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
 
@@ -21,61 +23,63 @@ const (
 
 	PROMETHEUS = "prometheus"
 )
+const AlertRuleTableName = "alert_rule"
 
 type AlertRule struct {
-	Id                    int64             `json:"id" gorm:"primaryKey"`
-	GroupId               int64             `json:"group_id"`                      // busi group id
-	Cate                  string            `json:"cate"`                          // alert rule cate (prometheus|elasticsearch)
-	DatasourceIds         string            `json:"-" gorm:"datasource_ids"`       // datasource ids
-	DatasourceIdsJson     []int64           `json:"datasource_ids" gorm:"-"`       // for fe
-	Cluster               string            `json:"cluster"`                       // take effect by clusters, seperated by space
-	Name                  string            `json:"name"`                          // rule name
-	Note                  string            `json:"note"`                          // will sent in notify
-	Prod                  string            `json:"prod"`                          // product empty means n9e
-	Algorithm             string            `json:"algorithm"`                     // algorithm (''|holtwinters), empty means threshold
-	AlgoParams            string            `json:"-" gorm:"algo_params"`          // params algorithm need
-	AlgoParamsJson        interface{}       `json:"algo_params" gorm:"-"`          // for fe
-	Delay                 int               `json:"delay"`                         // Time (in seconds) to delay evaluation
-	Severity              int               `json:"severity"`                      // 1: Emergency 2: Warning 3: Notice
-	Severities            []int             `json:"severities" gorm:"-"`           // 1: Emergency 2: Warning 3: Notice
-	Disabled              int               `json:"disabled"`                      // 0: enabled, 1: disabled
-	PromForDuration       int               `json:"prom_for_duration"`             // prometheus for, unit:s
-	PromQl                string            `json:"prom_ql"`                       // just one ql
-	RuleConfig            string            `json:"-" gorm:"rule_config"`          // rule config
-	RuleConfigJson        interface{}       `json:"rule_config" gorm:"-"`          // rule config for fe
-	PromEvalInterval      int               `json:"prom_eval_interval"`            // unit:s
-	EnableStime           string            `json:"-"`                             // split by space: "00:00 10:00 12:00"
-	EnableStimeJSON       string            `json:"enable_stime" gorm:"-"`         // for fe
-	EnableStimesJSON      []string          `json:"enable_stimes" gorm:"-"`        // for fe
-	EnableEtime           string            `json:"-"`                             // split by space: "00:00 10:00 12:00"
-	EnableEtimeJSON       string            `json:"enable_etime" gorm:"-"`         // for fe
-	EnableEtimesJSON      []string          `json:"enable_etimes" gorm:"-"`        // for fe
-	EnableDaysOfWeek      string            `json:"-"`                             // eg: "0 1 2 3 4 5 6 ; 0 1 2"
-	EnableDaysOfWeekJSON  []string          `json:"enable_days_of_week" gorm:"-"`  // for fe
-	EnableDaysOfWeeksJSON [][]string        `json:"enable_days_of_weeks" gorm:"-"` // for fe
-	EnableInBG            int               `json:"enable_in_bg"`                  // 0: global 1: enable one busi-group
-	NotifyRecovered       int               `json:"notify_recovered"`              // whether notify when recovery
-	NotifyChannels        string            `json:"-"`                             // split by space: sms voice email dingtalk wecom
-	NotifyChannelsJSON    []string          `json:"notify_channels" gorm:"-"`      // for fe
-	NotifyGroups          string            `json:"-"`                             // split by space: 233 43
-	NotifyGroupsObj       []UserGroup       `json:"notify_groups_obj" gorm:"-"`    // for fe
-	NotifyGroupsJSON      []string          `json:"notify_groups" gorm:"-"`        // for fe
-	NotifyRepeatStep      int               `json:"notify_repeat_step"`            // notify repeat interval, unit: min
-	NotifyMaxNumber       int               `json:"notify_max_number"`             // notify: max number
-	RecoverDuration       int64             `json:"recover_duration"`              // unit: s
-	Callbacks             string            `json:"-"`                             // split by space: http://a.com/api/x http://a.com/api/y'
-	CallbacksJSON         []string          `json:"callbacks" gorm:"-"`            // for fe
-	RunbookUrl            string            `json:"runbook_url"`                   // sop url
-	AppendTags            string            `json:"-"`                             // split by space: service=n9e mod=api
-	AppendTagsJSON        []string          `json:"append_tags" gorm:"-"`          // for fe
-	Annotations           string            `json:"-"`                             //
-	AnnotationsJSON       map[string]string `json:"annotations" gorm:"-"`          // for fe
-	ExtraConfig           string            `json:"-" gorm:"extra_config"`         // extra config
-	ExtraConfigJSON       interface{}       `json:"extra_config" gorm:"-"`         // for fe
-	CreateAt              int64             `json:"create_at"`
-	CreateBy              string            `json:"create_by"`
-	UpdateAt              int64             `json:"update_at"`
-	UpdateBy              string            `json:"update_by"`
+	zorm.EntityStruct
+	Id                    int64             `json:"id" column:"id"`
+	GroupId               int64             `json:"group_id" column:"group_id"`                     // busi group id
+	Cate                  string            `json:"cate" column:"cate"`                             // alert rule cate (prometheus|elasticsearch)
+	DatasourceIds         string            `json:"-" column:"datasource_ids"`                      // datasource ids
+	DatasourceIdsJson     []int64           `json:"datasource_ids"`                                 // for fe
+	Cluster               string            `json:"cluster" column:"cluster"`                       // take effect by clusters, seperated by space
+	Name                  string            `json:"name" column:"name"`                             // rule name
+	Note                  string            `json:"note" column:"note"`                             // will sent in notify
+	Prod                  string            `json:"prod" column:"prod"`                             // product empty means n9e
+	Algorithm             string            `json:"algorithm" column:"algorithm"`                   // algorithm (''|holtwinters), empty means threshold
+	AlgoParams            string            `json:"-" column:"algo_params"`                         // params algorithm need
+	AlgoParamsJson        interface{}       `json:"algo_params"`                                    // for fe
+	Delay                 int               `json:"delay" column:"delay"`                           // Time (in seconds) to delay evaluation
+	Severity              int               `json:"severity" column:"severity"`                     // 1: Emergency 2: Warning 3: Notice
+	Severities            []int             `json:"severities"`                                     // 1: Emergency 2: Warning 3: Notice
+	Disabled              int               `json:"disabled" column:"disabled"`                     // 0: enabled, 1: disabled
+	PromForDuration       int               `json:"prom_for_duration" column:"prom_for_duration"`   // prometheus for, unit:s
+	PromQl                string            `json:"prom_ql" column:"prom_ql"`                       // just one ql
+	RuleConfig            string            `json:"-" column:"rule_config"`                         // rule config
+	RuleConfigJson        interface{}       `json:"rule_config"`                                    // rule config for fe
+	PromEvalInterval      int               `json:"prom_eval_interval" column:"prom_eval_interval"` // unit:s
+	EnableStime           string            `json:"-" column:"enable_stime"`                        // split by space: "00:00 10:00 12:00"
+	EnableStimeJSON       string            `json:"enable_stime"`                                   // for fe
+	EnableStimesJSON      []string          `json:"enable_stimes"`                                  // for fe
+	EnableEtime           string            `json:"-" column:"enable_etime"`                        // split by space: "00:00 10:00 12:00"
+	EnableEtimeJSON       string            `json:"enable_etime"`                                   // for fe
+	EnableEtimesJSON      []string          `json:"enable_etimes"`                                  // for fe
+	EnableDaysOfWeek      string            `json:"-" column:"enable_days_of_week"`                 // eg: "0 1 2 3 4 5 6 ; 0 1 2"
+	EnableDaysOfWeekJSON  []string          `json:"enable_days_of_week"`                            // for fe
+	EnableDaysOfWeeksJSON [][]string        `json:"enable_days_of_weeks"`                           // for fe
+	EnableInBG            int               `json:"enable_in_bg" column:"enable_in_bg"`             // 0: global 1: enable one busi-group
+	NotifyRecovered       int               `json:"notify_recovered" column:"notify_recovered"`     // whether notify when recovery
+	NotifyChannels        string            `json:"-" column:"notify_channels"`                     // split by space: sms voice email dingtalk wecom
+	NotifyChannelsJSON    []string          `json:"notify_channels"`                                // for fe
+	NotifyGroups          string            `json:"-" column:"notify_groups"`                       // split by space: 233 43
+	NotifyGroupsObj       []UserGroup       `json:"notify_groups_obj"`                              // for fe
+	NotifyGroupsJSON      []string          `json:"notify_groups"`                                  // for fe
+	NotifyRepeatStep      int               `json:"notify_repeat_step" column:"notify_repeat_step"` // notify repeat interval, unit: min
+	NotifyMaxNumber       int               `json:"notify_max_number" column:"notify_max_number"`   // notify: max number
+	RecoverDuration       int64             `json:"recover_duration" column:"recover_duration"`     // unit: s
+	Callbacks             string            `json:"-" column:"callbacks"`                           // split by space: http://a.com/api/x http://a.com/api/y'
+	CallbacksJSON         []string          `json:"callbacks"`                                      // for fe
+	RunbookUrl            string            `json:"runbook_url" column:"runbook_url"`               // sop url
+	AppendTags            string            `json:"-" column:"append_tags"`                         // split by space: service=n9e mod=api
+	AppendTagsJSON        []string          `json:"append_tags"`                                    // for fe
+	Annotations           string            `json:"-" column:"annotations"`                         //
+	AnnotationsJSON       map[string]string `json:"annotations"`                                    // for fe
+	ExtraConfig           string            `json:"-" column:"extra_config"`                        // extra config
+	ExtraConfigJSON       interface{}       `json:"extra_config"`                                   // for fe
+	CreateAt              int64             `json:"create_at" column:"create_at"`
+	CreateBy              string            `json:"create_by" column:"create_by"`
+	UpdateAt              int64             `json:"update_at" column:"update_at"`
+	UpdateBy              string            `json:"update_by" column:"update_by"`
 }
 
 type PromRuleConfig struct {
@@ -190,8 +194,8 @@ func Str2Int(arr []string) []int64 {
 	return ret
 }
 
-func (ar *AlertRule) TableName() string {
-	return "alert_rule"
+func (ar *AlertRule) GetTableName() string {
+	return AlertRuleTableName
 }
 
 func (ar *AlertRule) Verify() error {
@@ -298,7 +302,11 @@ func (ar *AlertRule) Update(ctx *ctx.Context, arf AlertRule) error {
 	if err != nil {
 		return err
 	}
-	return DB(ctx).Model(ar).Select("*").Updates(arf).Error
+	_, err = zorm.Transaction(ctx.Ctx, func(ctx context.Context) (interface{}, error) {
+		return zorm.UpdateNotZeroValue(ctx, &arf)
+	})
+	return err
+	//return DB(ctx).Model(ar).Select("*").Updates(arf).Error
 }
 
 func (ar *AlertRule) UpdateColumn(ctx *ctx.Context, column string, value interface{}) error {
@@ -311,7 +319,8 @@ func (ar *AlertRule) UpdateColumn(ctx *ctx.Context, column string, value interfa
 		if err != nil {
 			return err
 		}
-		return DB(ctx).Model(ar).UpdateColumn(column, string(b)).Error
+		return UpdateColumn(ctx, AlertRuleTableName, ar.Id, column, string(b))
+		//return DB(ctx).Model(ar).UpdateColumn(column, string(b)).Error
 	}
 
 	if column == "severity" {
@@ -329,7 +338,8 @@ func (ar *AlertRule) UpdateColumn(ctx *ctx.Context, column string, value interfa
 				if err != nil {
 					return err
 				}
-				return DB(ctx).Model(ar).UpdateColumn("rule_config", string(b)).Error
+				return UpdateColumn(ctx, AlertRuleTableName, ar.Id, "rule_config", string(b))
+				//return DB(ctx).Model(ar).UpdateColumn("rule_config", string(b)).Error
 			}
 
 			if len(ruleConfig.Queries) != 1 {
@@ -341,7 +351,8 @@ func (ar *AlertRule) UpdateColumn(ctx *ctx.Context, column string, value interfa
 			if err != nil {
 				return err
 			}
-			return DB(ctx).Model(ar).UpdateColumn("rule_config", string(b)).Error
+			return UpdateColumn(ctx, AlertRuleTableName, ar.Id, "rule_config", string(b))
+			//return DB(ctx).Model(ar).UpdateColumn("rule_config", string(b)).Error
 		} else if ar.Cate == HOST {
 			var ruleConfig HostRuleConfig
 			err := json.Unmarshal([]byte(ar.RuleConfig), &ruleConfig)
@@ -359,7 +370,8 @@ func (ar *AlertRule) UpdateColumn(ctx *ctx.Context, column string, value interfa
 			if err != nil {
 				return err
 			}
-			return DB(ctx).Model(ar).UpdateColumn("rule_config", string(b)).Error
+			return UpdateColumn(ctx, AlertRuleTableName, ar.Id, "rule_config", string(b))
+			//return DB(ctx).Model(ar).UpdateColumn("rule_config", string(b)).Error
 		} else {
 			var ruleConfig RuleQuery
 			err := json.Unmarshal([]byte(ar.RuleConfig), &ruleConfig)
@@ -376,7 +388,8 @@ func (ar *AlertRule) UpdateColumn(ctx *ctx.Context, column string, value interfa
 			if err != nil {
 				return err
 			}
-			return DB(ctx).Model(ar).UpdateColumn("rule_config", string(b)).Error
+			return UpdateColumn(ctx, AlertRuleTableName, ar.Id, "rule_config", string(b))
+			//return DB(ctx).Model(ar).UpdateColumn("rule_config", string(b)).Error
 		}
 	}
 
@@ -398,15 +411,16 @@ func (ar *AlertRule) UpdateColumn(ctx *ctx.Context, column string, value interfa
 		if err != nil {
 			return err
 		}
-
-		return DB(ctx).Model(ar).UpdateColumn("annotations", string(b)).Error
+		return UpdateColumn(ctx, AlertRuleTableName, ar.Id, "annotations", string(b))
+		//return DB(ctx).Model(ar).UpdateColumn("annotations", string(b)).Error
 	}
-
-	return DB(ctx).Model(ar).UpdateColumn(column, value).Error
+	return UpdateColumn(ctx, AlertRuleTableName, ar.Id, column, value)
+	//return DB(ctx).Model(ar).UpdateColumn(column, value).Error
 }
 
 func (ar *AlertRule) UpdateFieldsMap(ctx *ctx.Context, fields map[string]interface{}) error {
-	return DB(ctx).Model(ar).Updates(fields).Error
+	return UpdateFieldsMap(ctx, ar, ar.Id, fields)
+	//return DB(ctx).Model(ar).Updates(fields).Error
 }
 
 // for v5 rule
@@ -485,7 +499,9 @@ func (ar *AlertRule) FillNotifyGroups(ctx *ctx.Context, cache map[int64]*UserGro
 		// some user-group already deleted
 		ar.NotifyGroupsJSON = exists
 		ar.NotifyGroups = strings.Join(exists, " ")
-		DB(ctx).Model(ar).Update("notify_groups", ar.NotifyGroups)
+
+		UpdateColumn(ctx, AlertRuleTableName, ar.Id, "notify_groups", ar.NotifyGroups)
+		//DB(ctx).Model(ar).Update("notify_groups", ar.NotifyGroups)
 	}
 
 	return nil
@@ -605,29 +621,38 @@ func (ar *AlertRule) DB2FE() error {
 
 func AlertRuleDels(ctx *ctx.Context, ids []int64, bgid ...int64) error {
 	for i := 0; i < len(ids); i++ {
-		session := DB(ctx).Where("id = ?", ids[i])
+		finder := zorm.NewDeleteFinder(AlertRuleTableName).Append("WHERE id=?", ids[i])
+		//session := DB(ctx).Where("id = ?", ids[i])
 		if len(bgid) > 0 {
-			session = session.Where("group_id = ?", bgid[0])
+			//session = session.Where("group_id = ?", bgid[0])
+			finder.Append("and group_id = ?", bgid[0])
 		}
-		ret := session.Delete(&AlertRule{})
-		if ret.Error != nil {
-			return ret.Error
-		}
+		zorm.Transaction(ctx.Ctx, func(ctx context.Context) (interface{}, error) {
+			rowsAffected, err := zorm.UpdateFinder(ctx, finder)
+			if err != nil {
+				return rowsAffected, err
+			}
+			// 说明确实删掉了，把相关的活跃告警也删了，这些告警永远都不会恢复了，而且策略都没了，说明没人关心了
+			if rowsAffected > 0 {
+				f := zorm.NewDeleteFinder(AlertCurEventTableName).Append("WHERE rule_id = ?", ids[i])
+				zorm.UpdateFinder(ctx, f)
+				//DB(ctx).Where("rule_id = ?", ids[i]).Delete(new(AlertCurEvent))
+			}
+			return rowsAffected, err
+		})
+		//ret := session.Delete(&AlertRule{})
 
-		// 说明确实删掉了，把相关的活跃告警也删了，这些告警永远都不会恢复了，而且策略都没了，说明没人关心了
-		if ret.RowsAffected > 0 {
-			DB(ctx).Where("rule_id = ?", ids[i]).Delete(new(AlertCurEvent))
-		}
 	}
 
 	return nil
 }
 
 func AlertRuleExists(ctx *ctx.Context, id, groupId int64, datasourceIds []int64, name string) (bool, error) {
-	session := DB(ctx).Where("id <> ? and group_id = ? and name = ?", id, groupId, name)
-
-	var lst []AlertRule
-	err := session.Find(&lst).Error
+	finder := zorm.NewSelectFinder(AlertRuleTableName).Append("WHERE id <> ? and group_id = ? and name = ?", id, groupId, name)
+	//session := DB(ctx).Where("id <> ? and group_id = ? and name = ?", id, groupId, name)
+	lst := make([]AlertRule, 0)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := session.Find(&lst).Error
 	if err != nil {
 		return false, err
 	}
@@ -648,10 +673,12 @@ func AlertRuleExists(ctx *ctx.Context, id, groupId int64, datasourceIds []int64,
 }
 
 func AlertRuleGets(ctx *ctx.Context, groupId int64) ([]AlertRule, error) {
-	session := DB(ctx).Where("group_id=?", groupId).Order("name")
+	finder := zorm.NewSelectFinder(AlertRuleTableName).Append("WHERE group_id=? order by name asc ", groupId)
+	//session := DB(ctx).Where("group_id=?", groupId).Order("name")
 
-	var lst []AlertRule
-	err := session.Find(&lst).Error
+	lst := make([]AlertRule, 0)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := session.Find(&lst).Error
 	if err == nil {
 		for i := 0; i < len(lst); i++ {
 			lst[i].DB2FE()
@@ -672,11 +699,12 @@ func AlertRuleGetsAll(ctx *ctx.Context) ([]*AlertRule, error) {
 		}
 		return lst, err
 	}
+	finder := zorm.NewSelectFinder(AlertRuleTableName).Append("WHERE disabled = ?", 0)
+	//session := DB(ctx).Where("disabled = ?", 0)
 
-	session := DB(ctx).Where("disabled = ?", 0)
-
-	var lst []*AlertRule
-	err := session.Find(&lst).Error
+	lst := make([]*AlertRule, 0)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := session.Find(&lst).Error
 	if err != nil {
 		return lst, err
 	}
@@ -692,38 +720,47 @@ func AlertRuleGetsAll(ctx *ctx.Context) ([]*AlertRule, error) {
 }
 
 func AlertRulesGetsBy(ctx *ctx.Context, prods []string, query, algorithm, cluster string, cates []string, disabled int) ([]*AlertRule, error) {
-	session := DB(ctx)
+
+	finder := zorm.NewSelectFinder(AlertRuleTableName).Append("WHERE 1=1")
+	//session := DB(ctx)
 
 	if len(prods) > 0 {
-		session = session.Where("prod in (?)", prods)
+		//session = session.Where("prod in (?)", prods)
+		finder.Append("and prod in (?)", prods)
 	}
 
 	if query != "" {
 		arr := strings.Fields(query)
 		for i := 0; i < len(arr); i++ {
 			qarg := "%" + arr[i] + "%"
-			session = session.Where("append_tags like ?", qarg)
+			//session = session.Where("append_tags like ?", qarg)
+			finder.Append("and append_tags like ?", qarg)
 		}
 	}
 
 	if algorithm != "" {
-		session = session.Where("algorithm = ?", algorithm)
+		//session = session.Where("algorithm = ?", algorithm)
+		finder.Append("and algorithm = ?", algorithm)
 	}
 
 	if cluster != "" {
-		session = session.Where("cluster like ?", "%"+cluster+"%")
+		//session = session.Where("cluster like ?", "%"+cluster+"%")
+		finder.Append("and cluster like ?", "%"+cluster+"%")
 	}
 
 	if len(cates) != 0 {
-		session = session.Where("cate in (?)", cates)
+		//session = session.Where("cate in (?)", cates)
+		finder.Append("and cate in (?)", cates)
 	}
 
 	if disabled != -1 {
-		session = session.Where("disabled = ?", disabled)
+		//session = session.Where("disabled = ?", disabled)
+		finder.Append("and disabled = ?", disabled)
 	}
 
-	var lst []*AlertRule
-	err := session.Find(&lst).Error
+	lst := make([]*AlertRule, 0)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := session.Find(&lst).Error
 	if err == nil {
 		for i := 0; i < len(lst); i++ {
 			lst[i].DB2FE()
@@ -734,8 +771,11 @@ func AlertRulesGetsBy(ctx *ctx.Context, prods []string, query, algorithm, cluste
 }
 
 func AlertRuleGet(ctx *ctx.Context, where string, args ...interface{}) (*AlertRule, error) {
-	var lst []*AlertRule
-	err := DB(ctx).Where(where, args...).Find(&lst).Error
+	lst := make([]*AlertRule, 0)
+	finder := zorm.NewSelectFinder(AlertRuleTableName)
+	AppendWhere(finder, where, args...)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Where(where, args...).Find(&lst).Error
 	if err != nil {
 		return nil, err
 	}
@@ -755,7 +795,9 @@ func AlertRuleGetById(ctx *ctx.Context, id int64) (*AlertRule, error) {
 
 func AlertRuleGetName(ctx *ctx.Context, id int64) (string, error) {
 	var names []string
-	err := DB(ctx).Model(new(AlertRule)).Where("id = ?", id).Pluck("name", &names).Error
+	finder := zorm.NewSelectFinder(AlertRuleTableName, "name").Append("WHERE id = ?", id)
+	err := zorm.Query(ctx.Ctx, finder, &names, nil)
+	//err := DB(ctx).Model(new(AlertRule)).Where("id = ?", id).Pluck("name", &names).Error
 	if err != nil {
 		return "", err
 	}
@@ -763,7 +805,6 @@ func AlertRuleGetName(ctx *ctx.Context, id int64) (string, error) {
 	if len(names) == 0 {
 		return "", nil
 	}
-
 	return names[0], nil
 }
 
@@ -773,15 +814,15 @@ func AlertRuleStatistics(ctx *ctx.Context) (*Statistics, error) {
 		return s, err
 	}
 
-	session := DB(ctx).Model(&AlertRule{}).Select("count(*) as total", "max(update_at) as last_updated").Where("disabled = ?", 0)
-
-	var stats []*Statistics
-	err := session.Find(&stats).Error
+	finder := zorm.NewSelectFinder(AlertRuleTableName, "count(*) as Total , max(update_at) as LastUpdated").Append("WHERE disabled = ?", 0)
+	//session := DB(ctx).Model(&AlertRule{}).Select("count(*) as total", "max(update_at) as last_updated").Where("disabled = ?", 0)
+	stats := make([]Statistics, 0)
+	err := zorm.Query(ctx.Ctx, finder, &stats, nil)
+	//err := session.Find(&stats).Error
 	if err != nil {
 		return nil, err
 	}
-
-	return stats[0], nil
+	return &stats[0], nil
 }
 
 func (ar *AlertRule) IsPrometheusRule() bool {
@@ -834,8 +875,10 @@ func (ar *AlertRule) UpdateEvent(event *AlertCurEvent) {
 }
 
 func AlertRuleUpgradeToV6(ctx *ctx.Context, dsm map[string]Datasource) error {
-	var lst []*AlertRule
-	err := DB(ctx).Find(&lst).Error
+	lst := make([]AlertRule, 0)
+	finder := zorm.NewSelectFinder(AlertRuleTableName)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Find(&lst).Error
 	if err != nil {
 		return err
 	}

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
 	"github.com/pkg/errors"
@@ -13,27 +14,31 @@ import (
 	"github.com/toolkits/pkg/str"
 )
 
+const DatasourceTableName = "datasource"
+
 type Datasource struct {
-	Id             int64                  `json:"id"`
-	Name           string                 `json:"name"`
-	Description    string                 `json:"description"`
-	PluginId       int64                  `json:"plugin_id"`
-	PluginType     string                 `json:"plugin_type"`      // prometheus
-	PluginTypeName string                 `json:"plugin_type_name"` // Prometheus Like
-	Category       string                 `json:"category"`         // timeseries
-	ClusterName    string                 `json:"cluster_name"`
-	Settings       string                 `json:"-" gorm:"settings"`
-	SettingsJson   map[string]interface{} `json:"settings" gorm:"-"`
-	Status         string                 `json:"status"`
-	HTTP           string                 `json:"-" gorm:"http"`
-	HTTPJson       HTTP                   `json:"http" gorm:"-"`
-	Auth           string                 `json:"-" gorm:"auth"`
-	AuthJson       Auth                   `json:"auth" gorm:"-"`
-	CreatedAt      int64                  `json:"created_at"`
-	UpdatedAt      int64                  `json:"updated_at"`
-	CreatedBy      string                 `json:"created_by"`
-	UpdatedBy      string                 `json:"updated_by"`
-	Transport      *http.Transport        `json:"-" gorm:"-"`
+	// 引入默认的struct,隔离IEntityStruct的方法改动
+	zorm.EntityStruct
+	Id             int64                  `json:"id" column:"id"`
+	Name           string                 `json:"name" column:"name"`
+	Description    string                 `json:"description" column:"description"`
+	PluginId       int64                  `json:"plugin_id" column:"plugin_id"`
+	PluginType     string                 `json:"plugin_type" column:"plugin_type"`           // prometheus
+	PluginTypeName string                 `json:"plugin_type_name" column:"plugin_type_name"` // Prometheus Like
+	Category       string                 `json:"category" column:"category"`                 // timeseries
+	ClusterName    string                 `json:"cluster_name" column:"cluster_name"`
+	Settings       string                 `json:"-" column:"settings"`
+	SettingsJson   map[string]interface{} `json:"settings"`
+	Status         string                 `json:"status" column:"status"`
+	HTTP           string                 `json:"-" column:"http"`
+	HTTPJson       HTTP                   `json:"http"`
+	Auth           string                 `json:"-" column:"auth"`
+	AuthJson       Auth                   `json:"auth"`
+	CreatedAt      int64                  `json:"created_at" column:"created_at"`
+	UpdatedAt      int64                  `json:"updated_at" column:"updated_at"`
+	CreatedBy      string                 `json:"created_by" column:"created_by"`
+	UpdatedBy      string                 `json:"updated_by" column:"updated_by"`
+	Transport      *http.Transport        `json:"-"`
 }
 
 type Auth struct {
@@ -55,8 +60,8 @@ type TLS struct {
 	SkipTlsVerify bool `json:"skip_tls_verify"`
 }
 
-func (ds *Datasource) TableName() string {
-	return "datasource"
+func (ds *Datasource) GetTableName() string {
+	return DatasourceTableName
 }
 
 func (ds *Datasource) Verify() error {
@@ -68,13 +73,13 @@ func (ds *Datasource) Verify() error {
 	return err
 }
 
-func (ds *Datasource) Update(ctx *ctx.Context, selectField interface{}, selectFields ...interface{}) error {
+func (ds *Datasource) Update(ctx *ctx.Context, selectFields ...string) error {
 	if err := ds.Verify(); err != nil {
 		return err
 	}
-
 	ds.UpdatedAt = time.Now().Unix()
-	return DB(ctx).Model(ds).Select(selectField, selectFields...).Updates(ds).Error
+	return Update(ctx, ds, selectFields)
+	//return DB(ctx).Model(ds).Select(selectField, selectFields...).Updates(ds).Error
 }
 
 func (ds *Datasource) Add(ctx *ctx.Context) error {
@@ -92,20 +97,25 @@ func DatasourceDel(ctx *ctx.Context, ids []int64) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	return DB(ctx).Where("id in ?", ids).Delete(new(Datasource)).Error
+	return DeleteByIds(ctx, DatasourceTableName, ids)
+	//return DB(ctx).Where("id in ?", ids).Delete(new(Datasource)).Error
 }
 
 func DatasourceGet(ctx *ctx.Context, id int64) (*Datasource, error) {
-	var ds *Datasource
-	err := DB(ctx).Where("id = ?", id).First(&ds).Error
+	var ds Datasource
+	finder := zorm.NewSelectFinder(DatasourceTableName).Append("WHERE id=?", id)
+	_, err := zorm.QueryRow(ctx.Ctx, finder, &ds)
+	//err := DB(ctx).Where("id = ?", id).First(&ds).Error
 	if err != nil {
 		return nil, err
 	}
-	return ds, ds.DB2FE()
+	return &ds, ds.DB2FE()
 }
 
 func (ds *Datasource) Get(ctx *ctx.Context) error {
-	err := DB(ctx).Where("id = ?", ds.Id).First(ds).Error
+	finder := zorm.NewSelectFinder(DatasourceTableName).Append("WHERE id=?", ds.Id)
+	_, err := zorm.QueryRow(ctx.Ctx, finder, ds)
+	//err := DB(ctx).Where("id = ?", ds.Id).First(ds).Error
 	if err != nil {
 		return err
 	}
@@ -124,8 +134,10 @@ func GetDatasources(ctx *ctx.Context) ([]Datasource, error) {
 		return lst, nil
 	}
 
-	var dss []Datasource
-	err := DB(ctx).Find(&dss).Error
+	dss := make([]Datasource, 0)
+	finder := zorm.NewSelectFinder(DatasourceTableName)
+	err := zorm.Query(ctx.Ctx, finder, &dss, nil)
+	//err := DB(ctx).Find(&dss).Error
 
 	for i := 0; i < len(dss); i++ {
 		dss[i].DB2FE()
@@ -140,75 +152,91 @@ func GetDatasourceIdsByEngineName(ctx *ctx.Context, engineName string) ([]int64,
 		return lst, err
 	}
 
-	var dss []Datasource
-	var ids []int64
-	err := DB(ctx).Where("cluster_name = ?", engineName).Find(&dss).Error
-	if err != nil {
-		return ids, err
-	}
+	//dss := make([]Datasource, 0)
+	ids := make([]int64, 0)
+	finder := zorm.NewSelectFinder(DatasourceTableName, "id").Append("WHERE cluster_name = ?", engineName)
+	err := zorm.Query(ctx.Ctx, finder, &ids, nil)
+	/*
+		err := DB(ctx).Where("cluster_name = ?", engineName).Find(&dss).Error
+		if err != nil {
+			return ids, err
+		}
 
-	for i := 0; i < len(dss); i++ {
-		ids = append(ids, dss[i].Id)
-	}
+		for i := 0; i < len(dss); i++ {
+			ids = append(ids, dss[i].Id)
+		}
+	*/
 	return ids, err
 }
 
 func GetDatasourcesCountByName(ctx *ctx.Context, name string) (int64, error) {
-	session := DB(ctx).Model(&Datasource{})
+	finder := zorm.NewSelectFinder(DatasourceTableName, "count(*)")
+	//session := DB(ctx).Model(&Datasource{})
 	if name != "" {
-		session = session.Where("name = ?", name)
+		//session = session.Where("name = ?", name)
+		finder.Append("WHERE name = ?", name)
 	}
 
-	return Count(session)
+	return Count(ctx, finder)
 }
 
 func GetDatasourcesCountBy(ctx *ctx.Context, typ, cate, name string) (int64, error) {
-	session := DB(ctx).Model(&Datasource{})
+	finder := zorm.NewSelectFinder(DatasourceTableName, "count(*)").Append("WHERE 1=1")
+	//session := DB(ctx).Model(&Datasource{})
 
 	if name != "" {
 		arr := strings.Fields(name)
 		for i := 0; i < len(arr); i++ {
 			qarg := "%" + arr[i] + "%"
-			session = session.Where("name =  ?", qarg)
+			//session = session.Where("name =  ?", qarg)
+			finder.Append("and name =  ?", qarg)
 		}
 	}
 
 	if typ != "" {
-		session = session.Where("plugin_type = ?", typ)
+		//session = session.Where("plugin_type = ?", typ)
+		finder.Append("and plugin_type = ?", typ)
 	}
 
 	if cate != "" {
-		session = session.Where("category = ?", cate)
+		//session = session.Where("category = ?", cate)
+		finder.Append("and category = ?", cate)
 	}
 
-	return Count(session)
+	return Count(ctx, finder)
 }
 
 func GetDatasourcesGetsBy(ctx *ctx.Context, typ, cate, name, status string) ([]*Datasource, error) {
-	session := DB(ctx)
+	finder := zorm.NewSelectFinder(DatasourceTableName).Append("WHERE 1=1")
+	//session := DB(ctx)
 
 	if name != "" {
 		arr := strings.Fields(name)
 		for i := 0; i < len(arr); i++ {
 			qarg := "%" + arr[i] + "%"
-			session = session.Where("name =  ?", qarg)
+			//session = session.Where("name =  ?", qarg)
+			finder.Append("and name =  ?", qarg)
 		}
 	}
 
 	if typ != "" {
-		session = session.Where("plugin_type = ?", typ)
+		//session = session.Where("plugin_type = ?", typ)
+		finder.Append("and plugin_type = ?", typ)
 	}
 
 	if cate != "" {
-		session = session.Where("category = ?", cate)
+		//session = session.Where("category = ?", cate)
+		finder.Append("and category = ?", cate)
 	}
 
 	if status != "" {
-		session = session.Where("status = ?", status)
+		//session = session.Where("status = ?", status)
+		finder.Append("and status = ?", status)
 	}
-
-	var lst []*Datasource
-	err := session.Order("id desc").Find(&lst).Error
+	finder.Append("order by id desc")
+	lst := make([]*Datasource, 0)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := session.Order("id desc").Find(&lst).Error
 	if err == nil {
 		for i := 0; i < len(lst); i++ {
 			lst[i].DB2FE()
@@ -218,9 +246,11 @@ func GetDatasourcesGetsBy(ctx *ctx.Context, typ, cate, name, status string) ([]*
 }
 
 func GetDatasourcesGetsByTypes(ctx *ctx.Context, typs []string) (map[string]*Datasource, error) {
-	var lst []*Datasource
+	lst := make([]*Datasource, 0)
 	m := make(map[string]*Datasource)
-	err := DB(ctx).Where("plugin_type in ?", typs).Find(&lst).Error
+	finder := zorm.NewSelectFinder(DatasourceTableName).Append("WHERE plugin_type in (?)", typs)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Where("plugin_type in ?", typs).Find(&lst).Error
 	if err == nil {
 		for i := 0; i < len(lst); i++ {
 			lst[i].DB2FE()
@@ -292,7 +322,7 @@ func (ds *Datasource) DB2FE() error {
 }
 
 func DatasourceGetMap(ctx *ctx.Context) (map[int64]*Datasource, error) {
-	var lst []*Datasource
+	lst := make([]*Datasource, 0)
 	var err error
 	if !ctx.IsCenter {
 		lst, err = poster.GetByUrls[[]*Datasource](ctx, "/v1/n9e/datasources")
@@ -303,7 +333,9 @@ func DatasourceGetMap(ctx *ctx.Context) (map[int64]*Datasource, error) {
 			lst[i].FE2DB()
 		}
 	} else {
-		err := DB(ctx).Find(&lst).Error
+		finder := zorm.NewSelectFinder(DatasourceTableName)
+		err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+		//err := DB(ctx).Find(&lst).Error
 		if err != nil {
 			return nil, err
 		}
@@ -330,14 +362,20 @@ func DatasourceStatistics(ctx *ctx.Context) (*Statistics, error) {
 		s, err := poster.GetByUrls[*Statistics](ctx, "/v1/n9e/statistic?name=datasource")
 		return s, err
 	}
+	var stats Statistics
+	finder := zorm.NewSelectFinder(DatasourceTableName, "count(*) as Total , max(updated_at) as LastUpdated")
+	_, err := zorm.QueryRow(ctx.Ctx, finder, &stats)
+	return &stats, err
+	//return StatisticsGet(ctx, DatasourceTableName)
+	/*
+		session := DB(ctx).Model(&Datasource{}).Select("count(*) as total", "max(updated_at) as last_updated")
 
-	session := DB(ctx).Model(&Datasource{}).Select("count(*) as total", "max(updated_at) as last_updated")
+		var stats []*Statistics
+		err := session.Find(&stats).Error
+		if err != nil {
+			return nil, err
+		}
 
-	var stats []*Statistics
-	err := session.Find(&stats).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return stats[0], nil
+		return stats[0], nil
+	*/
 }

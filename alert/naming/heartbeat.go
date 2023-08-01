@@ -1,11 +1,13 @@
 package naming
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
 	"time"
 
+	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/alert/aconf"
 	"github.com/ccfos/nightingale/v6/models"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
@@ -56,7 +58,12 @@ func (n *Naming) loopDeleteInactiveInstances() {
 }
 
 func (n *Naming) DeleteInactiveInstances() {
-	err := models.DB(n.ctx).Where("clock < ?", time.Now().Unix()-600).Delete(new(models.AlertingEngines)).Error
+
+	finder := zorm.NewDeleteFinder(models.AlertingEnginesTableName).Append("WHERE clock < ?", time.Now().Unix()-600)
+	_, err := zorm.Transaction(n.ctx.Ctx, func(ctx context.Context) (interface{}, error) {
+		return zorm.UpdateFinder(ctx, finder)
+	})
+	//err := models.DB(n.ctx).Where("clock < ?", time.Now().Unix()-600).Delete(new(models.AlertingEngines)).Error
 	if err != nil {
 		logger.Errorf("delete inactive instances err:%v", err)
 	}

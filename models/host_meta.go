@@ -1,6 +1,8 @@
 package models
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type HostMeta struct {
 	AgentVersion string  `json:"agent_version"`

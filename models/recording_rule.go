@@ -1,11 +1,13 @@
 package models
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
+	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
 
@@ -14,26 +16,30 @@ import (
 	"github.com/toolkits/pkg/logger"
 )
 
+const RecordingRuleTableName = "recording_rule"
+
 // A RecordingRule records its vector expression into new timeseries.
 type RecordingRule struct {
-	Id                int64         `json:"id" gorm:"primaryKey"`
-	GroupId           int64         `json:"group_id"`                // busi group id
-	DatasourceIds     string        `json:"-" gorm:"datasource_ids"` // datasource ids
-	DatasourceIdsJson []int64       `json:"datasource_ids" gorm:"-"` // for fe
-	Cluster           string        `json:"cluster"`                 // take effect by cluster, seperated by space
-	Name              string        `json:"name"`                    // new metric name
-	Disabled          int           `json:"disabled"`                // 0: enabled, 1: disabled
-	PromQl            string        `json:"prom_ql"`                 // just one ql for promql
-	QueryConfigs      string        `json:"-" gorm:"query_configs"`  // query_configs
-	QueryConfigsJson  []QueryConfig `json:"query_configs" gorm:"-"`  // query_configs for fe
-	PromEvalInterval  int           `json:"prom_eval_interval"`      // unit:s
-	AppendTags        string        `json:"-"`                       // split by space: service=n9e mod=api
-	AppendTagsJSON    []string      `json:"append_tags" gorm:"-"`    // for fe
-	Note              string        `json:"note"`                    // note
-	CreateAt          int64         `json:"create_at"`
-	CreateBy          string        `json:"create_by"`
-	UpdateAt          int64         `json:"update_at"`
-	UpdateBy          string        `json:"update_by"`
+	// 引入默认的struct,隔离IEntityStruct的方法改动
+	zorm.EntityStruct
+	Id                int64         `json:"id" column:"id"`
+	GroupId           int64         `json:"group_id" column:"group_id"`                     // busi group id
+	DatasourceIds     string        `json:"-" column:"datasource_ids"`                      // datasource ids
+	DatasourceIdsJson []int64       `json:"datasource_ids"`                                 // for fe
+	Cluster           string        `json:"cluster" column:"cluster"`                       // take effect by cluster, seperated by space
+	Name              string        `json:"name" column:"name"`                             // new metric name
+	Disabled          int           `json:"disabled" column:"disabled"`                     // 0: enabled, 1: disabled
+	PromQl            string        `json:"prom_ql" column:"prom_ql"`                       // just one ql for promql
+	QueryConfigs      string        `json:"-" column:"query_configs"`                       // query_configs
+	QueryConfigsJson  []QueryConfig `json:"query_configs"`                                  // query_configs for fe
+	PromEvalInterval  int           `json:"prom_eval_interval" column:"prom_eval_interval"` // unit:s
+	AppendTags        string        `json:"-" column:"append_tags"`                         // split by space: service=n9e mod=api
+	AppendTagsJSON    []string      `json:"append_tags"`                                    // for fe
+	Note              string        `json:"note" column:"note"`                             // note
+	CreateAt          int64         `json:"create_at" column:"create_at"`
+	CreateBy          string        `json:"create_by" column:"create_by"`
+	UpdateAt          int64         `json:"update_at" column:"update_at"`
+	UpdateBy          string        `json:"update_by" column:"update_by"`
 }
 
 type QueryConfig struct {
@@ -50,8 +56,8 @@ type Query struct {
 	Config        interface{} `json:"config"`
 }
 
-func (re *RecordingRule) TableName() string {
-	return "recording_rule"
+func (re *RecordingRule) GetTableName() string {
+	return RecordingRuleTableName
 }
 
 func (re *RecordingRule) FE2DB() {
@@ -155,22 +161,35 @@ func (re *RecordingRule) Update(ctx *ctx.Context, ref RecordingRule) error {
 	if err != nil {
 		return err
 	}
-	return DB(ctx).Model(re).Select("*").Updates(ref).Error
+	return Update(ctx, &ref, nil)
+	//return DB(ctx).Model(re).Select("*").Updates(ref).Error
 }
 
 func (re *RecordingRule) UpdateFieldsMap(ctx *ctx.Context, fields map[string]interface{}) error {
-	return DB(ctx).Model(re).Updates(fields).Error
+	entityMap := zorm.NewEntityMap(RecordingRuleTableName)
+	entityMap.PkColumnName = re.GetPKColumnName()
+	for k, v := range fields {
+		entityMap.Set(k, v)
+	}
+	entityMap.Set(re.GetPKColumnName(), re.Id)
+	_, err := zorm.Transaction(ctx.Ctx, func(ctx context.Context) (interface{}, error) {
+		return zorm.UpdateEntityMap(ctx, entityMap)
+	})
+	return err
+	//return DB(ctx).Model(re).Updates(fields).Error
 }
 
 func RecordingRuleDels(ctx *ctx.Context, ids []int64, groupId int64) error {
-	for i := 0; i < len(ids); i++ {
-		ret := DB(ctx).Where("id = ? and group_id=?", ids[i], groupId).Delete(&RecordingRule{})
-		if ret.Error != nil {
-			return ret.Error
+	/*
+		for i := 0; i < len(ids); i++ {
+			ret := DB(ctx).Where("id = ? and group_id=?", ids[i], groupId).Delete(&RecordingRule{})
+			if ret.Error != nil {
+				return ret.Error
+			}
 		}
-	}
-
-	return nil
+	*/
+	finder := zorm.NewDeleteFinder(RecordingRuleTableName).Append("WHERE id in (?) and group_id=?", ids, groupId)
+	return UpdateFinder(ctx, finder)
 }
 
 // func RecordingRuleExists(ctx *ctx.Context, id, groupId int64, cluster, name string) (bool, error) {
@@ -195,10 +214,12 @@ func RecordingRuleDels(ctx *ctx.Context, ids []int64, groupId int64) error {
 // }
 
 func RecordingRuleGets(ctx *ctx.Context, groupId int64) ([]RecordingRule, error) {
-	session := DB(ctx).Where("group_id=?", groupId).Order("name")
+	finder := zorm.NewSelectFinder(RecordingRuleTableName).Append("WHERE group_id=? order by name asc", groupId)
+	//session := DB(ctx).Where("group_id=?", groupId).Order("name")
 
-	var lst []RecordingRule
-	err := session.Find(&lst).Error
+	lst := make([]RecordingRule, 0)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := session.Find(&lst).Error
 	if err == nil {
 		for i := 0; i < len(lst); i++ {
 			lst[i].DB2FE()
@@ -209,8 +230,11 @@ func RecordingRuleGets(ctx *ctx.Context, groupId int64) ([]RecordingRule, error)
 }
 
 func RecordingRuleGet(ctx *ctx.Context, where string, regs ...interface{}) (*RecordingRule, error) {
-	var lst []*RecordingRule
-	err := DB(ctx).Where(where, regs...).Find(&lst).Error
+	finder := zorm.NewSelectFinder(RecordingRuleTableName)
+	AppendWhere(finder, where, regs...)
+	lst := make([]RecordingRule, 0)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Where(where, regs...).Find(&lst).Error
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +245,7 @@ func RecordingRuleGet(ctx *ctx.Context, where string, regs ...interface{}) (*Rec
 
 	lst[0].DB2FE()
 
-	return lst[0], nil
+	return &lst[0], nil
 }
 
 func RecordingRuleGetById(ctx *ctx.Context, id int64) (*RecordingRule, error) {
@@ -229,10 +253,11 @@ func RecordingRuleGetById(ctx *ctx.Context, id int64) (*RecordingRule, error) {
 }
 
 func RecordingRuleEnabledGets(ctx *ctx.Context) ([]*RecordingRule, error) {
-	session := DB(ctx)
-
-	var lst []*RecordingRule
-	err := session.Where("disabled = ?", 0).Find(&lst).Error
+	//session := DB(ctx)
+	finder := zorm.NewSelectFinder(RecordingRuleTableName).Append("WHERE disabled = ?", 0)
+	lst := make([]*RecordingRule, 0)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := session.Where("disabled = ?", 0).Find(&lst).Error
 	if err != nil {
 		return lst, err
 	}
@@ -254,11 +279,12 @@ func RecordingRuleGetsByCluster(ctx *ctx.Context) ([]*RecordingRule, error) {
 		}
 		return lst, err
 	}
+	finder := zorm.NewSelectFinder(RecordingRuleTableName).Append("WHERE disabled = ?", 0)
+	//session := DB(ctx).Where("disabled = ?", 0)
 
-	session := DB(ctx).Where("disabled = ?", 0)
-
-	var lst []*RecordingRule
-	err := session.Find(&lst).Error
+	lst := make([]*RecordingRule, 0)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := session.Find(&lst).Error
 	if err != nil {
 		return lst, err
 	}
@@ -278,21 +304,26 @@ func RecordingRuleStatistics(ctx *ctx.Context) (*Statistics, error) {
 		s, err := poster.GetByUrls[*Statistics](ctx, "/v1/n9e/statistic?name=recording_rule")
 		return s, err
 	}
+	return StatisticsGet(ctx, RecordingRuleTableName)
 
-	session := DB(ctx).Model(&RecordingRule{}).Select("count(*) as total", "max(update_at) as last_updated")
+	/*
+		session := DB(ctx).Model(&RecordingRule{}).Select("count(*) as total", "max(update_at) as last_updated")
 
-	var stats []*Statistics
-	err := session.Find(&stats).Error
-	if err != nil {
-		return nil, err
-	}
+		var stats []*Statistics
+		err := session.Find(&stats).Error
+		if err != nil {
+			return nil, err
+		}
 
-	return stats[0], nil
+		return stats[0], nil
+	*/
 }
 
 func RecordingRuleUpgradeToV6(ctx *ctx.Context, dsm map[string]Datasource) error {
-	var lst []*RecordingRule
-	err := DB(ctx).Find(&lst).Error
+	finder := zorm.NewSelectFinder(RecordingRuleTableName)
+	lst := make([]RecordingRule, 0)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Find(&lst).Error
 	if err != nil {
 		return err
 	}

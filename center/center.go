@@ -14,7 +14,6 @@ import (
 	"github.com/ccfos/nightingale/v6/dumper"
 	"github.com/ccfos/nightingale/v6/memsto"
 	"github.com/ccfos/nightingale/v6/models"
-	"github.com/ccfos/nightingale/v6/models/migrate"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/httpx"
 	"github.com/ccfos/nightingale/v6/pkg/i18nx"
@@ -51,7 +50,8 @@ func Initialize(configDir string, cryptoKey string) (func(), error) {
 	}
 	ctx := ctx.NewContext(context.Background(), db, true)
 	models.InitRoot(ctx)
-	migrate.Migrate(db)
+	//不建议这样更新数据库,表结构还是手动更新的好
+	//migrate.Migrate(db)
 
 	redis, err := storage.NewRedis(config.Redis)
 	if err != nil {

@@ -3,19 +3,18 @@ package ctx
 import (
 	"context"
 
+	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/conf"
-
-	"gorm.io/gorm"
 )
 
 type Context struct {
-	DB        *gorm.DB
+	DB        *zorm.DBDao
 	CenterApi conf.CenterApi
 	Ctx       context.Context
 	IsCenter  bool
 }
 
-func NewContext(ctx context.Context, db *gorm.DB, isCenter bool, centerApis ...conf.CenterApi) *Context {
+func NewContext(ctx context.Context, db *zorm.DBDao, isCenter bool, centerApis ...conf.CenterApi) *Context {
 	var api conf.CenterApi
 	if len(centerApis) > 0 {
 		api = centerApis[0]
@@ -30,7 +29,7 @@ func NewContext(ctx context.Context, db *gorm.DB, isCenter bool, centerApis ...c
 }
 
 // set db to Context
-func (c *Context) SetDB(db *gorm.DB) {
+func (c *Context) SetDB(db *zorm.DBDao) {
 	c.DB = db
 }
 
@@ -40,6 +39,6 @@ func (c *Context) GetContext() context.Context {
 }
 
 // get db from Context
-func (c *Context) GetDB() *gorm.DB {
+func (c *Context) GetDB() *zorm.DBDao {
 	return c.DB
 }

@@ -7,56 +7,60 @@ import (
 	"strings"
 	"time"
 
+	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/toolkits/pkg/logger"
 )
 
+const AlertHisEventTableName = "alert_his_event"
+
 type AlertHisEvent struct {
-	Id                 int64             `json:"id" gorm:"primaryKey"`
-	Cate               string            `json:"cate"`
-	IsRecovered        int               `json:"is_recovered"`
-	DatasourceId       int64             `json:"datasource_id"`
-	Cluster            string            `json:"cluster"`
-	GroupId            int64             `json:"group_id"`
-	GroupName          string            `json:"group_name"` // busi group name
-	Hash               string            `json:"hash"`
-	RuleId             int64             `json:"rule_id"`
-	RuleName           string            `json:"rule_name"`
-	RuleNote           string            `json:"rule_note"`
-	RuleProd           string            `json:"rule_prod"`
-	RuleAlgo           string            `json:"rule_algo"`
-	Severity           int               `json:"severity"`
-	PromForDuration    int               `json:"prom_for_duration"`
-	PromQl             string            `json:"prom_ql"`
-	RuleConfig         string            `json:"-" gorm:"rule_config"` // rule config
-	RuleConfigJson     interface{}       `json:"rule_config" gorm:"-"` // rule config for fe
-	PromEvalInterval   int               `json:"prom_eval_interval"`
-	Callbacks          string            `json:"-"`
-	CallbacksJSON      []string          `json:"callbacks" gorm:"-"`
-	RunbookUrl         string            `json:"runbook_url"`
-	NotifyRecovered    int               `json:"notify_recovered"`
-	NotifyChannels     string            `json:"-"`
-	NotifyChannelsJSON []string          `json:"notify_channels" gorm:"-"`
-	NotifyGroups       string            `json:"-"`
-	NotifyGroupsJSON   []string          `json:"notify_groups" gorm:"-"`
-	NotifyGroupsObj    []UserGroup       `json:"notify_groups_obj" gorm:"-"`
-	TargetIdent        string            `json:"target_ident"`
-	TargetNote         string            `json:"target_note"`
-	TriggerTime        int64             `json:"trigger_time"`
-	TriggerValue       string            `json:"trigger_value"`
-	RecoverTime        int64             `json:"recover_time"`
-	LastEvalTime       int64             `json:"last_eval_time"`
-	Tags               string            `json:"-"`
-	TagsJSON           []string          `json:"tags" gorm:"-"`
-	Annotations        string            `json:"-"`
-	AnnotationsJSON    map[string]string `json:"annotations" gorm:"-"` // for fe
-	NotifyCurNumber    int               `json:"notify_cur_number"`    // notify: current number
-	FirstTriggerTime   int64             `json:"first_trigger_time"`   // 连续告警的首次告警时间
-	ExtraConfig        interface{}       `json:"extra_config" gorm:"-"`
+	zorm.EntityStruct
+	Id                 int64             `json:"id" column:"id"`
+	Cate               string            `json:"cate" column:"cate"`
+	IsRecovered        int               `json:"is_recovered" column:"is_recovered"`
+	DatasourceId       int64             `json:"datasource_id" column:"datasource_id"`
+	Cluster            string            `json:"cluster" column:"cluster"`
+	GroupId            int64             `json:"group_id" column:"group_id"`
+	GroupName          string            `json:"group_name" column:"group_name"` // busi group name
+	Hash               string            `json:"hash" column:"hash"`
+	RuleId             int64             `json:"rule_id" column:"rule_id"`
+	RuleName           string            `json:"rule_name" column:"rule_name"`
+	RuleNote           string            `json:"rule_note" column:"rule_note"`
+	RuleProd           string            `json:"rule_prod" column:"rule_prod"`
+	RuleAlgo           string            `json:"rule_algo" column:"rule_algo"`
+	Severity           int               `json:"severity" column:"severity"`
+	PromForDuration    int               `json:"prom_for_duration" column:"prom_for_duration"`
+	PromQl             string            `json:"prom_ql" column:"prom_ql"`
+	RuleConfig         string            `json:"-" column:"rule_config"` // rule config
+	RuleConfigJson     interface{}       `json:"rule_config"`            // rule config for fe
+	PromEvalInterval   int               `json:"prom_eval_interval" column:"prom_eval_interval"`
+	Callbacks          string            `json:"-" column:"callbacks"`
+	CallbacksJSON      []string          `json:"callbacks"`
+	RunbookUrl         string            `json:"runbook_url" column:"runbook_url"`
+	NotifyRecovered    int               `json:"notify_recovered" column:"notify_recovered"`
+	NotifyChannels     string            `json:"-" column:"notify_channels"`
+	NotifyChannelsJSON []string          `json:"notify_channels"`
+	NotifyGroups       string            `json:"-" column:"notify_groups"`
+	NotifyGroupsJSON   []string          `json:"notify_groups"`
+	NotifyGroupsObj    []UserGroup       `json:"notify_groups_obj"`
+	TargetIdent        string            `json:"target_ident" column:"target_ident"`
+	TargetNote         string            `json:"target_note" column:"target_note"`
+	TriggerTime        int64             `json:"trigger_time" column:"trigger_time"`
+	TriggerValue       string            `json:"trigger_value" column:"trigger_value"`
+	RecoverTime        int64             `json:"recover_time" column:"recover_time"`
+	LastEvalTime       int64             `json:"last_eval_time" column:"last_eval_time"`
+	Tags               string            `json:"-" column:"tags"`
+	TagsJSON           []string          `json:"tags"`
+	Annotations        string            `json:"-" column:"annotations"`
+	AnnotationsJSON    map[string]string `json:"annotations"`                                    // for fe
+	NotifyCurNumber    int               `json:"notify_cur_number" column:"notify_cur_number"`   // notify: current number
+	FirstTriggerTime   int64             `json:"first_trigger_time" column:"first_trigger_time"` // 连续告警的首次告警时间
+	ExtraConfig        interface{}       `json:"extra_config"`
 }
 
-func (e *AlertHisEvent) TableName() string {
-	return "alert_his_event"
+func (e *AlertHisEvent) GetTableName() string {
+	return AlertHisEventTableName
 }
 
 func (e *AlertHisEvent) Add(ctx *ctx.Context) error {
@@ -107,80 +111,104 @@ func (e *AlertHisEvent) FillNotifyGroups(ctx *ctx.Context, cache map[int64]*User
 }
 
 func AlertHisEventTotal(ctx *ctx.Context, prods []string, bgid, stime, etime int64, severity int, recovered int, dsIds []int64, cates []string, query string) (int64, error) {
-	session := DB(ctx).Model(&AlertHisEvent{}).Where("last_eval_time between ? and ?", stime, etime)
+	finder := zorm.NewSelectFinder(AlertHisEventTableName, "count(*)")
+	finder.Append("WHERE last_eval_time between ? and ?", stime, etime)
+	//session := DB(ctx).Model(&AlertHisEvent{}).Where("last_eval_time between ? and ?", stime, etime)
 
 	if len(prods) > 0 {
-		session = session.Where("rule_prod in ?", prods)
+		//session = session.Where("rule_prod in ?", prods)
+		finder.Append("and rule_prod in (?)", prods)
 	}
 
 	if bgid > 0 {
-		session = session.Where("group_id = ?", bgid)
+		//session = session.Where("group_id = ?", bgid)
+		finder.Append("and group_id = ?", bgid)
 	}
 
 	if severity >= 0 {
-		session = session.Where("severity = ?", severity)
+		//session = session.Where("severity = ?", severity)
+		finder.Append("and severity = ?", severity)
 	}
 
 	if recovered >= 0 {
-		session = session.Where("is_recovered = ?", recovered)
+		//session = session.Where("is_recovered = ?", recovered)
+		finder.Append("and is_recovered = ?", recovered)
 	}
 
 	if len(dsIds) > 0 {
-		session = session.Where("datasource_id in ?", dsIds)
+		//session = session.Where("datasource_id in ?", dsIds)
+		finder.Append("and datasource_id in (?)", dsIds)
 	}
 
 	if len(cates) > 0 {
-		session = session.Where("cate in ?", cates)
+		//session = session.Where("cate in ?", cates)
+		finder.Append("and cate in (?)", cates)
 	}
 
 	if query != "" {
 		arr := strings.Fields(query)
 		for i := 0; i < len(arr); i++ {
 			qarg := "%" + arr[i] + "%"
-			session = session.Where("rule_name like ? or tags like ?", qarg, qarg)
+			//session = session.Where("rule_name like ? or tags like ?", qarg, qarg)
+			finder.Append("and (rule_name like ? or tags like ?)", qarg, qarg)
 		}
 	}
-
-	return Count(session)
+	return Count(ctx, finder)
+	//return Count(session)
 }
 
 func AlertHisEventGets(ctx *ctx.Context, prods []string, bgid, stime, etime int64, severity int, recovered int, dsIds []int64, cates []string, query string, limit, offset int) ([]AlertHisEvent, error) {
-	session := DB(ctx).Where("last_eval_time between ? and ?", stime, etime)
+	finder := zorm.NewSelectFinder(AlertHisEventTableName)
+	finder.Append("WHERE last_eval_time between ? and ?", stime, etime)
+	//session := DB(ctx).Where("last_eval_time between ? and ?", stime, etime)
 
 	if len(prods) != 0 {
-		session = session.Where("rule_prod in ?", prods)
+		//session = session.Where("rule_prod in ?", prods)
+		finder.Append("and rule_prod in (?)", prods)
 	}
 
 	if bgid > 0 {
-		session = session.Where("group_id = ?", bgid)
+		//session = session.Where("group_id = ?", bgid)
+		finder.Append("and group_id = ?", bgid)
 	}
 
 	if severity >= 0 {
-		session = session.Where("severity = ?", severity)
+		//session = session.Where("severity = ?", severity)
+		finder.Append("and severity = ?", severity)
 	}
 
 	if recovered >= 0 {
-		session = session.Where("is_recovered = ?", recovered)
+		//session = session.Where("is_recovered = ?", recovered)
+		finder.Append("and is_recovered = ?", recovered)
 	}
 
 	if len(dsIds) > 0 {
-		session = session.Where("datasource_id in ?", dsIds)
+		//session = session.Where("datasource_id in ?", dsIds)
+		finder.Append("and datasource_id in (?)", dsIds)
 	}
 
 	if len(cates) > 0 {
-		session = session.Where("cate in ?", cates)
+		//session = session.Where("cate in ?", cates)
+		finder.Append("and cate in (?)", cates)
 	}
 
 	if query != "" {
 		arr := strings.Fields(query)
 		for i := 0; i < len(arr); i++ {
 			qarg := "%" + arr[i] + "%"
-			session = session.Where("rule_name like ? or tags like ?", qarg, qarg)
+			//session = session.Where("rule_name like ? or tags like ?", qarg, qarg)
+			finder.Append("and (rule_name like ? or tags like ?)", qarg, qarg)
 		}
 	}
+	finder.Append("order by id desc")
 
-	var lst []AlertHisEvent
-	err := session.Order("id desc").Limit(limit).Offset(offset).Find(&lst).Error
+	lst := make([]AlertHisEvent, 0)
+	page := zorm.NewPage()
+	page.PageSize = limit
+	page.PageNo = offset / limit
+	finder.SelectTotalCount = false
+	err := zorm.Query(ctx.Ctx, finder, &lst, page)
+	//err := session.Order("id desc").Limit(limit).Offset(offset).Find(&lst).Error
 
 	if err == nil {
 		for i := 0; i < len(lst); i++ {
@@ -192,8 +220,11 @@ func AlertHisEventGets(ctx *ctx.Context, prods []string, bgid, stime, etime int6
 }
 
 func AlertHisEventGet(ctx *ctx.Context, where string, args ...interface{}) (*AlertHisEvent, error) {
-	var lst []*AlertHisEvent
-	err := DB(ctx).Where(where, args...).Find(&lst).Error
+	lst := make([]AlertHisEvent, 0)
+	finder := zorm.NewSelectFinder(AlertHisEventTableName)
+	AppendWhere(finder, where, args...)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Where(where, args...).Find(&lst).Error
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +236,7 @@ func AlertHisEventGet(ctx *ctx.Context, where string, args ...interface{}) (*Ale
 	lst[0].DB2FE()
 	lst[0].FillNotifyGroups(ctx, make(map[int64]*UserGroup))
 
-	return lst[0], nil
+	return &lst[0], nil
 }
 
 func AlertHisEventGetById(ctx *ctx.Context, id int64) (*AlertHisEvent, error) {
@@ -213,12 +244,18 @@ func AlertHisEventGetById(ctx *ctx.Context, id int64) (*AlertHisEvent, error) {
 }
 
 func (m *AlertHisEvent) UpdateFieldsMap(ctx *ctx.Context, fields map[string]interface{}) error {
-	return DB(ctx).Model(m).Updates(fields).Error
+	return UpdateFieldsMap(ctx, m, m.Id, fields)
+	//return DB(ctx).Model(m).Updates(fields).Error
 }
 
 func AlertHisEventUpgradeToV6(ctx *ctx.Context, dsm map[string]Datasource) error {
-	var lst []*AlertHisEvent
-	err := DB(ctx).Where("trigger_time > ?", time.Now().Unix()-3600*24*30).Limit(10000).Order("id desc").Find(&lst).Error
+	lst := make([]AlertHisEvent, 0)
+	finder := zorm.NewSelectFinder(AlertHisEventTableName).Append("WHERE trigger_time > ? order by id desc", time.Now().Unix()-3600*24*30)
+	page := zorm.NewPage()
+	page.PageSize = 10000
+	finder.SelectTotalCount = false
+	err := zorm.Query(ctx.Ctx, finder, &lst, page)
+	//err := DB(ctx).Where("trigger_time > ?", time.Now().Unix()-3600*24*30).Limit(10000).Order("id desc").Find(&lst).Error
 	if err != nil {
 		return err
 	}

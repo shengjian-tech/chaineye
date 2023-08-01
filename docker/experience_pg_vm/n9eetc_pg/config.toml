@@ -81,21 +81,22 @@ RSAPrivateKeyPath = "/etc/n9e/private.pem"
 RSAPassWord = ""
 
 [DB]
-DSN="host=postgres port=5432 user=root dbname=n9e_v6 password=1234 sslmode=disable"
+# postgres: host=%s port=%s user=%s dbname=%s password=%s sslmode=%s
+DSN="host=postgres port=5432 user=postgres password=root dbname=n9e_v6 sslmode=disable"
 # enable debug mode or not
-Debug = false
-# mysql postgres
-DBType = "postgres"
+SlowSQLMillis = -1
+# mysql,postgresql,oracle,mssql,sqlite,db2,clickhouse,dm,kingbase,shentong,tdengine
+Dialect = "mysql"
+# mysql,postgres,oracle(go-ora),sqlserver,sqlite3,go_ibm_db,clickhouse,dm,kingbase,aci,taosSql|taosRestful
+DriverName ="mysql"
 # unit: s
 MaxLifetime = 7200
 # max open connections
 MaxOpenConns = 150
 # max idle connections
 MaxIdleConns = 50
-# table prefix
-TablePrefix = ""
-# enable auto migrate or not
-# EnableAutoMigrate = false
+DisableTransaction = false
+TDengineInsertsColumnName = false
 
 [Redis]
 # address, ip:port or ip1:port,ip2:port for cluster and sentinel(SentinelAddrs)

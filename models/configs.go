@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
 
@@ -14,14 +15,18 @@ import (
 	"github.com/toolkits/pkg/str"
 )
 
+const ConfigsTableName = "configs"
+
 type Configs struct {
-	Id   int64 `gorm:"primaryKey"`
-	Ckey string
-	Cval string
+	// 引入默认的struct,隔离IEntityStruct的方法改动
+	zorm.EntityStruct
+	Id   int64  `column:"id"`
+	Ckey string `column:"ckey"`
+	Cval string `column:"cval"`
 }
 
-func (Configs) TableName() string {
-	return "configs"
+func (Configs) GetTableName() string {
+	return ConfigsTableName
 }
 
 func (c *Configs) DB2FE() error {
@@ -55,8 +60,10 @@ func ConfigsGet(ctx *ctx.Context, ckey string) (string, error) {
 		}
 	}
 
-	var lst []string
-	err := DB(ctx).Model(&Configs{}).Where("ckey=?", ckey).Pluck("cval", &lst).Error
+	lst := make([]string, 0)
+	finder := zorm.NewSelectFinder(ConfigsTableName, "cval").Append("WHERE ckey=?", ckey)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Model(&Configs{}).Where("ckey=?", ckey).Pluck("cval", &lst).Error
 	if err != nil {
 		return "", errors.WithMessage(err, "failed to query configs")
 	}
@@ -69,48 +76,69 @@ func ConfigsGet(ctx *ctx.Context, ckey string) (string, error) {
 }
 
 func ConfigsSet(ctx *ctx.Context, ckey, cval string) error {
-	num, err := Count(DB(ctx).Model(&Configs{}).Where("ckey=?", ckey))
+	finder := zorm.NewSelectFinder(ConfigsTableName, "count(*)").Append("WHERE ckey=?", ckey)
+	num, err := Count(ctx, finder)
+	//num, err := Count(DB(ctx).Model(&Configs{}).Where("ckey=?", ckey))
 	if err != nil {
 		return errors.WithMessage(err, "failed to count configs")
 	}
 
 	if num == 0 {
 		// insert
-		err = DB(ctx).Create(&Configs{
+		/*
+			err = DB(ctx).Create(&Configs{
+				Ckey: ckey,
+				Cval: cval,
+			}).Error
+		*/
+		err = Insert(ctx, &Configs{
 			Ckey: ckey,
 			Cval: cval,
-		}).Error
+		})
 	} else {
 		// update
-		err = DB(ctx).Model(&Configs{}).Where("ckey=?", ckey).Update("cval", cval).Error
+		finder := zorm.NewUpdateFinder(ConfigsTableName).Append("cval=? WHERE ckey=?", cval, ckey)
+		err = UpdateFinder(ctx, finder)
+		//err = DB(ctx).Model(&Configs{}).Where("ckey=?", ckey).Update("cval", cval).Error
 	}
 
 	return err
 }
 
 func ConfigGet(ctx *ctx.Context, id int64) (*Configs, error) {
-	var objs []*Configs
-	err := DB(ctx).Where("id=?", id).Find(&objs).Error
+	objs := make([]Configs, 0)
+	finder := zorm.NewSelectFinder(ConfigsTableName).Append("WHERE id=?", id)
+	err := zorm.Query(ctx.Ctx, finder, &objs, nil)
+	//err := DB(ctx).Where("id=?", id).Find(&objs).Error
 
 	if len(objs) == 0 {
 		return nil, nil
 	}
-	return objs[0], err
+	return &objs[0], err
 }
 
 func ConfigsGets(ctx *ctx.Context, prefix string, limit, offset int) ([]*Configs, error) {
-	var objs []*Configs
-	session := DB(ctx)
+	objs := make([]*Configs, 0)
+	finder := zorm.NewSelectFinder(ConfigsTableName)
+	//session := DB(ctx)
 	if prefix != "" {
-		session = session.Where("ckey like ?", prefix+"%")
+		//session = session.Where("ckey like ?", prefix+"%")
+		finder.Append("WHERE ckey like ?", prefix+"%")
 	}
-
-	err := session.Order("id desc").Limit(limit).Offset(offset).Find(&objs).Error
+	finder.Append(" order by id desc")
+	page := zorm.NewPage()
+	page.PageSize = limit
+	page.PageNo = offset / limit
+	finder.SelectTotalCount = false
+	err := zorm.Query(ctx.Ctx, finder, &objs, page)
+	//err := session.Order("id desc").Limit(limit).Offset(offset).Find(&objs).Error
 	return objs, err
 }
 
 func (c *Configs) Add(ctx *ctx.Context) error {
-	num, err := Count(DB(ctx).Model(&Configs{}).Where("ckey=?", c.Ckey))
+	finder := zorm.NewSelectFinder(ConfigsTableName, "count(*)").Append("WHERE ckey=?", c.Ckey)
+	num, err := Count(ctx, finder)
+	//num, err := Count(DB(ctx).Model(&Configs{}).Where("ckey=?", c.Ckey))
 	if err != nil {
 		return errors.WithMessage(err, "failed to count configs")
 	}
@@ -119,33 +147,44 @@ func (c *Configs) Add(ctx *ctx.Context) error {
 	}
 
 	// insert
-	err = DB(ctx).Create(&Configs{
+	/*
+		err = DB(ctx).Create(&Configs{
+			Ckey: c.Ckey,
+			Cval: c.Cval,
+		}).Error
+	*/
+	err = Insert(ctx, &Configs{
 		Ckey: c.Ckey,
 		Cval: c.Cval,
-	}).Error
+	})
+
 	return err
 }
 
 func (c *Configs) Update(ctx *ctx.Context) error {
-	num, err := Count(DB(ctx).Model(&Configs{}).Where("id<>? and ckey=?", c.Id, c.Ckey))
+	finder := zorm.NewSelectFinder(ConfigsTableName, "count(*)").Append("WHERE id<>? and ckey=?", c.Id, c.Ckey)
+	num, err := Count(ctx, finder)
+	//num, err := Count(DB(ctx).Model(&Configs{}).Where("id<>? and ckey=?", c.Id, c.Ckey))
 	if err != nil {
 		return errors.WithMessage(err, "failed to count configs")
 	}
 	if num > 0 {
 		return errors.WithMessage(err, "key is exists")
 	}
-
-	err = DB(ctx).Model(&Configs{}).Where("id=?", c.Id).Updates(c).Error
-	return err
+	return Update(ctx, c, nil)
+	//err = DB(ctx).Model(&Configs{}).Where("id=?", c.Id).Updates(c).Error
 }
 
 func ConfigsDel(ctx *ctx.Context, ids []int64) error {
-	return DB(ctx).Where("id in ?", ids).Delete(&Configs{}).Error
+	return DeleteByIds(ctx, ConfigsTableName, ids)
+	//return DB(ctx).Where("id in ?", ids).Delete(&Configs{}).Error
 }
 
 func ConfigsGetsByKey(ctx *ctx.Context, ckeys []string) (map[string]string, error) {
-	var objs []Configs
-	err := DB(ctx).Where("ckey in ?", ckeys).Find(&objs).Error
+	objs := make([]Configs, 0)
+	finder := zorm.NewSelectFinder(ConfigsTableName).Append("WHERE ckey in (?)", ckeys)
+	err := zorm.Query(ctx.Ctx, finder, &objs, nil)
+	//err := DB(ctx).Where("ckey in ?", ckeys).Find(&objs).Error
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to gets configs")
 	}

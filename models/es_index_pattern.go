@@ -3,26 +3,31 @@ package models
 import (
 	"time"
 
+	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 
 	"github.com/pkg/errors"
 )
 
+const EsIndexPatternTableName = "es_index_pattern"
+
 type EsIndexPattern struct {
-	Id                     int64  `json:"id" gorm:"primaryKey"`
-	DatasourceId           int64  `json:"datasource_id"`
-	Name                   string `json:"name"`
-	TimeField              string `json:"time_field"`
-	AllowHideSystemIndices bool   `json:"allow_hide_system_indices"`
-	FieldsFormat           string `json:"fields_format"`
-	CreateAt               int64  `json:"create_at"`
-	CreateBy               string `json:"create_by"`
-	UpdateAt               int64  `json:"update_at"`
-	UpdateBy               string `json:"update_by"`
+	// 引入默认的struct,隔离IEntityStruct的方法改动
+	zorm.EntityStruct
+	Id                     int64  `json:"id" column:"id"`
+	DatasourceId           int64  `json:"datasource_id" column:"datasource_id"`
+	Name                   string `json:"name" column:"name"`
+	TimeField              string `json:"time_field" column:"time_field"`
+	AllowHideSystemIndices bool   `json:"allow_hide_system_indices" column:"allow_hide_system_indices"`
+	FieldsFormat           string `json:"fields_format" column:"fields_format"`
+	CreateAt               int64  `json:"create_at" column:"create_at"`
+	CreateBy               string `json:"create_by" column:"create_by"`
+	UpdateAt               int64  `json:"update_at" column:"update_at"`
+	UpdateBy               string `json:"update_by" column:"update_by"`
 }
 
-func (t *EsIndexPattern) TableName() string {
-	return "es_index_pattern"
+func (t *EsIndexPattern) GetTableName() string {
+	return EsIndexPatternTableName
 }
 
 func (r *EsIndexPattern) Add(ctx *ctx.Context) error {
@@ -34,15 +39,16 @@ func (r *EsIndexPattern) Add(ctx *ctx.Context) error {
 	if esIndexPattern != nil {
 		return errors.New("es index pattern datasource and name already exists")
 	}
-
-	return DB(ctx).Create(r).Error
+	return Insert(ctx, r)
+	//return DB(ctx).Create(r).Error
 }
 
 func EsIndexPatternDel(ctx *ctx.Context, ids []int64) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	return DB(ctx).Where("id in ?", ids).Delete(new(EsIndexPattern)).Error
+	return DeleteByIds(ctx, EsIndexPatternTableName, ids)
+	//return DB(ctx).Where("id in ?", ids).Delete(new(EsIndexPattern)).Error
 }
 
 func (ei *EsIndexPattern) Update(ctx *ctx.Context, eip EsIndexPattern) error {
@@ -62,12 +68,16 @@ func (ei *EsIndexPattern) Update(ctx *ctx.Context, eip EsIndexPattern) error {
 	eip.CreateBy = ei.CreateBy
 	eip.UpdateAt = time.Now().Unix()
 
-	return DB(ctx).Model(ei).Select("*").Updates(eip).Error
+	return Update(ctx, &eip, nil)
+	//return DB(ctx).Model(ei).Select("*").Updates(eip).Error
 }
 
 func EsIndexPatternGets(ctx *ctx.Context, where string, args ...interface{}) ([]*EsIndexPattern, error) {
-	var objs []*EsIndexPattern
-	err := DB(ctx).Where(where, args...).Find(&objs).Error
+	objs := make([]*EsIndexPattern, 0)
+	finder := zorm.NewSelectFinder(EsIndexPatternTableName)
+	AppendWhere(finder, where, args...)
+	err := zorm.Query(ctx.Ctx, finder, &objs, nil)
+	//err := DB(ctx).Where(where, args...).Find(&objs).Error
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to query es index pattern")
 	}
@@ -75,8 +85,11 @@ func EsIndexPatternGets(ctx *ctx.Context, where string, args ...interface{}) ([]
 }
 
 func EsIndexPatternGet(ctx *ctx.Context, where string, args ...interface{}) (*EsIndexPattern, error) {
-	var lst []*EsIndexPattern
-	err := DB(ctx).Where(where, args...).Find(&lst).Error
+	lst := make([]*EsIndexPattern, 0)
+	finder := zorm.NewSelectFinder(EsIndexPatternTableName)
+	AppendWhere(finder, where, args...)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Where(where, args...).Find(&lst).Error
 	if err != nil {
 		return nil, err
 	}
@@ -93,16 +106,25 @@ func EsIndexPatternGetById(ctx *ctx.Context, id int64) (*EsIndexPattern, error) 
 }
 
 func EsIndexPatternExists(ctx *ctx.Context, id, datasourceId int64, name string) (bool, error) {
-	session := DB(ctx).Where("id <> ? and datasource_id = ? and name = ?", id, datasourceId, name)
+	finder := zorm.NewSelectFinder(EsIndexPatternTableName, "count(*)").Append("WHERE id <> ? and datasource_id = ? and name = ?", id, datasourceId, name)
 
-	var lst []EsIndexPattern
-	err := session.Find(&lst).Error
+	count := 0
+	_, err := zorm.QueryRow(ctx.Ctx, finder, &count)
 	if err != nil {
 		return false, err
 	}
-	if len(lst) == 0 {
+
+	/*
+		session := DB(ctx).Where("id <> ? and datasource_id = ? and name = ?", id, datasourceId, name)
+
+		var lst []EsIndexPattern
+		err := session.Find(&lst).Error
+		if err != nil {
+			return false, err
+		}
+	*/
+	if count == 0 {
 		return false, nil
 	}
-
 	return true, nil
 }

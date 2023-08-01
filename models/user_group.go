@@ -1,29 +1,34 @@
 package models
 
 import (
+	"context"
 	"time"
 
+	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
 
 	"github.com/pkg/errors"
 	"github.com/toolkits/pkg/str"
-	"gorm.io/gorm"
 )
 
+const UserGroupTableName = "user_group"
+
 type UserGroup struct {
-	Id       int64   `json:"id" gorm:"primaryKey"`
-	Name     string  `json:"name"`
-	Note     string  `json:"note"`
-	CreateAt int64   `json:"create_at"`
-	CreateBy string  `json:"create_by"`
-	UpdateAt int64   `json:"update_at"`
-	UpdateBy string  `json:"update_by"`
-	UserIds  []int64 `json:"-" gorm:"-"`
+	// 引入默认的struct,隔离IEntityStruct的方法改动
+	zorm.EntityStruct
+	Id       int64   `json:"id" column:"id"`
+	Name     string  `json:"name" column:"name"`
+	Note     string  `json:"note" column:"note"`
+	CreateAt int64   `json:"create_at" column:"create_at"`
+	CreateBy string  `json:"create_by" column:"create_by"`
+	UpdateAt int64   `json:"update_at" column:"update_at"`
+	UpdateBy string  `json:"update_by" column:"update_by"`
+	UserIds  []int64 `json:"-"`
 }
 
-func (ug *UserGroup) TableName() string {
-	return "user_group"
+func (ug *UserGroup) GetTableName() string {
+	return UserGroupTableName
 }
 
 func (ug *UserGroup) DB2FE() error {
@@ -41,16 +46,19 @@ func (ug *UserGroup) Verify() error {
 	return nil
 }
 
-func (ug *UserGroup) Update(ctx *ctx.Context, selectField interface{}, selectFields ...interface{}) error {
+func (ug *UserGroup) Update(ctx *ctx.Context, selectFields ...string) error {
 	if err := ug.Verify(); err != nil {
 		return err
 	}
-
-	return DB(ctx).Model(ug).Select(selectField, selectFields...).Updates(ug).Error
+	return Update(ctx, ug, selectFields)
+	//return DB(ctx).Model(ug).Select(selectField, selectFields...).Updates(ug).Error
 }
 
 func UserGroupCount(ctx *ctx.Context, where string, args ...interface{}) (num int64, err error) {
-	return Count(DB(ctx).Model(&UserGroup{}).Where(where, args...))
+	finder := zorm.NewSelectFinder(UserGroupTableName, "count(*)")
+	AppendWhere(finder, where, args...)
+	return Count(ctx, finder)
+	//return Count(DB(ctx).Model(&UserGroup{}).Where(where, args...))
 }
 
 func (ug *UserGroup) Add(ctx *ctx.Context) error {
@@ -74,22 +82,38 @@ func (ug *UserGroup) Add(ctx *ctx.Context) error {
 }
 
 func (ug *UserGroup) Del(ctx *ctx.Context) error {
-	return DB(ctx).Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("group_id=?", ug.Id).Delete(&UserGroupMember{}).Error; err != nil {
-			return err
-		}
 
-		if err := tx.Where("id=?", ug.Id).Delete(&UserGroup{}).Error; err != nil {
-			return err
+	_, err := zorm.Transaction(ctx.Ctx, func(ctx context.Context) (interface{}, error) {
+		f1 := zorm.NewDeleteFinder(UserGroupMemberTableName).Append("WHERE group_id=?", ug.Id)
+		_, err := zorm.UpdateFinder(ctx, f1)
+		if err != nil {
+			return nil, err
 		}
-
-		return nil
+		return zorm.Delete(ctx, ug)
 	})
+	return err
+
+	/*
+		return DB(ctx).Transaction(func(tx *zorm.DBDao) error {
+			if err := tx.Where("group_id=?", ug.Id).Delete(&UserGroupMember{}).Error; err != nil {
+				return err
+			}
+
+			if err := tx.Where("id=?", ug.Id).Delete(&UserGroup{}).Error; err != nil {
+				return err
+			}
+
+			return nil
+		})
+	*/
 }
 
 func UserGroupGet(ctx *ctx.Context, where string, args ...interface{}) (*UserGroup, error) {
-	var lst []*UserGroup
-	err := DB(ctx).Where(where, args...).Find(&lst).Error
+	lst := make([]*UserGroup, 0)
+	finder := zorm.NewSelectFinder(UserGroupTableName)
+	AppendWhere(finder, where, args...)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Where(where, args...).Find(&lst).Error
 	if err != nil {
 		return nil, err
 	}
@@ -106,12 +130,13 @@ func UserGroupGetById(ctx *ctx.Context, id int64) (*UserGroup, error) {
 }
 
 func UserGroupGetByIds(ctx *ctx.Context, ids []int64) ([]UserGroup, error) {
-	var lst []UserGroup
+	lst := make([]UserGroup, 0)
 	if len(ids) == 0 {
 		return lst, nil
 	}
-
-	err := DB(ctx).Where("id in ?", ids).Order("name").Find(&lst).Error
+	finder := zorm.NewSelectFinder(UserGroupTableName).Append("WHERE id in (?) order by name asc", ids)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Where("id in ?", ids).Order("name").Find(&lst).Error
 	return lst, err
 }
 
@@ -121,8 +146,10 @@ func UserGroupGetAll(ctx *ctx.Context) ([]*UserGroup, error) {
 		return lst, err
 	}
 
-	var lst []*UserGroup
-	err := DB(ctx).Find(&lst).Error
+	lst := make([]*UserGroup, 0)
+	finder := zorm.NewSelectFinder(UserGroupTableName)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Find(&lst).Error
 	return lst, err
 }
 
@@ -153,14 +180,16 @@ func UserGroupStatistics(ctx *ctx.Context) (*Statistics, error) {
 		s, err := poster.GetByUrls[*Statistics](ctx, "/v1/n9e/statistic?name=user_group")
 		return s, err
 	}
+	return StatisticsGet(ctx, UserGroupTableName)
+	/*
+		session := DB(ctx).Model(&UserGroup{}).Select("count(*) as total", "max(update_at) as last_updated")
 
-	session := DB(ctx).Model(&UserGroup{}).Select("count(*) as total", "max(update_at) as last_updated")
+		var stats []*Statistics
+		err := session.Find(&stats).Error
+		if err != nil {
+			return nil, err
+		}
 
-	var stats []*Statistics
-	err := session.Find(&stats).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return stats[0], nil
+		return stats[0], nil
+	*/
 }

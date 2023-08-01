@@ -1,30 +1,35 @@
 package models
 
 import (
+	"context"
 	"fmt"
 	"time"
 
+	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
 
 	"github.com/pkg/errors"
-	"gorm.io/gorm"
 )
 
+const BusiGroupTableName = "busi_group"
+
 type BusiGroup struct {
-	Id          int64                   `json:"id" gorm:"primaryKey"`
-	Name        string                  `json:"name"`
-	LabelEnable int                     `json:"label_enable"`
-	LabelValue  string                  `json:"label_value"`
-	CreateAt    int64                   `json:"create_at"`
-	CreateBy    string                  `json:"create_by"`
-	UpdateAt    int64                   `json:"update_at"`
-	UpdateBy    string                  `json:"update_by"`
-	UserGroups  []UserGroupWithPermFlag `json:"user_groups" gorm:"-"`
-	DB          *gorm.DB                `json:"-" gorm:"-"`
+	// 引入默认的struct,隔离IEntityStruct的方法改动
+	zorm.EntityStruct
+	Id          int64                   `json:"id" column:"id"`
+	Name        string                  `json:"name" column:"name"`
+	LabelEnable int                     `json:"label_enable" column:"label_enable"`
+	LabelValue  string                  `json:"label_value" column:"label_value"`
+	CreateAt    int64                   `json:"create_at" column:"create_at"`
+	CreateBy    string                  `json:"create_by" column:"create_by"`
+	UpdateAt    int64                   `json:"update_at" column:"update_at"`
+	UpdateBy    string                  `json:"update_by" column:"update_by"`
+	UserGroups  []UserGroupWithPermFlag `json:"user_groups"`
+	DB          *zorm.DBDao             `json:"-"`
 }
 
-func New(db *gorm.DB) *BusiGroup {
+func New(db *zorm.DBDao) *BusiGroup {
 	return &BusiGroup{
 		DB: db,
 	}
@@ -35,8 +40,8 @@ type UserGroupWithPermFlag struct {
 	PermFlag  string     `json:"perm_flag"`
 }
 
-func (bg *BusiGroup) TableName() string {
-	return "busi_group"
+func (bg *BusiGroup) GetTableName() string {
+	return BusiGroupTableName
 }
 
 func (bg *BusiGroup) DB2FE() error {
@@ -68,7 +73,7 @@ func (bg *BusiGroup) FillUserGroups(ctx *ctx.Context) error {
 }
 
 func BusiGroupGetMap(ctx *ctx.Context) (map[int64]*BusiGroup, error) {
-	var lst []*BusiGroup
+	lst := make([]*BusiGroup, 0)
 	var err error
 	if !ctx.IsCenter {
 		lst, err = poster.GetByUrls[[]*BusiGroup](ctx, "/v1/n9e/busi-groups")
@@ -76,7 +81,9 @@ func BusiGroupGetMap(ctx *ctx.Context) (map[int64]*BusiGroup, error) {
 			return nil, err
 		}
 	} else {
-		err = DB(ctx).Find(&lst).Error
+		finder := zorm.NewSelectFinder(BusiGroupTableName)
+		err = zorm.Query(ctx.Ctx, finder, &lst, nil)
+		//err = DB(ctx).Find(&lst).Error
 		if err != nil {
 			return nil, err
 		}
@@ -91,14 +98,19 @@ func BusiGroupGetMap(ctx *ctx.Context) (map[int64]*BusiGroup, error) {
 }
 
 func BusiGroupGetAll(ctx *ctx.Context) ([]*BusiGroup, error) {
-	var lst []*BusiGroup
-	err := DB(ctx).Find(&lst).Error
+	lst := make([]*BusiGroup, 0)
+	finder := zorm.NewSelectFinder(BusiGroupTableName)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Find(&lst).Error
 	return lst, err
 }
 
 func BusiGroupGet(ctx *ctx.Context, where string, args ...interface{}) (*BusiGroup, error) {
-	var lst []*BusiGroup
-	err := DB(ctx).Where(where, args...).Find(&lst).Error
+	lst := make([]*BusiGroup, 0)
+	finder := zorm.NewSelectFinder(BusiGroupTableName)
+	AppendWhere(finder, where, args...)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Where(where, args...).Find(&lst).Error
 	if err != nil {
 		return nil, err
 	}
@@ -115,12 +127,17 @@ func BusiGroupGetById(ctx *ctx.Context, id int64) (*BusiGroup, error) {
 }
 
 func BusiGroupExists(ctx *ctx.Context, where string, args ...interface{}) (bool, error) {
-	num, err := Count(DB(ctx).Model(&BusiGroup{}).Where(where, args...))
+	finder := zorm.NewSelectFinder(BusiGroupTableName, "count(*)")
+	AppendWhere(finder, where, args...)
+	num, err := Count(ctx, finder)
+	//num, err := Count(DB(ctx).Model(&BusiGroup{}).Where(where, args...))
 	return num > 0, err
 }
 
 func (bg *BusiGroup) Del(ctx *ctx.Context) error {
-	has, err := Exists(DB(ctx).Model(&AlertMute{}).Where("group_id=?", bg.Id))
+	finder := zorm.NewSelectFinder(AlertMuteTableName, "count(*)").Append("WHERE group_id=?", bg.Id)
+	has, err := Exists(ctx, finder)
+	//has, err := Exists(DB(ctx).Model(&AlertMute{}).Where("group_id=?", bg.Id))
 	if err != nil {
 		return err
 	}
@@ -128,8 +145,9 @@ func (bg *BusiGroup) Del(ctx *ctx.Context) error {
 	if has {
 		return errors.New("Some alert mutes still in the BusiGroup")
 	}
-
-	has, err = Exists(DB(ctx).Model(&AlertSubscribe{}).Where("group_id=?", bg.Id))
+	finder = zorm.NewSelectFinder(AlertSubscribeTableName, "count(*)").Append("WHERE group_id=?", bg.Id)
+	has, err = Exists(ctx, finder)
+	//has, err = Exists(DB(ctx).Model(&AlertSubscribe{}).Where("group_id=?", bg.Id))
 	if err != nil {
 		return err
 	}
@@ -137,8 +155,9 @@ func (bg *BusiGroup) Del(ctx *ctx.Context) error {
 	if has {
 		return errors.New("Some alert subscribes still in the BusiGroup")
 	}
-
-	has, err = Exists(DB(ctx).Model(&Target{}).Where("group_id=?", bg.Id))
+	finder = zorm.NewSelectFinder(TargetTableName, "count(*)").Append("WHERE group_id=?", bg.Id)
+	has, err = Exists(ctx, finder)
+	//has, err = Exists(DB(ctx).Model(&Target{}).Where("group_id=?", bg.Id))
 	if err != nil {
 		return err
 	}
@@ -146,8 +165,9 @@ func (bg *BusiGroup) Del(ctx *ctx.Context) error {
 	if has {
 		return errors.New("Some targets still in the BusiGroup")
 	}
-
-	has, err = Exists(DB(ctx).Model(&Board{}).Where("group_id=?", bg.Id))
+	finder = zorm.NewSelectFinder(BoardTableName, "count(*)").Append("WHERE group_id=?", bg.Id)
+	has, err = Exists(ctx, finder)
+	//has, err = Exists(DB(ctx).Model(&Board{}).Where("group_id=?", bg.Id))
 	if err != nil {
 		return err
 	}
@@ -155,8 +175,9 @@ func (bg *BusiGroup) Del(ctx *ctx.Context) error {
 	if has {
 		return errors.New("Some dashboards still in the BusiGroup")
 	}
-
-	has, err = Exists(DB(ctx).Model(&TaskTpl{}).Where("group_id=?", bg.Id))
+	finder = zorm.NewSelectFinder(TaskTplTableName, "count(*)").Append("WHERE group_id=?", bg.Id)
+	has, err = Exists(ctx, finder)
+	//has, err = Exists(DB(ctx).Model(&TaskTpl{}).Where("group_id=?", bg.Id))
 	if err != nil {
 		return err
 	}
@@ -173,8 +194,9 @@ func (bg *BusiGroup) Del(ctx *ctx.Context) error {
 	// if hasCR {
 	// 	return errors.New("Some collect rules still in the BusiGroup")
 	// }
-
-	has, err = Exists(DB(ctx).Model(&AlertRule{}).Where("group_id=?", bg.Id))
+	finder = zorm.NewSelectFinder(AlertRuleTableName, "count(*)").Append("WHERE group_id=?", bg.Id)
+	has, err = Exists(ctx, finder)
+	//has, err = Exists(DB(ctx).Model(&AlertRule{}).Where("group_id=?", bg.Id))
 	if err != nil {
 		return err
 	}
@@ -183,24 +205,42 @@ func (bg *BusiGroup) Del(ctx *ctx.Context) error {
 		return errors.New("Some alert rules still in the BusiGroup")
 	}
 
-	return DB(ctx).Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("busi_group_id=?", bg.Id).Delete(&BusiGroupMember{}).Error; err != nil {
-			return err
-		}
+	/*
+		return DB(ctx).Transaction(func(tx *zorm.DBDao) error {
+			if err := tx.Where("busi_group_id=?", bg.Id).Delete(&BusiGroupMember{}).Error; err != nil {
+				return err
+			}
 
-		if err := tx.Where("id=?", bg.Id).Delete(&BusiGroup{}).Error; err != nil {
-			return err
-		}
+			if err := tx.Where("id=?", bg.Id).Delete(&BusiGroup{}).Error; err != nil {
+				return err
+			}
 
-		// 这个需要好好斟酌一下，删掉BG，对应的活跃告警事件也一并删除
-		// BG都删了，说明下面已经没有告警规则了，说明这些活跃告警永远都不会恢复了
-		// 而且这些活跃告警已经没人关心了，既然是没人关心的，删了吧
-		if err := tx.Where("group_id=?", bg.Id).Delete(&AlertCurEvent{}).Error; err != nil {
-			return err
-		}
+			// 这个需要好好斟酌一下，删掉BG，对应的活跃告警事件也一并删除
+			// BG都删了，说明下面已经没有告警规则了，说明这些活跃告警永远都不会恢复了
+			// 而且这些活跃告警已经没人关心了，既然是没人关心的，删了吧
+			if err := tx.Where("group_id=?", bg.Id).Delete(&AlertCurEvent{}).Error; err != nil {
+				return err
+			}
 
-		return nil
+			return nil
+		})
+	*/
+	_, err = zorm.Transaction(ctx.Ctx, func(ctx context.Context) (interface{}, error) {
+		f1 := zorm.NewDeleteFinder(BusiGroupMemberTableName).Append("WHERE busi_group_id=?", bg.Id)
+		_, err := zorm.UpdateFinder(ctx, f1)
+		if err != nil {
+			return nil, err
+		}
+		f2 := zorm.NewDeleteFinder(BusiGroupTableName).Append("WHERE id=?", bg.Id)
+		_, err = zorm.UpdateFinder(ctx, f2)
+		if err != nil {
+			return nil, err
+		}
+		f3 := zorm.NewDeleteFinder(AlertCurEventTableName).Append("WHERE group_id=?", bg.Id)
+		return zorm.UpdateFinder(ctx, f3)
 	})
+	return err
+
 }
 
 func (bg *BusiGroup) AddMembers(ctx *ctx.Context, members []BusiGroupMember, username string) error {
@@ -211,10 +251,14 @@ func (bg *BusiGroup) AddMembers(ctx *ctx.Context, members []BusiGroupMember, use
 		}
 	}
 
-	return DB(ctx).Model(bg).Updates(map[string]interface{}{
-		"update_at": time.Now().Unix(),
-		"update_by": username,
-	}).Error
+	/*
+		return DB(ctx).Model(bg).Updates(map[string]interface{}{
+			"update_at": time.Now().Unix(),
+			"update_by": username,
+		}).Error
+	*/
+	finder := zorm.NewUpdateFinder(BusiGroupTableName).Append("update_at=?,update_by=? WHERE id=?", time.Now().Unix(), username, bg.Id)
+	return UpdateFinder(ctx, finder)
 }
 
 func (bg *BusiGroup) DelMembers(ctx *ctx.Context, members []BusiGroupMember, username string) error {
@@ -235,10 +279,14 @@ func (bg *BusiGroup) DelMembers(ctx *ctx.Context, members []BusiGroupMember, use
 		}
 	}
 
-	return DB(ctx).Model(bg).Updates(map[string]interface{}{
-		"update_at": time.Now().Unix(),
-		"update_by": username,
-	}).Error
+	/*
+		return DB(ctx).Model(bg).Updates(map[string]interface{}{
+			"update_at": time.Now().Unix(),
+			"update_by": username,
+		}).Error
+	*/
+	finder := zorm.NewUpdateFinder(BusiGroupTableName).Append("update_at=?,update_by=? WHERE id=?", time.Now().Unix(), username, bg.Id)
+	return UpdateFinder(ctx, finder)
 }
 
 func (bg *BusiGroup) Update(ctx *ctx.Context, name string, labelEnable int, labelValue string, updateBy string) error {
@@ -268,13 +316,18 @@ func (bg *BusiGroup) Update(ctx *ctx.Context, name string, labelEnable int, labe
 		labelValue = ""
 	}
 
-	return DB(ctx).Model(bg).Updates(map[string]interface{}{
-		"name":         name,
-		"label_enable": labelEnable,
-		"label_value":  labelValue,
-		"update_at":    time.Now().Unix(),
-		"update_by":    updateBy,
-	}).Error
+	/*
+		return DB(ctx).Model(bg).Updates(map[string]interface{}{
+			"name":         name,
+			"label_enable": labelEnable,
+			"label_value":  labelValue,
+			"update_at":    time.Now().Unix(),
+			"update_by":    updateBy,
+		}).Error
+	*/
+	finder := zorm.NewUpdateFinder(BusiGroupTableName).Append("name=?,label_enable=?,label_value=?,update_at=?,update_by=? WHERE id=?", name, labelEnable, labelValue, time.Now().Unix(), updateBy, bg.Id)
+	return UpdateFinder(ctx, finder)
+
 }
 
 func BusiGroupAdd(ctx *ctx.Context, name string, labelEnable int, labelValue string, members []BusiGroupMember, creator string) error {
@@ -323,23 +376,45 @@ func BusiGroupAdd(ctx *ctx.Context, name string, labelEnable int, labelValue str
 		UpdateBy:    creator,
 	}
 
-	return DB(ctx).Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(obj).Error; err != nil {
-			return err
+	/*
+		return DB(ctx).Transaction(func(tx *zorm.DBDao) error {
+			if err := tx.Create(obj).Error; err != nil {
+				return err
+			}
+
+			for i := 0; i < len(members); i++ {
+				if err := tx.Create(&BusiGroupMember{
+					BusiGroupId: obj.Id,
+					UserGroupId: members[i].UserGroupId,
+					PermFlag:    members[i].PermFlag,
+				}).Error; err != nil {
+					return err
+				}
+			}
+
+			return nil
+		})
+	*/
+	_, err = zorm.Transaction(ctx.Ctx, func(ctx context.Context) (interface{}, error) {
+
+		_, err := zorm.Insert(ctx, obj)
+		if err != nil {
+			return nil, err
 		}
 
 		for i := 0; i < len(members); i++ {
-			if err := tx.Create(&BusiGroupMember{
+			if _, err := zorm.Insert(ctx, &BusiGroupMember{
 				BusiGroupId: obj.Id,
 				UserGroupId: members[i].UserGroupId,
 				PermFlag:    members[i].PermFlag,
-			}).Error; err != nil {
-				return err
+			}); err != nil {
+				return nil, err
 			}
 		}
-
-		return nil
+		return nil, err
 	})
+	return err
+
 }
 
 func BusiGroupStatistics(ctx *ctx.Context) (*Statistics, error) {
@@ -348,13 +423,16 @@ func BusiGroupStatistics(ctx *ctx.Context) (*Statistics, error) {
 		return s, err
 	}
 
-	session := DB(ctx).Model(&BusiGroup{}).Select("count(*) as total", "max(update_at) as last_updated")
+	return StatisticsGet(ctx, BusiGroupTableName)
+	/*
+		session := DB(ctx).Model(&BusiGroup{}).Select("count(*) as total", "max(update_at) as last_updated")
 
-	var stats []*Statistics
-	err := session.Find(&stats).Error
-	if err != nil {
-		return nil, err
-	}
+		var stats []*Statistics
+		err := session.Find(&stats).Error
+		if err != nil {
+			return nil, err
+		}
 
-	return stats[0], nil
+		return stats[0], nil
+	*/
 }

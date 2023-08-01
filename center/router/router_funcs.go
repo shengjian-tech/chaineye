@@ -19,26 +19,26 @@ const defaultLimit = 300
 
 func (rt *Router) statistic(c *gin.Context) {
 	name := ginx.QueryStr(c, "name")
-	var model interface{}
+	var model string
 	var err error
 	var statistics *models.Statistics
 	switch name {
 	case "alert_mute":
-		model = models.AlertMute{}
+		model = models.AlertMuteTableName
 	case "alert_rule":
-		model = models.AlertRule{}
+		model = models.AlertRuleTableName
 	case "alert_subscribe":
-		model = models.AlertSubscribe{}
+		model = models.AlertSubscribeTableName
 	case "busi_group":
-		model = models.BusiGroup{}
+		model = models.BusiGroupTableName
 	case "recording_rule":
-		model = models.RecordingRule{}
+		model = models.RecordingRuleTableName
 	case "target":
-		model = models.Target{}
+		model = models.TargetTableName
 	case "user":
-		model = models.User{}
+		model = models.UserTableName
 	case "user_group":
-		model = models.UserGroup{}
+		model = models.UserGroupTableName
 	case "datasource":
 		// datasource update_at is different from others
 		statistics, err = models.DatasourceStatistics(rt.Ctx)

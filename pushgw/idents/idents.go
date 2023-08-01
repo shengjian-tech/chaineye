@@ -1,9 +1,12 @@
 package idents
 
 import (
+	"context"
 	"sync"
 	"time"
 
+	"gitee.com/chunanyong/zorm"
+	"github.com/ccfos/nightingale/v6/models"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
 
@@ -103,29 +106,51 @@ func (s *Set) UpdateTargets(lst []string, now int64) error {
 		return nil
 	}
 
-	ret := s.ctx.DB.Table("target").Where("ident in ?", lst).Update("update_at", now)
-	if ret.Error != nil {
-		return ret.Error
+	finder := zorm.NewUpdateFinder(models.TargetTableName).Append("update_at = ? WHERE ident in (?)", now, lst)
+	rowsAffected, err := zorm.Transaction(s.ctx.Ctx, func(ctx context.Context) (interface{}, error) {
+		return zorm.UpdateFinder(ctx, finder)
+	})
+
+	//ret := s.ctx.DB.Table("target").Where("ident in ?", lst).Update("update_at", now)
+	if err != nil {
+		return err
 	}
 
-	if ret.RowsAffected == count {
+	if rowsAffected == count {
 		return nil
 	}
-
 	// there are some idents not found in db, so insert them
 	var exists []string
-	err := s.ctx.DB.Table("target").Where("ident in ?", lst).Pluck("ident", &exists).Error
+	f := zorm.NewSelectFinder(models.TargetTableName, "ident").Append("WHERE ident in (?)", lst)
+	err = zorm.Query(s.ctx.Ctx, f, &exists, nil)
+	//err := s.ctx.DB.Table("target").Where("ident in ?", lst).Pluck("ident", &exists).Error
 	if err != nil {
 		return err
 	}
 
 	news := slice.SubString(lst, exists)
+	data := make([]zorm.IEntityMap, 0, len(news))
 	for i := 0; i < len(news); i++ {
-		err = s.ctx.DB.Exec("INSERT INTO target(ident, update_at) VALUES(?, ?)", news[i], now).Error
-		if err != nil {
-			logger.Error("failed to insert target:", news[i], "error:", err)
-		}
+		entity := zorm.NewEntityMap(models.TargetTableName)
+		entity.Set("ident", news[i])
+		entity.Set("update_at", now)
+		data = append(data, entity)
+		/*
+			err = s.ctx.DB.Exec("INSERT INTO target(ident, update_at) VALUES(?, ?)", news[i], now).Error
+			if err != nil {
+				logger.Error("failed to insert target:", news[i], "error:", err)
+			}
+		*/
 	}
 
-	return nil
+	if len(data) < 1 {
+		return nil
+	}
+	_, err = zorm.Transaction(s.ctx.Ctx, func(ctx context.Context) (interface{}, error) {
+		return zorm.InsertEntityMapSlice(ctx, data)
+	})
+	if err != nil {
+		logger.Error("failed to insert target:, error:", err)
+	}
+	return err
 }

@@ -1,12 +1,14 @@
 package models
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
 	"time"
 
+	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/ormx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
@@ -25,31 +27,33 @@ type TagFilter struct {
 
 const TimeRange int = 0
 const Periodic int = 1
+const AlertMuteTableName = "alert_mute"
 
 type AlertMute struct {
-	Id                int64          `json:"id" gorm:"primaryKey"`
-	GroupId           int64          `json:"group_id"`
-	Note              string         `json:"note"`
-	Cate              string         `json:"cate"`
-	Prod              string         `json:"prod"`
-	DatasourceIds     string         `json:"-" gorm:"datasource_ids"` // datasource ids
-	DatasourceIdsJson []int64        `json:"datasource_ids" gorm:"-"` // for fe
-	Cluster           string         `json:"cluster"`                 // take effect by clusters, seperated by space
-	Tags              ormx.JSONArr   `json:"tags"`
-	Cause             string         `json:"cause"`
-	Btime             int64          `json:"btime"`
-	Etime             int64          `json:"etime"`
-	Disabled          int            `json:"disabled"` // 0: enabled, 1: disabled
-	CreateBy          string         `json:"create_by"`
-	UpdateBy          string         `json:"update_by"`
-	CreateAt          int64          `json:"create_at"`
-	UpdateAt          int64          `json:"update_at"`
-	ITags             []TagFilter    `json:"-" gorm:"-"`     // inner tags
-	MuteTimeType      int            `json:"mute_time_type"` //  0: mute by time range, 1: mute by periodic time
-	PeriodicMutes     string         `json:"-" gorm:"periodic_mutes"`
-	PeriodicMutesJson []PeriodicMute `json:"periodic_mutes" gorm:"-"`
-	Severities        string         `json:"-" gorm:"severities"`
-	SeveritiesJson    []int          `json:"severities" gorm:"-"`
+	zorm.EntityStruct
+	Id                int64          `json:"id" column:"id"`
+	GroupId           int64          `json:"group_id" column:"group_id"`
+	Note              string         `json:"note" column:"note"`
+	Cate              string         `json:"cate" column:"cate"`
+	Prod              string         `json:"prod" column:"prod"`
+	DatasourceIds     string         `json:"-" column:"datasource_ids"` // datasource ids
+	DatasourceIdsJson []int64        `json:"datasource_ids"`            // for fe
+	Cluster           string         `json:"cluster" column:"cluster"`  // take effect by clusters, seperated by space
+	Tags              ormx.JSONArr   `json:"tags" column:"tags"`
+	Cause             string         `json:"cause" column:"cause"`
+	Btime             int64          `json:"btime" column:"btime"`
+	Etime             int64          `json:"etime" column:"etime"`
+	Disabled          int            `json:"disabled" column:"disabled"` // 0: enabled, 1: disabled
+	CreateBy          string         `json:"create_by" column:"create_by"`
+	UpdateBy          string         `json:"update_by" column:"update_by"`
+	CreateAt          int64          `json:"create_at" column:"create_at"`
+	UpdateAt          int64          `json:"update_at" column:"update_at"`
+	ITags             []TagFilter    `json:"-"`                                      // inner tags
+	MuteTimeType      int            `json:"mute_time_type" column:"mute_time_type"` //  0: mute by time range, 1: mute by periodic time
+	PeriodicMutes     string         `json:"-" column:"periodic_mutes"`
+	PeriodicMutesJson []PeriodicMute `json:"periodic_mutes"`
+	Severities        string         `json:"-" column:"severities"`
+	SeveritiesJson    []int          `json:"severities"`
 }
 
 type PeriodicMute struct {
@@ -58,8 +62,8 @@ type PeriodicMute struct {
 	EnableDaysOfWeek string `json:"enable_days_of_week"` // eg: "0 1 2 3 4 5 6"
 }
 
-func (m *AlertMute) TableName() string {
-	return "alert_mute"
+func (m *AlertMute) GetTableName() string {
+	return AlertMuteTableName
 }
 
 func AlertMuteGetById(ctx *ctx.Context, id int64) (*AlertMute, error) {
@@ -67,8 +71,11 @@ func AlertMuteGetById(ctx *ctx.Context, id int64) (*AlertMute, error) {
 }
 
 func AlertMuteGet(ctx *ctx.Context, where string, args ...interface{}) (*AlertMute, error) {
-	var lst []*AlertMute
-	err := DB(ctx).Where(where, args...).Find(&lst).Error
+	lst := make([]AlertMute, 0)
+	finder := zorm.NewSelectFinder(AlertMuteTableName)
+	AppendWhere(finder, where, args...)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Where(where, args...).Find(&lst).Error
 	if err != nil {
 		return nil, err
 	}
@@ -77,41 +84,50 @@ func AlertMuteGet(ctx *ctx.Context, where string, args ...interface{}) (*AlertMu
 		return nil, nil
 	}
 	err = lst[0].DB2FE()
-	return lst[0], err
+	return &lst[0], err
 }
 
-func AlertMuteGets(ctx *ctx.Context, prods []string, bgid int64, query string) (lst []AlertMute, err error) {
-	session := DB(ctx)
+func AlertMuteGets(ctx *ctx.Context, prods []string, bgid int64, query string) ([]AlertMute, error) {
+	lst := make([]AlertMute, 0)
 
+	//session := DB(ctx)
+	finder := zorm.NewSelectFinder(AlertMuteTableName).Append("WHERE 1=1")
 	if bgid != -1 {
-		session = session.Where("group_id = ?", bgid)
+		//session = session.Where("group_id = ?", bgid)
+		finder.Append("and group_id = ?", bgid)
 	}
 
 	if len(prods) > 0 {
-		session = session.Where("prod in (?)", prods)
+		//session = session.Where("prod in (?)", prods)
+		finder.Append("and prod in (?)", prods)
 	}
 
 	if query != "" {
 		arr := strings.Fields(query)
 		for i := 0; i < len(arr); i++ {
 			qarg := "%" + arr[i] + "%"
-			session = session.Where("cause like ?", qarg)
+			//session = session.Where("cause like ?", qarg)
+			finder.Append("and cause like ?", qarg)
 		}
 	}
-
-	err = session.Order("id desc").Find(&lst).Error
+	finder.Append("order by id desc")
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err = session.Order("id desc").Find(&lst).Error
 	for i := 0; i < len(lst); i++ {
 		lst[i].DB2FE()
 	}
-	return
+	return lst, err
 }
 
-func AlertMuteGetsByBG(ctx *ctx.Context, groupId int64) (lst []AlertMute, err error) {
-	err = DB(ctx).Where("group_id=?", groupId).Order("id desc").Find(&lst).Error
+func AlertMuteGetsByBG(ctx *ctx.Context, groupId int64) ([]AlertMute, error) {
+	lst := make([]AlertMute, 0)
+	finder := zorm.NewSelectFinder(AlertMuteTableName).Append("WHERE group_id=? order by id desc", groupId)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err = DB(ctx).Where("group_id=?", groupId).Order("id desc").Find(&lst).Error
 	for i := 0; i < len(lst); i++ {
 		lst[i].DB2FE()
 	}
-	return
+	return lst, err
 }
 
 func (m *AlertMute) Verify() error {
@@ -193,8 +209,11 @@ func (m *AlertMute) Update(ctx *ctx.Context, arm AlertMute) error {
 	if err := arm.FE2DB(); err != nil {
 		return err
 	}
-
-	return DB(ctx).Model(m).Select("*").Updates(arm).Error
+	_, err = zorm.Transaction(ctx.Ctx, func(ctx context.Context) (interface{}, error) {
+		return zorm.UpdateNotZeroValue(ctx, &arm)
+	})
+	return err
+	//return DB(ctx).Model(m).Select("*").Updates(arm).Error
 }
 
 func (m *AlertMute) FE2DB() error {
@@ -239,18 +258,21 @@ func (m *AlertMute) DB2FE() error {
 }
 
 func (m *AlertMute) UpdateFieldsMap(ctx *ctx.Context, fields map[string]interface{}) error {
-	return DB(ctx).Model(m).Updates(fields).Error
+	return UpdateFieldsMap(ctx, m, m.Id, fields)
+	//return DB(ctx).Model(m).Updates(fields).Error
 }
 
 func AlertMuteDel(ctx *ctx.Context, ids []int64) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	return DB(ctx).Where("id in ?", ids).Delete(new(AlertMute)).Error
+	finder := zorm.NewDeleteFinder(AlertMuteTableName).Append("WHERE id in (?)", ids)
+	return UpdateFinder(ctx, finder)
+	//return DB(ctx).Where("id in ?", ids).Delete(new(AlertMute)).Error
 }
 
 func AlertMuteStatistics(ctx *ctx.Context) (*Statistics, error) {
-	var stats []*Statistics
+	//stats := make([]Statistics, 0)
 	if !ctx.IsCenter {
 		s, err := poster.GetByUrls[*Statistics](ctx, "/v1/n9e/statistic?name=alert_mute")
 		return s, err
@@ -258,24 +280,27 @@ func AlertMuteStatistics(ctx *ctx.Context) (*Statistics, error) {
 
 	// clean expired first
 	buf := int64(30)
-	err := DB(ctx).Where("etime < ? and mute_time_type = 0", time.Now().Unix()-buf).Delete(new(AlertMute)).Error
+	finder := zorm.NewDeleteFinder(AlertMuteTableName).Append("WHERE etime < ? and mute_time_type = 0", time.Now().Unix()-buf)
+	err := UpdateFinder(ctx, finder)
+	//err := DB(ctx).Where("etime < ? and mute_time_type = 0", time.Now().Unix()-buf).Delete(new(AlertMute)).Error
 	if err != nil {
 		return nil, err
 	}
+	return StatisticsGet(ctx, AlertMuteTableName)
+	/*
+			session := DB(ctx).Model(&AlertMute{}).Select("count(*) as Total", "max(update_at) as last_updated")
+			err = session.Find(&stats).Error
+			if err != nil {
+				return nil, err
+			}
 
-	session := DB(ctx).Model(&AlertMute{}).Select("count(*) as total", "max(update_at) as last_updated")
-
-	err = session.Find(&stats).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return stats[0], nil
+		return stats[0], nil
+	*/
 }
 
 func AlertMuteGetsAll(ctx *ctx.Context) ([]*AlertMute, error) {
 	// get my cluster's mutes
-	var lst []*AlertMute
+	lst := make([]*AlertMute, 0)
 	if !ctx.IsCenter {
 		lst, err := poster.GetByUrls[[]*AlertMute](ctx, "/v1/n9e/alert-mutes")
 		if err != nil {
@@ -287,9 +312,10 @@ func AlertMuteGetsAll(ctx *ctx.Context) ([]*AlertMute, error) {
 		return lst, err
 	}
 
-	session := DB(ctx).Model(&AlertMute{})
-
-	err := session.Find(&lst).Error
+	finder := zorm.NewSelectFinder(AlertMuteTableName)
+	//session := DB(ctx).Model(&AlertMute{})
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := session.Find(&lst).Error
 	if err != nil {
 		return nil, err
 	}
@@ -302,8 +328,10 @@ func AlertMuteGetsAll(ctx *ctx.Context) ([]*AlertMute, error) {
 }
 
 func AlertMuteUpgradeToV6(ctx *ctx.Context, dsm map[string]Datasource) error {
-	var lst []*AlertMute
-	err := DB(ctx).Find(&lst).Error
+	lst := make([]AlertMute, 0)
+	finder := zorm.NewSelectFinder(AlertMuteTableName)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Find(&lst).Error
 	if err != nil {
 		return err
 	}

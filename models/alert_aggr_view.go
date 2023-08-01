@@ -7,23 +7,27 @@ import (
 	"strings"
 	"time"
 
+	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/toolkits/pkg/slice"
 )
 
+const AlertAggrViewTableName = "alert_aggr_view"
+
 // AlertAggrView 在告警聚合视图查看的时候，要存储一些聚合规则
 type AlertAggrView struct {
-	Id       int64  `json:"id" gorm:"primaryKey"`
-	Name     string `json:"name"`
-	Rule     string `json:"rule"`
-	Cate     int    `json:"cate"`
-	CreateAt int64  `json:"create_at"`
-	CreateBy int64  `json:"create_by"`
-	UpdateAt int64  `json:"update_at"`
+	zorm.EntityStruct
+	Id       int64  `json:"id" column:"id"`
+	Name     string `json:"name" column:"name"`
+	Rule     string `json:"rule" column:"rule"`
+	Cate     int    `json:"cate" column:"cate"`
+	CreateAt int64  `json:"create_at" column:"create_at"`
+	CreateBy int64  `json:"create_by" column:"create_by"`
+	UpdateAt int64  `json:"update_at" column:"update_at"`
 }
 
-func (v *AlertAggrView) TableName() string {
-	return "alert_aggr_view"
+func (v *AlertAggrView) GetTableName() string {
+	return AlertAggrViewTableName
 }
 
 func (v *AlertAggrView) DB2FE() error {
@@ -92,8 +96,10 @@ func (v *AlertAggrView) Update(ctx *ctx.Context) error {
 		return err
 	}
 	v.UpdateAt = time.Now().Unix()
-
-	return DB(ctx).Model(v).Select("name", "rule", "cate", "update_at", "create_by").Updates(v).Error
+	finder := zorm.NewUpdateFinder(AlertAggrViewTableName)
+	finder.Append("name=?,rule=?,cate=?,update_at=?,create_by=? WHERE id=?", v.Name, v.Rule, v.Cate, v.UpdateAt, v.CreateBy, v.Id)
+	return UpdateFinder(ctx, finder)
+	//return DB(ctx).Model(v).Select("name", "rule", "cate", "update_at", "create_by").Updates(v).Error
 }
 
 // AlertAggrViewDel: userid for safe delete
@@ -101,17 +107,26 @@ func AlertAggrViewDel(ctx *ctx.Context, ids []int64, createBy ...interface{}) er
 	if len(ids) == 0 {
 		return nil
 	}
-
+	finder := zorm.NewDeleteFinder(AlertAggrViewTableName).Append("WHERE id in (?) ", ids)
 	if len(createBy) > 0 {
-		return DB(ctx).Where("id in ? and create_by = ?", ids, createBy).Delete(new(AlertAggrView)).Error
+		finder.Append(" and create_by = ?", createBy)
 	}
+	return UpdateFinder(ctx, finder)
+	/*
+		if len(createBy) > 0 {
+			return DB(ctx).Where("id in ? and create_by = ?", ids, createBy).Delete(new(AlertAggrView)).Error
+		}
 
-	return DB(ctx).Where("id in ?", ids).Delete(new(AlertAggrView)).Error
+		return DB(ctx).Where("id in ?", ids).Delete(new(AlertAggrView)).Error
+	*/
 }
 
 func AlertAggrViewGets(ctx *ctx.Context, createBy interface{}) ([]AlertAggrView, error) {
-	var lst []AlertAggrView
-	err := DB(ctx).Where("create_by = ? or cate = 0", createBy).Find(&lst).Error
+	lst := make([]AlertAggrView, 0)
+	finder := zorm.NewSelectFinder(AlertAggrViewTableName).Append("WHERE create_by = ? or cate = 0", createBy)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Where("create_by = ? or cate = 0", createBy).Find(&lst).Error
+
 	if err == nil && len(lst) > 1 {
 		sort.Slice(lst, func(i, j int) bool {
 			if lst[i].Cate < lst[j].Cate {
@@ -129,15 +144,16 @@ func AlertAggrViewGets(ctx *ctx.Context, createBy interface{}) ([]AlertAggrView,
 }
 
 func AlertAggrViewGet(ctx *ctx.Context, where string, args ...interface{}) (*AlertAggrView, error) {
-	var lst []*AlertAggrView
-	err := DB(ctx).Where(where, args...).Find(&lst).Error
+	lst := make([]AlertAggrView, 0)
+	finder := zorm.NewSelectFinder(AlertAggrViewTableName)
+	AppendWhere(finder, where, args...)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := DB(ctx).Where(where, args...).Find(&lst).Error
 	if err != nil {
 		return nil, err
 	}
-
 	if len(lst) == 0 {
 		return nil, nil
 	}
-
-	return lst[0], nil
+	return &lst[0], nil
 }
