@@ -5,11 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
 	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
+	"github.com/ccfos/nightingale/v6/pkg/poster"
 	"github.com/toolkits/pkg/str"
 )
 
@@ -89,6 +91,15 @@ func TaskTplGets(ctx *ctx.Context, groupId int64, query string, limit, offset in
 	}
 
 	return tpls, err
+}
+
+func TaskTplGetById(ctx *ctx.Context, id int64) (*TaskTpl, error) {
+	if !ctx.IsCenter {
+		tpl, err := poster.GetByUrls[*TaskTpl](ctx, "/v1/n9e/task-tpl/"+strconv.FormatInt(id, 10))
+		return tpl, err
+	}
+
+	return TaskTplGet(ctx, "id = ?", id)
 }
 
 func TaskTplGet(ctx *ctx.Context, where string, args ...interface{}) (*TaskTpl, error) {
