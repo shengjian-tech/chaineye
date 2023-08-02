@@ -20,6 +20,10 @@ Output = "stdout"
 Host = "0.0.0.0"
 # http listening port
 Port = 17000
+
+# base path
+BasePath = "/"
+
 # https cert file path
 CertFile = ""
 # https key file path

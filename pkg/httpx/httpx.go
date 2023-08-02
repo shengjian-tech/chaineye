@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"reflect"
 	"strings"
 	"time"
+	"unsafe"
 
 	"github.com/ccfos/nightingale/v6/pkg/aop"
 	"github.com/ccfos/nightingale/v6/pkg/version"
@@ -19,6 +21,7 @@ import (
 type Config struct {
 	Host             string
 	Port             int
+	BasePath         string
 	CertFile         string
 	KeyFile          string
 	PProf            bool
@@ -79,6 +82,9 @@ func GinEngine(mode string, cfg Config) *gin.Engine {
 	}
 
 	r := gin.New()
+
+	//设置basePath,作为项目前缀
+	setBasePath(r, cfg.BasePath)
 
 	r.Use(recoveryMid)
 
@@ -178,4 +184,29 @@ func InitRSAConfig(rsaConfig *RSAConfig) {
 		panic(fmt.Errorf("could not read RSAPrivateKeyPath %q: %v", rsaConfig.RSAPrivateKeyPath, err))
 	}
 	rsaConfig.RSAPrivateKey = privateBuf
+}
+
+// setBasePath 设置项目名前缀basePath,因为gin暂时不支持直接修改RouterGroup的basePath,使用unsafe.Pointer修改
+// 需要在路由初始化前调用
+func setBasePath(r *gin.Engine, basePath string) {
+	if basePath == "" || basePath == "/" {
+		return
+	}
+
+	if !strings.HasPrefix(basePath, "/") {
+		basePath = "/" + basePath
+	}
+	if !strings.HasSuffix(basePath, "/") {
+		basePath = basePath + "/"
+	}
+	//因为Engine匿名注入了RouterGroup,所以直接获取Engine的反射对象
+	engine := reflect.ValueOf(r).Elem()
+	//获取RouterGroup的basePathValueOf属性反射值对象
+	basePathValueOf := engine.FieldByName("basePath")
+	//获取basePath的UnsafeAddr
+	p := unsafe.Pointer(basePathValueOf.UnsafeAddr())
+	//重新赋值basePath的反射值,NewAt默认返回的是指针,使用Elem获取反射值对象
+	basePathValueOf = reflect.NewAt(basePathValueOf.Type(), p).Elem()
+	//设置反射值
+	basePathValueOf.Set(reflect.ValueOf(basePath))
 }
