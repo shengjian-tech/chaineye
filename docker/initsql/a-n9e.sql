@@ -341,6 +341,7 @@ CREATE TABLE `alert_subscribe` (
     `create_by` varchar(64) not null default '',
     `update_at` bigint not null default 0,
     `update_by` varchar(64) not null default '',
+    `busi_groups` varchar(4096) not null default '[]',
     PRIMARY KEY (`id`),
     KEY (`update_at`),
     KEY (`group_id`)
