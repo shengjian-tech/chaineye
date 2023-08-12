@@ -8,7 +8,7 @@ import (
 
 	"github.com/ccfos/nightingale/v6/storage"
 
-	oidc "github.com/coreos/go-oidc"
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/google/uuid"
 	"github.com/toolkits/pkg/logger"
 	"golang.org/x/oauth2"
