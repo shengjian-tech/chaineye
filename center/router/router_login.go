@@ -16,8 +16,8 @@ import (
 	"github.com/ccfos/nightingale/v6/pkg/secu"
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"github.com/toolkits/pkg/ginx"
 	"github.com/toolkits/pkg/logger"
 )

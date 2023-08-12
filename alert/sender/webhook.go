@@ -3,7 +3,7 @@ package sender
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -60,7 +60,7 @@ func SendWebhooks(webhooks []*models.Webhook, event *models.AlertCurEvent) {
 		var body []byte
 		if resp.Body != nil {
 			defer resp.Body.Close()
-			body, _ = ioutil.ReadAll(resp.Body)
+			body, _ = io.ReadAll(resp.Body)
 		}
 
 		logger.Debugf("event_webhook_succ, url: %s, response code: %d, body: %s", conf.Url, resp.StatusCode, string(body))

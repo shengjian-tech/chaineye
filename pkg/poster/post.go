@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/rand"
 	"net/http"
 	"time"
@@ -67,7 +67,7 @@ func GetByUrl[T any](url string, cfg conf.CenterApi) (T, error) {
 		return dat, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return dat, fmt.Errorf("failed to read response body: %w", err)
 	}
@@ -132,7 +132,7 @@ func PostByUrl(url string, cfg conf.CenterApi, v interface{}) (err error) {
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("failed to read response body: %w", err)
 	}
@@ -202,7 +202,7 @@ func PostJSON(url string, timeout time.Duration, v interface{}, retries ...int) 
 
 	if resp.Body != nil {
 		defer resp.Body.Close()
-		response, err = ioutil.ReadAll(resp.Body)
+		response, err = io.ReadAll(resp.Body)
 	}
 
 	return
