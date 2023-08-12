@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -14,7 +15,6 @@ import (
 	"github.com/ccfos/nightingale/v6/pkg/poster"
 
 	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
 	"github.com/toolkits/pkg/logger"
 	"github.com/toolkits/pkg/slice"
 	"github.com/toolkits/pkg/str"
@@ -670,29 +670,45 @@ func (u *User) UserGroups(ctx *ctx.Context, limit int, query string) ([]UserGrou
 func (u *User) ExtractToken(key string) (string, bool) {
 	bs, err := u.Contacts.MarshalJSON()
 	if err != nil {
-		logger.Errorf("handle_notice: failed to marshal contacts: %v", err)
+		logger.Errorf("ExtractToken: failed to marshal contacts: %v", err)
 		return "", false
 	}
 
+	jsonMap := make(map[string]string, 0)
+	err = json.Unmarshal(bs, &jsonMap)
+	if err != nil {
+		logger.Errorf("ExtractToken: failed to unmarshal contacts: %v", err)
+		return "", false
+	}
+	value := ""
+	ok := false
 	switch key {
 	case Dingtalk:
-		ret := gjson.GetBytes(bs, DingtalkKey)
-		return ret.String(), ret.Exists()
+		//ret := gjson.GetBytes(bs, DingtalkKey)
+		//return ret.String(), ret.Exists()
+		value, ok = jsonMap[DingtalkKey]
 	case Wecom:
-		ret := gjson.GetBytes(bs, WecomKey)
-		return ret.String(), ret.Exists()
+		//ret := gjson.GetBytes(bs, WecomKey)
+		//return ret.String(), ret.Exists()
+		value, ok = jsonMap[WecomKey]
 	case Feishu, FeishuCard:
-		ret := gjson.GetBytes(bs, FeishuKey)
-		return ret.String(), ret.Exists()
+		//ret := gjson.GetBytes(bs, FeishuKey)
+		//return ret.String(), ret.Exists()
+		value, ok = jsonMap[FeishuKey]
 	case Mm:
-		ret := gjson.GetBytes(bs, MmKey)
-		return ret.String(), ret.Exists()
+		//ret := gjson.GetBytes(bs, MmKey)
+		//return ret.String(), ret.Exists()
+		value, ok = jsonMap[MmKey]
 	case Telegram:
-		ret := gjson.GetBytes(bs, TelegramKey)
-		return ret.String(), ret.Exists()
+		//ret := gjson.GetBytes(bs, TelegramKey)
+		//return ret.String(), ret.Exists()
+		value, ok = jsonMap[TelegramKey]
 	case Email:
-		return u.Email, u.Email != ""
+		value = u.Email
+		ok = u.Email != ""
+		//return u.Email, u.Email != ""
 	default:
 		return "", false
 	}
+	return value, ok
 }
