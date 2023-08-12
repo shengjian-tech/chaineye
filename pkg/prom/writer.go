@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/golang/snappy"
 	"github.com/prometheus/client_golang/api"
 	"github.com/prometheus/prometheus/prompb"
 	"github.com/toolkits/pkg/logger"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/protoadapt"
 )
 
 type WriterType struct {
@@ -26,16 +27,16 @@ func NewWriter(cli api.Client, opt ClientOptions) WriterType {
 	return writer
 }
 
-func (w WriterType) Write(items []*prompb.TimeSeries, headers ...map[string]string) {
+func (w WriterType) Write(items []prompb.TimeSeries, headers ...map[string]string) {
 	if len(items) == 0 {
 		return
 	}
 
-	req := &prompb.WriteRequest{
+	req := prompb.WriteRequest{
 		Timeseries: items,
 	}
-
-	data, err := proto.Marshal(req)
+	reqv2 := protoadapt.MessageV2Of(&req)
+	data, err := proto.Marshal(reqv2)
 	if err != nil {
 		logger.Warningf("marshal prom data to proto got error: %v, data: %+v", err, items)
 		return

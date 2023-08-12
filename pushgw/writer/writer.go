@@ -11,12 +11,13 @@ import (
 
 	"github.com/ccfos/nightingale/v6/pushgw/pconf"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/golang/snappy"
 	"github.com/prometheus/client_golang/api"
 	"github.com/prometheus/prometheus/prompb"
 	"github.com/toolkits/pkg/concurrent/semaphore"
 	"github.com/toolkits/pkg/logger"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/protoadapt"
 )
 
 type WriterType struct {
@@ -25,8 +26,8 @@ type WriterType struct {
 	Client           api.Client
 }
 
-func (w WriterType) writeRelabel(items []*prompb.TimeSeries) []*prompb.TimeSeries {
-	ritems := make([]*prompb.TimeSeries, 0, len(items))
+func (w WriterType) writeRelabel(items []prompb.TimeSeries) []prompb.TimeSeries {
+	ritems := make([]prompb.TimeSeries, 0, len(items))
 	for _, item := range items {
 		lbls := Process(item.Labels, w.Opts.WriteRelabels...)
 		if len(lbls) == 0 {
@@ -37,7 +38,7 @@ func (w WriterType) writeRelabel(items []*prompb.TimeSeries) []*prompb.TimeSerie
 	return ritems
 }
 
-func (w WriterType) Write(items []*prompb.TimeSeries, sema *semaphore.Semaphore, headers ...map[string]string) {
+func (w WriterType) Write(items []prompb.TimeSeries, sema *semaphore.Semaphore, headers ...map[string]string) {
 	defer sema.Release()
 	if len(items) == 0 {
 		return
@@ -58,11 +59,11 @@ func (w WriterType) Write(items []*prompb.TimeSeries, sema *semaphore.Semaphore,
 		}
 	}
 
-	req := &prompb.WriteRequest{
+	req := prompb.WriteRequest{
 		Timeseries: items,
 	}
-
-	data, err := proto.Marshal(req)
+	reqv2 := protoadapt.MessageV2Of(&req)
+	data, err := proto.Marshal(reqv2)
 	if err != nil {
 		logger.Warningf("marshal prom data to proto got error: %v, data: %+v", err, items)
 		return
