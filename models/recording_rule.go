@@ -11,7 +11,8 @@ import (
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
 
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/prometheus/common/model"
 	"github.com/toolkits/pkg/logger"
 )

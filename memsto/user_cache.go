@@ -8,8 +8,6 @@ import (
 	"github.com/ccfos/nightingale/v6/dumper"
 	"github.com/ccfos/nightingale/v6/models"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
-
-	"github.com/pkg/errors"
 	"github.com/toolkits/pkg/logger"
 )
 
@@ -141,7 +139,7 @@ func (uc *UserCacheType) syncUsers() error {
 	stat, err := models.UserStatistics(uc.ctx)
 	if err != nil {
 		dumper.PutSyncRecord("users", start.Unix(), -1, -1, "failed to query statistics: "+err.Error())
-		return errors.WithMessage(err, "failed to exec UserStatistics")
+		return fmt.Errorf("failed to exec UserStatistics:%w", err)
 	}
 
 	if !uc.StatChanged(stat.Total, stat.LastUpdated) {
@@ -154,7 +152,7 @@ func (uc *UserCacheType) syncUsers() error {
 	lst, err := models.UserGetAll(uc.ctx)
 	if err != nil {
 		dumper.PutSyncRecord("users", start.Unix(), -1, -1, "failed to query records: "+err.Error())
-		return errors.WithMessage(err, "failed to exec UserGetAll")
+		return fmt.Errorf("failed to exec UserGetAll:%w", err)
 	}
 
 	m := make(map[int64]*models.User)

@@ -12,7 +12,6 @@ import (
 	"github.com/ccfos/nightingale/v6/pkg/poster"
 	"github.com/ccfos/nightingale/v6/pkg/tplx"
 
-	"github.com/pkg/errors"
 	"github.com/toolkits/pkg/file"
 	"github.com/toolkits/pkg/logger"
 )
@@ -54,7 +53,7 @@ func (n *NotifyTpl) Update(c *ctx.Context) error {
 func (n *NotifyTpl) CreateIfNotExists(c *ctx.Context, channel string) error {
 	count, err := NotifyTplCountByChannel(c, channel)
 	if err != nil {
-		return errors.WithMessage(err, "failed to count notify tpls")
+		return fmt.Errorf("failed to count notify tpls:%w", err)
 	}
 
 	if count != 0 {
@@ -96,7 +95,7 @@ func NotifyTplGets(ctx *ctx.Context) ([]*NotifyTpl, error) {
 func ListTpls(c *ctx.Context) (map[string]*template.Template, error) {
 	notifyTpls, err := NotifyTplGets(c)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to get notify tpls")
+		return nil, fmt.Errorf("failed to get notify tpls:%w", err)
 	}
 
 	tpls := make(map[string]*template.Template)

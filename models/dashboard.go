@@ -2,12 +2,14 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
+	"errors"
+
 	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
-	"github.com/pkg/errors"
 	"github.com/toolkits/pkg/str"
 )
 
@@ -51,7 +53,7 @@ func (d *Dashboard) Add(ctx *ctx.Context) error {
 
 	exists, err := DashboardExists(ctx, "group_id=? and name=?", d.GroupId, d.Name)
 	if err != nil {
-		return errors.WithMessage(err, "failed to count dashboard")
+		return fmt.Errorf("failed to count dashboard:%w", err)
 	}
 
 	if exists {

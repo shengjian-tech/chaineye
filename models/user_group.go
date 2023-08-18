@@ -2,13 +2,15 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
 
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/toolkits/pkg/str"
 )
 
@@ -68,7 +70,7 @@ func (ug *UserGroup) Add(ctx *ctx.Context) error {
 
 	num, err := UserGroupCount(ctx, "name=?", ug.Name)
 	if err != nil {
-		return errors.WithMessage(err, "failed to count user-groups")
+		return fmt.Errorf("failed to count user-groups:%w", err)
 	}
 
 	if num > 0 {

@@ -1,9 +1,11 @@
 package models
 
 import (
+	"errors"
+	"fmt"
+
 	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
-	"github.com/pkg/errors"
 )
 
 const RoleTableName = "role"
@@ -31,7 +33,7 @@ func RoleGets(ctx *ctx.Context, where string, args ...interface{}) ([]Role, erro
 	err := zorm.Query(ctx.Ctx, finder, &objs, nil)
 	//err := DB(ctx).Where(where, args...).Find(&objs).Error
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to query roles")
+		return nil, fmt.Errorf("failed to query roles:%w", err)
 	}
 	return objs, nil
 }
@@ -44,7 +46,7 @@ func RoleGetsAll(ctx *ctx.Context) ([]Role, error) {
 func (r *Role) Add(ctx *ctx.Context) error {
 	role, err := RoleGet(ctx, "name = ?", r.Name)
 	if err != nil {
-		return errors.WithMessage(err, "failed to query user")
+		return fmt.Errorf("failed to query user:%w", err)
 	}
 
 	if role != nil {

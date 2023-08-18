@@ -5,9 +5,10 @@ import (
 	"strings"
 	"time"
 
+	"errors"
+
 	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
-	"github.com/pkg/errors"
 	"github.com/toolkits/pkg/str"
 )
 

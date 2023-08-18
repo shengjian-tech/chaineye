@@ -8,8 +8,6 @@ import (
 	"github.com/ccfos/nightingale/v6/dumper"
 	"github.com/ccfos/nightingale/v6/models"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
-
-	"github.com/pkg/errors"
 	"github.com/toolkits/pkg/logger"
 )
 
@@ -110,7 +108,7 @@ func (amc *AlertMuteCacheType) syncAlertMutes() error {
 	stat, err := models.AlertMuteStatistics(amc.ctx)
 	if err != nil {
 		dumper.PutSyncRecord("alert_mutes", start.Unix(), -1, -1, "failed to query statistics: "+err.Error())
-		return errors.WithMessage(err, "failed to exec AlertMuteStatistics")
+		return fmt.Errorf("failed to exec AlertMuteStatistics:%w", err)
 	}
 
 	if !amc.StatChanged(stat.Total, stat.LastUpdated) {
@@ -123,7 +121,7 @@ func (amc *AlertMuteCacheType) syncAlertMutes() error {
 	lst, err := models.AlertMuteGetsAll(amc.ctx)
 	if err != nil {
 		dumper.PutSyncRecord("alert_mutes", start.Unix(), -1, -1, "failed to query records: "+err.Error())
-		return errors.WithMessage(err, "failed to exec AlertMuteGetsByCluster")
+		return fmt.Errorf("failed to exec AlertMuteGetsByCluster:%w", err)
 	}
 
 	oks := make(map[int64][]*models.AlertMute)

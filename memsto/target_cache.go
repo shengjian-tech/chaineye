@@ -3,6 +3,7 @@ package memsto
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"math"
 	"sync"
@@ -12,8 +13,6 @@ import (
 	"github.com/ccfos/nightingale/v6/models"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/storage"
-
-	"github.com/pkg/errors"
 	"github.com/toolkits/pkg/logger"
 )
 
@@ -131,7 +130,7 @@ func (tc *TargetCacheType) syncTargets() error {
 	stat, err := models.TargetStatistics(tc.ctx)
 	if err != nil {
 		dumper.PutSyncRecord("targets", start.Unix(), -1, -1, "failed to query statistics: "+err.Error())
-		return errors.WithMessage(err, "failed to call TargetStatistics")
+		return fmt.Errorf("failed to call TargetStatistics:%w", err)
 	}
 
 	if !tc.StatChanged(stat.Total, stat.LastUpdated) {
@@ -144,7 +143,7 @@ func (tc *TargetCacheType) syncTargets() error {
 	lst, err := models.TargetGetsAll(tc.ctx)
 	if err != nil {
 		dumper.PutSyncRecord("targets", start.Unix(), -1, -1, "failed to query records: "+err.Error())
-		return errors.WithMessage(err, "failed to call TargetGetsAll")
+		return fmt.Errorf("failed to call TargetGetsAll:%w", err)
 	}
 
 	m := make(map[string]*models.Target)

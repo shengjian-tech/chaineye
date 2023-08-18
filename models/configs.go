@@ -10,7 +10,6 @@ import (
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
 
-	"github.com/pkg/errors"
 	"github.com/toolkits/pkg/runner"
 	"github.com/toolkits/pkg/str"
 )
@@ -65,7 +64,7 @@ func ConfigsGet(ctx *ctx.Context, ckey string) (string, error) {
 	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
 	//err := DB(ctx).Model(&Configs{}).Where("ckey=?", ckey).Pluck("cval", &lst).Error
 	if err != nil {
-		return "", errors.WithMessage(err, "failed to query configs")
+		return "", fmt.Errorf("failed to query configs:%w", err)
 	}
 
 	if len(lst) > 0 {
@@ -80,7 +79,7 @@ func ConfigsSet(ctx *ctx.Context, ckey, cval string) error {
 	num, err := Count(ctx, finder)
 	//num, err := Count(DB(ctx).Model(&Configs{}).Where("ckey=?", ckey))
 	if err != nil {
-		return errors.WithMessage(err, "failed to count configs")
+		return fmt.Errorf("failed to count configs:%w", err)
 	}
 
 	if num == 0 {
@@ -140,10 +139,10 @@ func (c *Configs) Add(ctx *ctx.Context) error {
 	num, err := Count(ctx, finder)
 	//num, err := Count(DB(ctx).Model(&Configs{}).Where("ckey=?", c.Ckey))
 	if err != nil {
-		return errors.WithMessage(err, "failed to count configs")
+		return fmt.Errorf("failed to count configs:%w", err)
 	}
 	if num > 0 {
-		return errors.WithMessage(err, "key is exists")
+		return fmt.Errorf("key is exists:%w", err)
 	}
 
 	// insert
@@ -166,10 +165,10 @@ func (c *Configs) Update(ctx *ctx.Context) error {
 	num, err := Count(ctx, finder)
 	//num, err := Count(DB(ctx).Model(&Configs{}).Where("id<>? and ckey=?", c.Id, c.Ckey))
 	if err != nil {
-		return errors.WithMessage(err, "failed to count configs")
+		return fmt.Errorf("failed to count configs:%w", err)
 	}
 	if num > 0 {
-		return errors.WithMessage(err, "key is exists")
+		return fmt.Errorf("key is exists:%w", err)
 	}
 	return Update(ctx, c, nil)
 	//err = DB(ctx).Model(&Configs{}).Where("id=?", c.Id).Updates(c).Error
@@ -186,7 +185,7 @@ func ConfigsGetsByKey(ctx *ctx.Context, ckeys []string) (map[string]string, erro
 	err := zorm.Query(ctx.Ctx, finder, &objs, nil)
 	//err := DB(ctx).Where("ckey in ?", ckeys).Find(&objs).Error
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to gets configs")
+		return nil, fmt.Errorf("failed to gets configs:%w", err)
 	}
 
 	count := len(ckeys)

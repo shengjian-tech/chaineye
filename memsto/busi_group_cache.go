@@ -1,6 +1,7 @@
 package memsto
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -8,8 +9,6 @@ import (
 	"github.com/ccfos/nightingale/v6/dumper"
 	"github.com/ccfos/nightingale/v6/models"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
-
-	"github.com/pkg/errors"
 	"github.com/toolkits/pkg/logger"
 )
 
@@ -85,7 +84,7 @@ func (c *BusiGroupCacheType) syncBusiGroups() error {
 	stat, err := models.BusiGroupStatistics(c.ctx)
 	if err != nil {
 		dumper.PutSyncRecord("busi_groups", start.Unix(), -1, -1, "failed to query statistics: "+err.Error())
-		return errors.WithMessage(err, "failed to call BusiGroupStatistics")
+		return fmt.Errorf("failed to call BusiGroupStatistics:%w", err)
 	}
 
 	if !c.StatChanged(stat.Total, stat.LastUpdated) {
@@ -98,7 +97,7 @@ func (c *BusiGroupCacheType) syncBusiGroups() error {
 	m, err := models.BusiGroupGetMap(c.ctx)
 	if err != nil {
 		dumper.PutSyncRecord("busi_groups", start.Unix(), -1, -1, "failed to query records: "+err.Error())
-		return errors.WithMessage(err, "failed to call BusiGroupGetMap")
+		return fmt.Errorf("failed to call BusiGroupGetMap:%w", err)
 	}
 
 	c.Set(m, stat.Total, stat.LastUpdated)

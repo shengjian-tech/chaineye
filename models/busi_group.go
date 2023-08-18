@@ -2,14 +2,13 @@ package models
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
-
-	"github.com/pkg/errors"
 )
 
 const BusiGroupTableName = "busi_group"
@@ -296,7 +295,7 @@ func (bg *BusiGroup) Update(ctx *ctx.Context, name string, labelEnable int, labe
 
 	exists, err := BusiGroupExists(ctx, "name = ? and id <> ?", name, bg.Id)
 	if err != nil {
-		return errors.WithMessage(err, "failed to count BusiGroup")
+		return fmt.Errorf("failed to count BusiGroup:%w", err)
 	}
 
 	if exists {
@@ -306,7 +305,7 @@ func (bg *BusiGroup) Update(ctx *ctx.Context, name string, labelEnable int, labe
 	if labelEnable == 1 {
 		exists, err = BusiGroupExists(ctx, "label_enable = 1 and label_value = ? and id <> ?", labelValue, bg.Id)
 		if err != nil {
-			return errors.WithMessage(err, "failed to count BusiGroup")
+			return fmt.Errorf("failed to count BusiGroup:%w", err)
 		}
 
 		if exists {
@@ -333,7 +332,7 @@ func (bg *BusiGroup) Update(ctx *ctx.Context, name string, labelEnable int, labe
 func BusiGroupAdd(ctx *ctx.Context, name string, labelEnable int, labelValue string, members []BusiGroupMember, creator string) error {
 	exists, err := BusiGroupExists(ctx, "name=?", name)
 	if err != nil {
-		return errors.WithMessage(err, "failed to count BusiGroup")
+		return fmt.Errorf("failed to count BusiGroup:%w", err)
 	}
 
 	if exists {
@@ -343,7 +342,7 @@ func BusiGroupAdd(ctx *ctx.Context, name string, labelEnable int, labelValue str
 	if labelEnable == 1 {
 		exists, err = BusiGroupExists(ctx, "label_enable = 1 and label_value = ?", labelValue)
 		if err != nil {
-			return errors.WithMessage(err, "failed to count BusiGroup")
+			return fmt.Errorf("failed to count BusiGroup:%w", err)
 		}
 
 		if exists {
@@ -357,7 +356,7 @@ func BusiGroupAdd(ctx *ctx.Context, name string, labelEnable int, labelValue str
 	for i := 0; i < count; i++ {
 		ug, err := UserGroupGet(ctx, "id=?", members[i].UserGroupId)
 		if err != nil {
-			return errors.WithMessage(err, "failed to get UserGroup")
+			return fmt.Errorf("failed to get UserGroup:%w", err)
 		}
 
 		if ug == nil {

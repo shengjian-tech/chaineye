@@ -8,8 +8,6 @@ import (
 	"github.com/ccfos/nightingale/v6/dumper"
 	"github.com/ccfos/nightingale/v6/models"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
-
-	"github.com/pkg/errors"
 	"github.com/toolkits/pkg/logger"
 )
 
@@ -112,7 +110,7 @@ func (ugc *UserGroupCacheType) syncUserGroups() error {
 	stat, err := models.UserGroupStatistics(ugc.ctx)
 	if err != nil {
 		dumper.PutSyncRecord("user_groups", start.Unix(), -1, -1, "failed to query statistics: "+err.Error())
-		return errors.WithMessage(err, "failed to exec UserGroupStatistics")
+		return fmt.Errorf("failed to exec UserGroupStatistics:%w", err)
 	}
 
 	if !ugc.StatChanged(stat.Total, stat.LastUpdated) {
@@ -125,7 +123,7 @@ func (ugc *UserGroupCacheType) syncUserGroups() error {
 	lst, err := models.UserGroupGetAll(ugc.ctx)
 	if err != nil {
 		dumper.PutSyncRecord("user_groups", start.Unix(), -1, -1, "failed to query records: "+err.Error())
-		return errors.WithMessage(err, "failed to exec UserGroupGetAll")
+		return fmt.Errorf("failed to exec UserGroupGetAll:%w", err)
 	}
 
 	m := make(map[int64]*models.UserGroup)
@@ -137,7 +135,7 @@ func (ugc *UserGroupCacheType) syncUserGroups() error {
 	members, err := models.UserGroupMemberGetAll(ugc.ctx)
 	if err != nil {
 		dumper.PutSyncRecord("user_groups", start.Unix(), -1, -1, "failed to query members: "+err.Error())
-		return errors.WithMessage(err, "failed to exec UserGroupMemberGetAll")
+		return fmt.Errorf("failed to exec UserGroupMemberGetAll:%w", err)
 	}
 
 	for i := 0; i < len(members); i++ {

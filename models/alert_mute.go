@@ -14,7 +14,7 @@ import (
 	"github.com/ccfos/nightingale/v6/pkg/poster"
 	"github.com/toolkits/pkg/logger"
 
-	"github.com/pkg/errors"
+	"errors"
 )
 
 type TagFilter struct {

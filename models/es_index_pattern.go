@@ -1,12 +1,13 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 
-	"github.com/pkg/errors"
+	"errors"
 )
 
 const EsIndexPatternTableName = "es_index_pattern"
@@ -33,7 +34,7 @@ func (t *EsIndexPattern) GetTableName() string {
 func (r *EsIndexPattern) Add(ctx *ctx.Context) error {
 	esIndexPattern, err := EsIndexPatternGet(ctx, "datasource_id = ? and name = ?", r.DatasourceId, r.Name)
 	if err != nil {
-		return errors.WithMessage(err, "failed to query es index pattern")
+		return fmt.Errorf("failed to query es index pattern:%w", err)
 	}
 
 	if esIndexPattern != nil {
@@ -79,7 +80,7 @@ func EsIndexPatternGets(ctx *ctx.Context, where string, args ...interface{}) ([]
 	err := zorm.Query(ctx.Ctx, finder, &objs, nil)
 	//err := DB(ctx).Where(where, args...).Find(&objs).Error
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to query es index pattern")
+		return nil, fmt.Errorf("failed to query es index pattern:%w", err)
 	}
 	return objs, nil
 }

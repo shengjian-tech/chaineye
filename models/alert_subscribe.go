@@ -6,11 +6,12 @@ import (
 	"strings"
 	"time"
 
+	"errors"
+
 	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/ormx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
-	"github.com/pkg/errors"
 	"github.com/toolkits/pkg/logger"
 )
 

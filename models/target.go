@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -9,8 +10,6 @@ import (
 	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
-
-	"github.com/pkg/errors"
 )
 
 const TargetTableName = "target"
@@ -60,7 +59,7 @@ func (t *Target) FillGroup(ctx *ctx.Context, cache map[int64]*BusiGroup) error {
 
 	bg, err := BusiGroupGetById(ctx, t.GroupId)
 	if err != nil {
-		return errors.WithMessage(err, "failed to get busi group")
+		return fmt.Errorf("failed to get busi group:%w", err)
 	}
 
 	t.GroupObj = bg

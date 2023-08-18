@@ -24,13 +24,12 @@ require (
 	github.com/mattn/go-isatty v0.0.19
 	github.com/mojocn/base64Captcha v1.3.5
 	github.com/pelletier/go-toml/v2 v2.0.9
-	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.16.0
 	github.com/prometheus/common v0.44.0
 	github.com/prometheus/prometheus v0.46.0
 	github.com/rakyll/statik v0.1.7
-	github.com/redis/go-redis/v9 v9.0.5
-	github.com/sijms/go-ora/v2 v2.7.11
+	github.com/redis/go-redis/v9 v9.1.0
+	github.com/sijms/go-ora/v2 v2.7.13
 	github.com/taosdata/driver-go/v3 v3.5.0
 	github.com/toolkits/pkg v1.3.4
 	golang.org/x/oauth2 v0.11.0

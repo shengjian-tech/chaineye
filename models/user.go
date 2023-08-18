@@ -14,7 +14,8 @@ import (
 	"github.com/ccfos/nightingale/v6/pkg/ormx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
 
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/toolkits/pkg/logger"
 	"github.com/toolkits/pkg/slice"
 	"github.com/toolkits/pkg/str"
@@ -119,7 +120,7 @@ func (u *User) Verify() error {
 func (u *User) Add(ctx *ctx.Context) error {
 	user, err := UserGetByUsername(ctx, u.Username)
 	if err != nil {
-		return errors.WithMessage(err, "failed to query user")
+		return fmt.Errorf("failed to query user:%w", err)
 	}
 
 	if user != nil {
@@ -330,7 +331,7 @@ func LdapLogin(ctx *ctx.Context, username, pass, roles string, ldap *ldapx.SsoCl
 			_, err := zorm.Update(ctx.Ctx, user)
 			//err := DB(ctx).Updates(user).Error
 			if err != nil {
-				return nil, errors.WithMessage(err, "failed to update user")
+				return nil, fmt.Errorf("failed to update user:%w", err)
 			}
 		}
 		return user, nil
@@ -362,7 +363,7 @@ func UserTotal(ctx *ctx.Context, query string) (num int64, err error) {
 	//}
 	num, err = Count(ctx, finder)
 	if err != nil {
-		return num, errors.WithMessage(err, "failed to count user")
+		return num, fmt.Errorf("failed to count user:%w", err)
 	}
 
 	return num, nil
@@ -386,7 +387,7 @@ func UserGets(ctx *ctx.Context, query string, limit, offset int) ([]User, error)
 	err := zorm.Query(ctx.Ctx, finder, &users, page)
 	//err := session.Find(&users).Error
 	if err != nil {
-		return users, errors.WithMessage(err, "failed to query user")
+		return users, fmt.Errorf("failed to query user:%w", err)
 	}
 
 	for i := 0; i < len(users); i++ {
@@ -576,12 +577,12 @@ func (u *User) BusiGroups(ctx *ctx.Context, limit int, query string, all ...bool
 
 	userGroupIds, err := MyGroupIds(ctx, u.Id)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to get MyGroupIds")
+		return nil, fmt.Errorf("failed to get MyGroupIds:%w", err)
 	}
 
 	busiGroupIds, err := BusiGroupIds(ctx, userGroupIds)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to get BusiGroupIds")
+		return nil, fmt.Errorf("failed to get BusiGroupIds:%w", err)
 	}
 
 	if len(busiGroupIds) == 0 {
@@ -646,7 +647,7 @@ func (u *User) UserGroups(ctx *ctx.Context, limit int, query string) ([]UserGrou
 
 	ids, err := MyGroupIds(ctx, u.Id)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to get MyGroupIds")
+		return nil, fmt.Errorf("failed to get MyGroupIds:%w", err)
 	}
 
 	if len(ids) > 0 {

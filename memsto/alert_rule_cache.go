@@ -8,8 +8,6 @@ import (
 	"github.com/ccfos/nightingale/v6/dumper"
 	"github.com/ccfos/nightingale/v6/models"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
-
-	"github.com/pkg/errors"
 	"github.com/toolkits/pkg/logger"
 )
 
@@ -106,7 +104,7 @@ func (arc *AlertRuleCacheType) syncAlertRules() error {
 	stat, err := models.AlertRuleStatistics(arc.ctx)
 	if err != nil {
 		dumper.PutSyncRecord("alert_rules", start.Unix(), -1, -1, "failed to query statistics: "+err.Error())
-		return errors.WithMessage(err, "failed to exec AlertRuleStatistics")
+		return fmt.Errorf("failed to exec AlertRuleStatistics:%w", err)
 	}
 
 	if !arc.StatChanged(stat.Total, stat.LastUpdated) {
@@ -119,7 +117,7 @@ func (arc *AlertRuleCacheType) syncAlertRules() error {
 	lst, err := models.AlertRuleGetsAll(arc.ctx)
 	if err != nil {
 		dumper.PutSyncRecord("alert_rules", start.Unix(), -1, -1, "failed to query records: "+err.Error())
-		return errors.WithMessage(err, "failed to exec AlertRuleGetsByCluster")
+		return fmt.Errorf("failed to exec AlertRuleGetsByCluster:%w", err)
 	}
 
 	m := make(map[int64]*models.AlertRule)

@@ -1,6 +1,7 @@
 package memsto
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -8,8 +9,6 @@ import (
 	"github.com/ccfos/nightingale/v6/dumper"
 	"github.com/ccfos/nightingale/v6/models"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
-
-	"github.com/pkg/errors"
 	"github.com/toolkits/pkg/logger"
 )
 
@@ -84,7 +83,7 @@ func (d *DatasourceCacheType) syncDatasources() error {
 	stat, err := models.DatasourceStatistics(d.ctx)
 	if err != nil {
 		dumper.PutSyncRecord("datasources", start.Unix(), -1, -1, "failed to query statistics: "+err.Error())
-		return errors.WithMessage(err, "failed to call DatasourceStatistics")
+		return fmt.Errorf("failed to call DatasourceStatistics:%w", err)
 	}
 
 	if !d.StatChanged(stat.Total, stat.LastUpdated) {
@@ -97,7 +96,7 @@ func (d *DatasourceCacheType) syncDatasources() error {
 	m, err := models.DatasourceGetMap(d.ctx)
 	if err != nil {
 		dumper.PutSyncRecord("datasources", start.Unix(), -1, -1, "failed to query records: "+err.Error())
-		return errors.WithMessage(err, "failed to call DatasourceGetMap")
+		return fmt.Errorf("failed to call DatasourceGetMap:%w", err)
 	}
 
 	d.Set(m, stat.Total, stat.LastUpdated)
