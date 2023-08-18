@@ -55,7 +55,7 @@ type AlertCurEvent struct {
 	TriggerValue             string            `json:"trigger_value" column:"trigger_value"`
 	Tags                     string            `json:"-" column:"tags"`        // for db
 	TagsJSON                 []string          `json:"tags"`                   // for fe
-	TagsMap                  map[string]string `json:"-"`                      // for internal usage
+	TagsMap                  map[string]string `json:"tags_map"`               // for internal usage
 	Annotations              string            `json:"-" column:"annotations"` //
 	AnnotationsJSON          map[string]string `json:"annotations"`            // for fe
 	IsRecovered              bool              `json:"is_recovered"`           // for notify.py
