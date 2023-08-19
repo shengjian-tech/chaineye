@@ -388,7 +388,8 @@ func (rt *Router) Config(r *gin.Engine) {
 			v = version.Version[:lastIndex]
 		}
 
-		ginx.NewRender(c).Data(gin.H{"version": v, "github_verison": version.GithubVersion.Load().(string)}, nil)
+		//ginx.NewRender(c).Data(gin.H{"version": v, "github_verison": version.GithubVersion.Load().(string)}, nil)
+		ginx.NewRender(c).Data(gin.H{"version": v}, nil)
 	})
 
 	if rt.HTTP.APIForService.Enable {

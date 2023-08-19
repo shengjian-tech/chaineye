@@ -76,6 +76,17 @@ func InitConfig(configDir, cryptoKey string) (*ConfigType, error) {
 
 	config.Alert.Heartbeat.Endpoint = fmt.Sprintf("%s:%d", config.Alert.Heartbeat.IP, config.HTTP.Port)
 
+	if config.HTTP.BasePath == "" {
+		config.HTTP.BasePath = "/"
+	}
+
+	if !strings.HasPrefix(config.HTTP.BasePath, "/") {
+		config.HTTP.BasePath = "/" + config.HTTP.BasePath
+	}
+	if !strings.HasSuffix(config.HTTP.BasePath, "/") {
+		config.HTTP.BasePath = config.HTTP.BasePath + "/"
+	}
+
 	return config, nil
 }
 

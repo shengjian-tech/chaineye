@@ -1,15 +1,8 @@
 package version
 
-import (
-	"sync/atomic"
-	"time"
+var Version = "v6.0.3"
 
-	"github.com/hashicorp/go-version"
-	"github.com/toolkits/pkg/logger"
-	"github.com/toolkits/pkg/net/httplib"
-)
-
-var Version = "unknown"
+/*
 var GithubVersion atomic.Value
 
 func CompareVersion(v1, v2 string) (int, error) {
@@ -48,3 +41,4 @@ func GetGithubVersion() {
 type GithubRelease struct {
 	TagName string `json:"tag_name"`
 }
+*/

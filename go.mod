@@ -15,7 +15,6 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/golang/snappy v0.0.4
 	github.com/google/uuid v1.3.0
-	github.com/hashicorp/go-version v1.6.0
 	github.com/json-iterator/go v1.1.12
 	github.com/koding/multiconfig v0.0.0-20171124222453-69c27309b2d7
 	github.com/lib/pq v1.10.9
@@ -29,7 +28,7 @@ require (
 	github.com/prometheus/prometheus v0.46.0
 	github.com/rakyll/statik v0.1.7
 	github.com/redis/go-redis/v9 v9.1.0
-	github.com/sijms/go-ora/v2 v2.7.13
+	github.com/sijms/go-ora/v2 v2.7.14
 	github.com/taosdata/driver-go/v3 v3.5.0
 	github.com/toolkits/pkg v1.3.4
 	golang.org/x/oauth2 v0.11.0
