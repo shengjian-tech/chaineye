@@ -110,11 +110,14 @@ func (rt *Router) configNoRoute(r *gin.Engine, fs *http.FileSystem) {
 	r.NoRoute(func(c *gin.Context) {
 		arr := strings.Split(c.Request.URL.Path, ".")
 		suffix := arr[len(arr)-1]
-
+		filePath := c.Request.URL.Path
+		if rt.HTTP.BasePath != "" && rt.HTTP.BasePath != "/" && strings.HasPrefix(filePath, rt.HTTP.BasePath) { //设置了basePath
+			filePath = "/" + filePath[len(rt.HTTP.BasePath):]
+		}
 		switch suffix {
 		case "png", "jpeg", "jpg", "svg", "ico", "gif", "css", "js", "html", "htm", "gz", "zip", "map", "ttf":
 			if !rt.Center.UseFileAssets {
-				c.FileFromFS(c.Request.URL.Path, *fs)
+				c.FileFromFS(filePath, *fs)
 			} else {
 				cwdarr := []string{"/"}
 				if runtime.GOOS == "windows" {
