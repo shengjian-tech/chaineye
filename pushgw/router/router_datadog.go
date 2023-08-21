@@ -3,23 +3,21 @@ package router
 import (
 	"compress/gzip"
 	"compress/zlib"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	easyjson "github.com/mailru/easyjson"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/prompb"
 )
 
-//easyjson:json
 type TimeSeries struct {
 	Series []*DatadogMetric `json:"series"`
 }
 
-//easyjson:json
 type DatadogMetric struct {
 	Metric string         `json:"metric"`
 	Points []DatadogPoint `json:"points"`
@@ -27,7 +25,6 @@ type DatadogMetric struct {
 	Tags   []string       `json:"tags,omitempty"`
 }
 
-//easyjson:json
 type DatadogPoint [2]float64
 
 func (m *DatadogMetric) Clean() error {
@@ -208,7 +205,7 @@ func (r *Router) datadogSeries(c *gin.Context) {
 	}
 
 	var series TimeSeries
-	err = easyjson.Unmarshal(bs, &series)
+	err = json.Unmarshal(bs, &series)
 	if err != nil {
 		c.String(400, err.Error())
 		return

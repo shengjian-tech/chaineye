@@ -2,6 +2,7 @@ package router
 
 import (
 	"compress/gzip"
+	"encoding/json"
 	"fmt"
 	"io"
 	"strconv"
@@ -9,12 +10,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mailru/easyjson"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/prompb"
 )
 
-//easyjson:json
 type FalconMetric struct {
 	Metric       string      `json:"metric"`
 	Endpoint     string      `json:"endpoint"`
@@ -24,7 +23,6 @@ type FalconMetric struct {
 	Tags         string      `json:"tags"`
 }
 
-//easyjson:json
 type FalconMetricArr []FalconMetric
 
 func (m *FalconMetric) Clean(ts int64) error {
@@ -163,10 +161,10 @@ func (rt *Router) falconPush(c *gin.Context) {
 	var arr FalconMetricArr
 
 	if bs[0] == '[' {
-		err = easyjson.Unmarshal(bs, &arr)
+		err = json.Unmarshal(bs, &arr)
 	} else {
 		var one FalconMetric
-		err = easyjson.Unmarshal(bs, &one)
+		err = json.Unmarshal(bs, &one)
 		arr = []FalconMetric{one}
 	}
 
