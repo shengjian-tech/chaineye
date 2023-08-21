@@ -6,10 +6,10 @@ import (
 
 	"gitee.com/chunanyong/zorm"
 	// 引入数据库驱动
+	_ "github.com/ClickHouse/clickhouse-go/v2"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
-	_ "github.com/mailru/go-clickhouse/v2"
 	_ "github.com/sijms/go-ora/v2"
 	_ "github.com/taosdata/driver-go/v3/taosRestful"
 	"github.com/toolkits/pkg/logger"
