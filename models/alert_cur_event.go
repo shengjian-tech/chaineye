@@ -629,7 +629,7 @@ func AlertCurEventGetsFromAlertMute(ctx *ctx.Context, alertMute *AlertMute) ([]*
 			//tx = tx.Where("datasource_id IN (?)", alertMute.DatasourceIdsJson)
 		}
 	}
-	finder.Append(" order by id desc")
+	finder.Append("order by id desc")
 	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
 	//err := tx.Order("id desc").Find(&lst).Error
 	return lst, err

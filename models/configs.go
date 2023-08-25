@@ -124,7 +124,7 @@ func ConfigsGets(ctx *ctx.Context, prefix string, limit, offset int) ([]*Configs
 		//session = session.Where("ckey like ?", prefix+"%")
 		finder.Append("WHERE ckey like ?", prefix+"%")
 	}
-	finder.Append(" order by id desc")
+	finder.Append("order by id desc")
 	page := zorm.NewPage()
 	page.PageSize = limit
 	page.PageNo = offset / limit

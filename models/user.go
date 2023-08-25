@@ -662,7 +662,7 @@ func (u *User) UserGroups(ctx *ctx.Context, limit int, query string) ([]UserGrou
 		//session = session.Where("name like ?", "%"+query+"%")
 		finder.Append("and name like ?", "%"+query+"%")
 	}
-	finder.Append(" order by name asc")
+	finder.Append("order by name asc")
 	err = zorm.Query(ctx.Ctx, finder, &lst, page)
 	//err = session.Find(&lst).Error
 	return lst, err
