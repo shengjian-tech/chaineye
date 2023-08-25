@@ -15,16 +15,17 @@ const EsIndexPatternTableName = "es_index_pattern"
 type EsIndexPattern struct {
 	// 引入默认的struct,隔离IEntityStruct的方法改动
 	zorm.EntityStruct
-	Id                     int64  `json:"id" column:"id"`
-	DatasourceId           int64  `json:"datasource_id" column:"datasource_id"`
-	Name                   string `json:"name" column:"name"`
-	TimeField              string `json:"time_field" column:"time_field"`
-	AllowHideSystemIndices bool   `json:"allow_hide_system_indices" column:"allow_hide_system_indices"`
-	FieldsFormat           string `json:"fields_format" column:"fields_format"`
-	CreateAt               int64  `json:"create_at" column:"create_at"`
-	CreateBy               string `json:"create_by" column:"create_by"`
-	UpdateAt               int64  `json:"update_at" column:"update_at"`
-	UpdateBy               string `json:"update_by" column:"update_by"`
+	Id                         int64  `json:"id" column:"id"`
+	DatasourceId               int64  `json:"datasource_id" column:"datasource_id"`
+	Name                       string `json:"name" column:"name"`
+	TimeField                  string `json:"time_field" column:"time_field"`
+	AllowHideSystemIndices     int    `json:"-" column:"allow_hide_system_indices"`
+	AllowHideSystemIndicesBool bool   `json:"allow_hide_system_indices"`
+	FieldsFormat               string `json:"fields_format" column:"fields_format"`
+	CreateAt                   int64  `json:"create_at" column:"create_at"`
+	CreateBy                   string `json:"create_by" column:"create_by"`
+	UpdateAt                   int64  `json:"update_at" column:"update_at"`
+	UpdateBy                   string `json:"update_by" column:"update_by"`
 }
 
 func (t *EsIndexPattern) GetTableName() string {
@@ -40,6 +41,7 @@ func (r *EsIndexPattern) Add(ctx *ctx.Context) error {
 	if esIndexPattern != nil {
 		return errors.New("es index pattern datasource and name already exists")
 	}
+	r.FE2DB()
 	return Insert(ctx, r)
 	//return DB(ctx).Create(r).Error
 }
@@ -68,9 +70,21 @@ func (ei *EsIndexPattern) Update(ctx *ctx.Context, eip EsIndexPattern) error {
 	eip.CreateAt = ei.CreateAt
 	eip.CreateBy = ei.CreateBy
 	eip.UpdateAt = time.Now().Unix()
-
+	eip.FE2DB()
 	return Update(ctx, &eip, nil)
 	//return DB(ctx).Model(ei).Select("*").Updates(eip).Error
+}
+
+func (dbIndexPatten *EsIndexPattern) DB2FE() {
+	if dbIndexPatten.AllowHideSystemIndices == 1 {
+		dbIndexPatten.AllowHideSystemIndicesBool = true
+	}
+}
+
+func (feIndexPatten *EsIndexPattern) FE2DB() {
+	if feIndexPatten.AllowHideSystemIndicesBool {
+		feIndexPatten.AllowHideSystemIndices = 1
+	}
 }
 
 func EsIndexPatternGets(ctx *ctx.Context, where string, args ...interface{}) ([]*EsIndexPattern, error) {
@@ -81,6 +95,10 @@ func EsIndexPatternGets(ctx *ctx.Context, where string, args ...interface{}) ([]
 	//err := DB(ctx).Where(where, args...).Find(&objs).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to query es index pattern:%w", err)
+	}
+
+	for _, i := range objs {
+		i.DB2FE()
 	}
 	return objs, nil
 }
@@ -98,6 +116,8 @@ func EsIndexPatternGet(ctx *ctx.Context, where string, args ...interface{}) (*Es
 	if len(lst) == 0 {
 		return nil, nil
 	}
+
+	lst[0].DB2FE()
 
 	return lst[0], nil
 }
