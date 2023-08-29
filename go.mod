@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	gitee.com/chunanyong/dm v1.8.12
-	gitee.com/chunanyong/zorm v1.7.1
+	gitee.com/chunanyong/zorm v1.7.2
 	github.com/BurntSushi/toml v1.3.2
 	github.com/ClickHouse/clickhouse-go/v2 v2.13.3
 	github.com/coreos/go-oidc/v3 v3.6.0
@@ -26,7 +26,7 @@ require (
 	github.com/prometheus/prometheus v0.46.0
 	github.com/rakyll/statik v0.1.7
 	github.com/redis/go-redis/v9 v9.1.0
-	github.com/sijms/go-ora/v2 v2.7.16
+	github.com/sijms/go-ora/v2 v2.7.17
 	github.com/taosdata/driver-go/v3 v3.5.0
 	github.com/toolkits/pkg v1.3.4
 	golang.org/x/oauth2 v0.11.0
