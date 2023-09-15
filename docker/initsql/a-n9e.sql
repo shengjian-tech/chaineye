@@ -354,8 +354,10 @@ CREATE TABLE `target` (
     `note` varchar(255) not null default '' comment 'append to alert event as field',
     `tags` varchar(512) not null default '' comment 'append to series data as tags, split by space, append external space at suffix',
     `update_at` bigint not null default 0,
+    `host_ip` varchar(15) default '' comment 'IPv4 string',
     PRIMARY KEY (`id`),
     UNIQUE KEY (`ident`),
+    INDEX idx_host_ip(`host_ip`),
     KEY (`group_id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
