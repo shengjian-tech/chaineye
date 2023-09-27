@@ -38,7 +38,7 @@ func (w WriterType) writeRelabel(items []prompb.TimeSeries) []prompb.TimeSeries 
 	return ritems
 }
 
-func (w WriterType) Write(items []prompb.TimeSeries, sema *semaphore.Semaphore, headers ...map[string]string) {
+func (w WriterType) Write(key string, items []prompb.TimeSeries, sema *semaphore.Semaphore, headers ...map[string]string) {
 	defer sema.Release()
 	if len(items) == 0 {
 		return
@@ -48,6 +48,12 @@ func (w WriterType) Write(items []prompb.TimeSeries, sema *semaphore.Semaphore, 
 	if len(items) == 0 {
 		return
 	}
+
+	CounterWirteTotal.WithLabelValues(key).Add(float64(len(items)))
+	start := time.Now()
+	defer func() {
+		ForwardDuration.WithLabelValues(key).Observe(time.Since(start).Seconds())
+	}()
 
 	if w.ForceUseServerTS {
 		ts := time.Now().UnixMilli()
@@ -212,7 +218,7 @@ func (ws *WritersType) StartConsumer(identQueue *IdentQueue) {
 			}
 			for key := range ws.backends {
 				ws.sema.Acquire()
-				go ws.backends[key].Write(series, ws.sema)
+				go ws.backends[key].Write(key, series, ws.sema)
 			}
 		}
 	}

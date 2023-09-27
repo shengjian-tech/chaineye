@@ -24,6 +24,7 @@ const (
 	LOKI   = "loki"
 
 	PROMETHEUS = "prometheus"
+	TDENGINE   = "tdengine"
 )
 const AlertRuleTableName = "alert_rule"
 
@@ -837,6 +838,10 @@ func (ar *AlertRule) IsLokiRule() bool {
 
 func (ar *AlertRule) IsHostRule() bool {
 	return ar.Prod == HOST
+}
+
+func (ar *AlertRule) IsTdengineRule() bool {
+	return ar.Cate == TDENGINE
 }
 
 func (ar *AlertRule) GetRuleType() string {

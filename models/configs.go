@@ -9,8 +9,10 @@ import (
 	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
+	"github.com/pingcap/errors"
 
 	"github.com/toolkits/pkg/runner"
+	"github.com/toolkits/pkg/slice"
 	"github.com/toolkits/pkg/str"
 )
 
@@ -19,22 +21,32 @@ const ConfigsTableName = "configs"
 type Configs struct {
 	// 引入默认的struct,隔离IEntityStruct的方法改动
 	zorm.EntityStruct
-	Id   int64  `column:"id"`
-	Ckey string `column:"ckey"`
-	Cval string `column:"cval"`
+	Id        int64  `column:"id" json:"id"`
+	Ckey      string `column:"ckey" json:"ckey"` //Unique field. Before inserting external configs, check if they are already defined as built-in configs.
+	Cval      string `column:"cval" json:"cval"`
+	Note      string `column:"note" json:"note"`
+	External  int    `column:"external" json:"external"`   //Controls frontend list display: 0 hides built-in (default), 1 shows external
+	Encrypted int    `column:"encrypted" json:"encrypted"` //Indicates whether the value(cval) is encrypted (1 for ciphertext, 0 for plaintext(default))
 }
 
 func (Configs) GetTableName() string {
 	return ConfigsTableName
 }
 
+var (
+	ConfigExternal  = 1 //external type
+	ConfigEncrypted = 1 //ciphertext
+)
+
 func (c *Configs) DB2FE() error {
 	return nil
 }
 
+const SALT = "salt"
+
 // InitSalt generate random salt
 func InitSalt(ctx *ctx.Context) {
-	val, err := ConfigsGet(ctx, "salt")
+	val, err := ConfigsGet(ctx, SALT)
 	if err != nil {
 		log.Fatalln("cannot query salt", err)
 	}
@@ -45,7 +57,7 @@ func InitSalt(ctx *ctx.Context) {
 
 	content := fmt.Sprintf("%s%d%d%s", runner.Hostname, os.Getpid(), time.Now().UnixNano(), str.RandLetters(6))
 	salt := str.MD5(content)
-	err = ConfigsSet(ctx, "salt", salt)
+	err = ConfigsSet(ctx, SALT, salt)
 	if err != nil {
 		log.Fatalln("init salt in mysql", err)
 	}
@@ -81,7 +93,6 @@ func ConfigsSet(ctx *ctx.Context, ckey, cval string) error {
 	if err != nil {
 		return fmt.Errorf("failed to count configs:%w", err)
 	}
-
 	if num == 0 {
 		// insert
 		/*
@@ -102,6 +113,18 @@ func ConfigsSet(ctx *ctx.Context, ckey, cval string) error {
 	}
 
 	return err
+}
+
+func ConfigsSelectByCkey(ctx *ctx.Context, ckey string) ([]Configs, error) {
+	objs := make([]Configs, 0)
+
+	finder := zorm.NewSelectFinder(ConfigsTableName).Append("WHERE ckey=?", ckey)
+	err := zorm.Query(ctx.Ctx, finder, &objs, nil)
+	//err := DB(ctx).Where("ckey=?", ckey).Find(&objs).Error
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to select conf")
+	}
+	return objs, nil
 }
 
 func ConfigGet(ctx *ctx.Context, id int64) (*Configs, error) {
@@ -199,4 +222,78 @@ func ConfigsGetsByKey(ctx *ctx.Context, ckeys []string) (map[string]string, erro
 	}
 
 	return kvmap, nil
+}
+func (c *Configs) IsInternal() bool {
+	return slice.ContainsString(InternalCkeySlice, c.Ckey)
+}
+
+func ConfigsGetUserVariable(context *ctx.Context) ([]Configs, error) {
+	objs := make([]Configs, 0)
+	finder := zorm.NewSelectFinder(ConfigsTableName).Append("WHERE external = ? order by id desc ", ConfigExternal)
+	err := zorm.Query(context.Ctx, finder, &objs, nil)
+	//tx := DB(context).Where("external = ?", ConfigExternal).Order("id desc")
+	//err := tx.Find(&objs).Error
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to gets user variable")
+	}
+
+	return objs, nil
+}
+
+func ConfigsUserVariableInsert(context *ctx.Context, conf Configs) error {
+	conf.External = ConfigExternal
+	conf.Id = 0
+	//Before inserting external conf, check if they are already defined as built-in conf
+	if conf.IsInternal() {
+		return fmt.Errorf("duplicate ckey(internal) value found: %s", conf.Ckey)
+	}
+	objs, err := ConfigsSelectByCkey(context, conf.Ckey)
+	if err != nil {
+		return err
+	}
+	if len(objs) > 0 {
+		return fmt.Errorf("duplicate ckey found: %s", conf.Ckey)
+	}
+
+	return Insert(context, &conf)
+	//return DB(context).Create(&conf).Error
+}
+
+func ConfigsUserVariableUpdate(context *ctx.Context, conf Configs) error {
+	if conf.IsInternal() {
+		return fmt.Errorf("duplicate ckey(internal) value found: %s", conf.Ckey)
+	}
+	err := userVariableCheck(context, conf)
+	if err != nil {
+		return err
+	}
+	return Update(context, &conf, []string{"ckey", "cval", "note", "encrypted"})
+	//return DB(context).Model(&Configs{Id: conf.Id}).Select("ckey", "cval", "note", "encrypted").Updates(conf).Error
+}
+
+func userVariableCheck(context *ctx.Context, conf Configs) error {
+
+	finder := zorm.NewSelectFinder(ConfigsTableName, "count(*)").Append("WHERE id <> ? and ckey = ?", conf.Id, conf.Ckey)
+	num, err := Count(context, finder)
+	//num, err := Count(DB(ctx).Model(&Configs{}).Where("ckey=?", ckey))
+	if err != nil {
+		return err
+	}
+	if num == 0 {
+		return nil
+	}
+
+	/*
+		var objs []*Configs
+		// id and ckey both unique
+		err := DB(context).Where("id <> ? and ckey = ? ", conf.Id, conf.Ckey).Find(&objs).Error
+		if err != nil {
+			return err
+		}
+		if len(objs) == 0 {
+			return nil
+		}
+	*/
+
+	return fmt.Errorf("duplicate ckey value found: %s", conf.Ckey)
 }

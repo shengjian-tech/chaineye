@@ -43,7 +43,7 @@ func Insert(ctx *ctx.Context, obj zorm.IEntityStruct) error {
 
 // CryptoPass crypto password use salt
 func CryptoPass(ctx *ctx.Context, raw string) (string, error) {
-	salt, err := ConfigsGet(ctx, "salt")
+	salt, err := ConfigsGet(ctx, SALT)
 	if err != nil {
 		return "", err
 	}

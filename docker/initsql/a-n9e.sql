@@ -55,6 +55,9 @@ CREATE TABLE `configs` (
     `id` bigint unsigned not null auto_increment,
     `ckey` varchar(191) not null,
     `cval` text not null,
+    `note` varchar(1024),
+    `external` int default 0 comment '0:built-in 1:external',
+    `encrypted` int default 0 comment '0:plaintext 1:ciphertext',
     PRIMARY KEY (`id`),
     UNIQUE KEY (`ckey`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
