@@ -594,6 +594,7 @@ CREATE TABLE `datasource`
     `status` varchar(255) not null default '',
     `http` varchar(4096) not null default '',
     `auth` varchar(8192) not null default '',
+    `is_default` int not null default 0 comment 'is default datasource',
     `created_at` bigint not null default 0,
     `created_by` varchar(64) not null default '',
     `updated_at` bigint not null default 0,
