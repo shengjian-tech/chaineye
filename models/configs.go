@@ -9,7 +9,6 @@ import (
 	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
-	"github.com/pingcap/errors"
 
 	"github.com/toolkits/pkg/runner"
 	"github.com/toolkits/pkg/slice"
@@ -122,7 +121,8 @@ func ConfigsSelectByCkey(ctx *ctx.Context, ckey string) ([]Configs, error) {
 	err := zorm.Query(ctx.Ctx, finder, &objs, nil)
 	//err := DB(ctx).Where("ckey=?", ckey).Find(&objs).Error
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to select conf")
+		return nil, fmt.Errorf("failed to select conf:%w", err)
+		//return nil, errors.WithMessage(err, "failed to select conf")
 	}
 	return objs, nil
 }
@@ -234,7 +234,8 @@ func ConfigsGetUserVariable(context *ctx.Context) ([]Configs, error) {
 	//tx := DB(context).Where("external = ?", ConfigExternal).Order("id desc")
 	//err := tx.Find(&objs).Error
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to gets user variable")
+		return nil, fmt.Errorf("failed to gets user variable:%w", err)
+		//return nil, errors.WithMessage(err, "failed to gets user variable")
 	}
 
 	return objs, nil

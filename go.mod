@@ -22,7 +22,6 @@ require (
 	github.com/mattn/go-isatty v0.0.19
 	github.com/mojocn/base64Captcha v1.3.5
 	github.com/pelletier/go-toml/v2 v2.1.0
-	github.com/pingcap/errors v0.11.4
 	github.com/prometheus/client_golang v1.17.0
 	github.com/prometheus/common v0.44.0
 	github.com/prometheus/prometheus v0.47.2
