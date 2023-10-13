@@ -20,6 +20,7 @@ import (
 
 const (
 	METRIC = "metric"
+	LOG    = "logging"
 	HOST   = "host"
 	LOKI   = "loki"
 
@@ -112,6 +113,7 @@ type HostTrigger struct {
 }
 
 type RuleQuery struct {
+	Inhibit  bool          `json:"inhibit"`
 	Queries  []interface{} `json:"queries"`
 	Triggers []Trigger     `json:"triggers"`
 }
@@ -845,7 +847,7 @@ func (ar *AlertRule) IsTdengineRule() bool {
 }
 
 func (ar *AlertRule) GetRuleType() string {
-	if ar.Prod == METRIC {
+	if ar.Prod == METRIC || ar.Prod == LOG {
 		return ar.Cate
 	}
 
@@ -871,7 +873,6 @@ func (ar *AlertRule) UpdateEvent(event *AlertCurEvent) {
 	event.RuleProd = ar.Prod
 	event.RuleAlgo = ar.Algorithm
 	event.PromForDuration = ar.PromForDuration
-	event.PromQl = ar.PromQl
 	event.RuleConfig = ar.RuleConfig
 	event.RuleConfigJson = ar.RuleConfigJson
 	event.PromEvalInterval = ar.PromEvalInterval

@@ -14,7 +14,6 @@ import (
 	"github.com/golang/snappy"
 	"github.com/prometheus/client_golang/api"
 	"github.com/prometheus/prometheus/prompb"
-	"github.com/toolkits/pkg/concurrent/semaphore"
 	"github.com/toolkits/pkg/logger"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/protoadapt"
@@ -38,8 +37,7 @@ func (w WriterType) writeRelabel(items []prompb.TimeSeries) []prompb.TimeSeries 
 	return ritems
 }
 
-func (w WriterType) Write(key string, items []prompb.TimeSeries, sema *semaphore.Semaphore, headers ...map[string]string) {
-	defer sema.Release()
+func (w WriterType) Write(key string, items []prompb.TimeSeries, headers ...map[string]string) {
 	if len(items) == 0 {
 		return
 	}
@@ -131,7 +129,6 @@ type WritersType struct {
 	pushgw   pconf.Pushgw
 	backends map[string]WriterType
 	queues   map[string]*IdentQueue
-	sema     *semaphore.Semaphore
 	sync.RWMutex
 }
 
@@ -146,7 +143,6 @@ func NewWriters(pushgwConfig pconf.Pushgw) *WritersType {
 		backends: make(map[string]WriterType),
 		queues:   make(map[string]*IdentQueue),
 		pushgw:   pushgwConfig,
-		sema:     semaphore.NewSemaphore(pushgwConfig.WriteConcurrency),
 	}
 
 	writers.Init()
@@ -217,8 +213,7 @@ func (ws *WritersType) StartConsumer(identQueue *IdentQueue) {
 				continue
 			}
 			for key := range ws.backends {
-				ws.sema.Acquire()
-				go ws.backends[key].Write(key, series, ws.sema)
+				ws.backends[key].Write(key, series)
 			}
 		}
 	}
