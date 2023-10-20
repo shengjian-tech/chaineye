@@ -54,12 +54,15 @@ insert into user_group_member(group_id, user_id) values(1, 1);
 CREATE TABLE `configs` (
     `id` bigint unsigned not null auto_increment,
     `ckey` varchar(191) not null,
-    `cval` text not null,
-    `note` varchar(1024),
+    `cval` text not null comment 'config value',
+    `note` varchar(1024) default '' comment 'note',
     `external` int default 0 comment '0:built-in 1:external',
     `encrypted` int default 0 comment '0:plaintext 1:ciphertext',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY (`ckey`)
+    `create_at` bigint not null default 0,
+    `create_by` varchar(64) not null default '',
+    `update_at` bigint not null default 0,
+    `update_by` varchar(64) not null default '',
+    PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 CREATE TABLE `role` (
@@ -284,7 +287,7 @@ CREATE TABLE `alert_rule` (
     `runbook_url` varchar(255),
     `append_tags` varchar(255) not null default '' comment 'split by space: service=n9e mod=api',
     `annotations` text not null comment 'annotations',
-    `extra_config` text not null comment 'extra_config',
+    `extra_config` text comment 'extra_config',
     `create_at` bigint not null default 0,
     `create_by` varchar(64) not null default '',
     `update_at` bigint not null default 0,
@@ -337,7 +340,7 @@ CREATE TABLE `alert_subscribe` (
     `new_channels` varchar(255) not null default '' comment 'split by space: sms voice email dingtalk wecom',
     `user_group_ids` varchar(250) not null comment 'split by space 1 34 5, notify cc to user_group_ids',
     `webhooks` text not null,
-    `extra_config` text not null comment 'extra_config',
+    `extra_config` text comment 'extra_config',
     `redefine_webhooks` tinyint(1) default 0,
     `for_duration` bigint not null default 0,
     `create_at` bigint not null default 0,

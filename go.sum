@@ -208,8 +208,8 @@ github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXl
 github.com/taosdata/driver-go/v3 v3.5.0 h1:30crN+E+ACURmq28kn3Y8B3jfL5knaC1fc1rLvgyXqs=
 github.com/taosdata/driver-go/v3 v3.5.0/go.mod h1:H2vo/At+rOPY1aMzUV9P49SVX7NlXb3LAbKw+MCLrmU=
 github.com/tidwall/pretty v1.0.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
-github.com/toolkits/pkg v1.3.4 h1:vrpehtaFHrU+5ecX7rERc29LmBZyWjHPMXw5ZJLWwqA=
-github.com/toolkits/pkg v1.3.4/go.mod h1:M9ecwFGW1vxCTUFM9sr2ZjXSKb04N+1sTQ6SA3RNAIU=
+github.com/toolkits/pkg v1.3.5 h1:rbdX2nthv3LXztep0EVKZ6ywx1PhYs8VD9a0PskzeNQ=
+github.com/toolkits/pkg v1.3.5/go.mod h1:M9ecwFGW1vxCTUFM9sr2ZjXSKb04N+1sTQ6SA3RNAIU=
 github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS4MhqMhdFk5YI=
 github.com/twitchyliquid64/golang-asm v0.15.1/go.mod h1:a1lVb/DtPvCB8fslRZhAngC2+aY1QWCk3Cedj/Gdt08=
 github.com/ugorji/go v1.2.7/go.mod h1:nF9osbDWLy6bDVv/Rtoh6QgnvNDpmCalQV5urGCCS6M=
