@@ -292,7 +292,7 @@ func userVariableCheck(context *ctx.Context, ckey string, id int64) error {
 		return fmt.Errorf("invalid key(%q), please use C-style naming convention ", ckey)
 	}
 	if id != 0 { //update
-		finder := zorm.NewSelectFinder(ConfigsTableName, "count(*)").Append("WHERE id <> ? and ckey = ? and external=?", &id, ckey, ConfigExternal)
+		finder := zorm.NewSelectFinder(ConfigsTableName, "count(*)").Append("WHERE id <> ? and ckey = ? and external=?", id, ckey, ConfigExternal)
 		num, err = Count(context, finder)
 		//err = DB(context).Where("id <> ? and ckey = ? and external=?", &id, ckey, ConfigExternal).Find(&objs).Error
 	} else {
@@ -313,16 +313,11 @@ func ConfigsUserVariableStatistics(context *ctx.Context) (*Statistics, error) {
 	if !context.IsCenter {
 		return poster.GetByUrls[*Statistics](context, "/v1/n9e/statistic?name=user_variable")
 	}
-	stats := Statistics{}
-	finder := zorm.NewSelectFinder(ConfigsTableName, "count(*) as total,max(update_at) as last_updated").Append("WHERE external=?", ConfigExternal)
-
-	_, err := zorm.QueryRow(context.Ctx, finder, &stats)
-
+	statistics, err := StatisticsGet(context, ConfigsTableName)
 	if err != nil {
 		return nil, err
 	}
-
-	return &stats, nil
+	return statistics, nil
 }
 
 func ConfigUserVariableGetDecryptMap(context *ctx.Context, privateKey []byte, passWord string) (map[string]string, error) {
