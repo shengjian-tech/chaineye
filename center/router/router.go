@@ -370,7 +370,7 @@ func (rt *Router) Config(r *gin.Engine) {
 		pages.PUT("/role/:id/ops", rt.auth(), rt.admin(), rt.roleBindOperation)
 		pages.GET("/operation", rt.operations)
 
-		pages.GET("/notify-tpls", rt.auth(), rt.admin(), rt.notifyTplGets)
+		pages.GET("/notify-tpls", rt.auth(), rt.user(), rt.perm("/help/notification-tpls"), rt.notifyTplGets)
 		pages.PUT("/notify-tpl/content", rt.auth(), rt.admin(), rt.notifyTplUpdateContent)
 		pages.PUT("/notify-tpl", rt.auth(), rt.admin(), rt.notifyTplUpdate)
 		pages.POST("/notify-tpl", rt.auth(), rt.admin(), rt.notifyTplAdd)
@@ -380,19 +380,19 @@ func (rt *Router) Config(r *gin.Engine) {
 		pages.GET("/sso-configs", rt.auth(), rt.admin(), rt.ssoConfigGets)
 		pages.PUT("/sso-config", rt.auth(), rt.admin(), rt.ssoConfigUpdate)
 
-		pages.GET("/webhooks", rt.auth(), rt.admin(), rt.webhookGets)
+		pages.GET("/webhooks", rt.auth(), rt.user(), rt.webhookGets)
 		pages.PUT("/webhooks", rt.auth(), rt.admin(), rt.webhookPuts)
 
-		pages.GET("/notify-script", rt.auth(), rt.admin(), rt.notifyScriptGet)
+		pages.GET("/notify-script", rt.auth(), rt.user(), rt.perm("/help/notification-settings"), rt.notifyScriptGet)
 		pages.PUT("/notify-script", rt.auth(), rt.admin(), rt.notifyScriptPut)
 
-		pages.GET("/notify-channel", rt.auth(), rt.admin(), rt.notifyChannelGets)
+		pages.GET("/notify-channel", rt.auth(), rt.user(), rt.perm("/help/notification-settings"), rt.notifyChannelGets)
 		pages.PUT("/notify-channel", rt.auth(), rt.admin(), rt.notifyChannelPuts)
 
-		pages.GET("/notify-contact", rt.auth(), rt.admin(), rt.notifyContactGets)
+		pages.GET("/notify-contact", rt.auth(), rt.user(), rt.perm("/help/notification-settings"), rt.notifyContactGets)
 		pages.PUT("/notify-contact", rt.auth(), rt.admin(), rt.notifyContactPuts)
 
-		pages.GET("/notify-config", rt.auth(), rt.admin(), rt.notifyConfigGet)
+		pages.GET("/notify-config", rt.auth(), rt.user(), rt.perm("/help/notification-settings"), rt.notifyConfigGet)
 		pages.PUT("/notify-config", rt.auth(), rt.admin(), rt.notifyConfigPut)
 		pages.PUT("/smtp-config-test", rt.auth(), rt.admin(), rt.attemptSendEmail)
 
@@ -402,10 +402,10 @@ func (rt *Router) Config(r *gin.Engine) {
 		pages.PUT("/es-index-pattern", rt.auth(), rt.admin(), rt.esIndexPatternPut)
 		pages.DELETE("/es-index-pattern", rt.auth(), rt.admin(), rt.esIndexPatternDel)
 
-		pages.GET("/user-variable-configs", rt.auth(), rt.admin(), rt.userVariableConfigGets)
-		pages.POST("/user-variable-config", rt.auth(), rt.admin(), rt.userVariableConfigAdd)
-		pages.PUT("/user-variable-config/:id", rt.auth(), rt.admin(), rt.userVariableConfigPut)
-		pages.DELETE("/user-variable-config/:id", rt.auth(), rt.admin(), rt.userVariableConfigDel)
+		pages.GET("/user-variable-configs", rt.auth(), rt.user(), rt.perm("/help/variable-configs"), rt.userVariableConfigGets)
+		pages.POST("/user-variable-config", rt.auth(), rt.user(), rt.perm("/help/variable-configs"), rt.userVariableConfigAdd)
+		pages.PUT("/user-variable-config/:id", rt.auth(), rt.user(), rt.perm("/help/variable-configs"), rt.userVariableConfigPut)
+		pages.DELETE("/user-variable-config/:id", rt.auth(), rt.user(), rt.perm("/help/variable-configs"), rt.userVariableConfigDel)
 
 		pages.GET("/config", rt.auth(), rt.admin(), rt.configGetByKey)
 		pages.PUT("/config", rt.auth(), rt.admin(), rt.configPutByKey)

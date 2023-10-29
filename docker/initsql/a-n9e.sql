@@ -93,6 +93,11 @@ INSERT INTO `role_operation`(role_name, operation) VALUES ('Guest', '/log/explor
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Guest', '/trace/explorer');
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Guest', '/help/version');
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Guest', '/help/contact');
+INSERT INTO `role_operation`(role_name, operation) VALUES ('Admin', '/help/source');
+INSERT INTO `role_operation`(role_name, operation) VALUES ('Admin', '/help/sso');
+INSERT INTO `role_operation`(role_name, operation) VALUES ('Admin', '/help/notification-tpls');
+INSERT INTO `role_operation`(role_name, operation) VALUES ('Admin', '/help/notification-settings');
+INSERT INTO `role_operation`(role_name, operation) VALUES ('Admin', '/permissions');
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/metric/explorer');
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/object/explorer');
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/log/explorer');
@@ -104,10 +109,6 @@ INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/help/mi
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/alert-rules-built-in');
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/dashboards-built-in');
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/trace/dependencies');
-INSERT INTO `role_operation`(role_name, operation) VALUES ('Admin', '/help/source');
-INSERT INTO `role_operation`(role_name, operation) VALUES ('Admin', '/help/sso');
-INSERT INTO `role_operation`(role_name, operation) VALUES ('Admin', '/help/notification-tpls');
-INSERT INTO `role_operation`(role_name, operation) VALUES ('Admin', '/help/notification-settings');
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/users');
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/user-groups');
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/user-groups/add');
@@ -152,6 +153,7 @@ INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/recordi
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/recording-rules/del');
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/alert-mutes/put');
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/log/index-patterns');
+INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/help/variable-configs');
 
 -- for alert_rule | collect_rule | mute | dashboard grouping
 CREATE TABLE `busi_group`  (
