@@ -40,6 +40,7 @@ type Config struct {
 	APIForAgent      BasicAuths
 	APIForService    BasicAuths
 	RSA              RSAConfig
+	XuperSdkYmlPath  string
 }
 
 type RSAConfig struct {

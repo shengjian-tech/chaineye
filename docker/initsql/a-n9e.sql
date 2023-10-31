@@ -650,3 +650,32 @@ CREATE TABLE `es_index_pattern`  (
   PRIMARY KEY (`id`),
   UNIQUE KEY (`datasource_id`, `name`)
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4;
+
+CREATE TABLE `t_xuper`  (
+  `id` varchar(255)  NOT NULL COMMENT '主键',
+  `block_height` bigint NOT NULL COMMENT '区块高度',
+  `block_hash` varchar(255)  NOT NULL COMMENT '区块hash',
+  `block_tx_count` bigint NOT NULL COMMENT '区块内的交易总数',
+  `total_tx_count` bigint NOT NULL COMMENT '链上交易总数',
+  `timestamp` bigint NOT NULL COMMENT '当前区块产生时间',
+  `chain_name` varchar(255)  NOT NULL COMMENT '链名',
+  `rootnet` varchar(255)  NOT NULL COMMENT '网络名',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4;
+
+CREATE TABLE `t_xuper_day_tx`  (
+  `id` varchar(255)  NOT NULL COMMENT '主键',
+  `block_day` varchar(255)  NOT NULL COMMENT '时间  2022-09-01 格式',
+  `total_tx_count` bigint NOT NULL COMMENT '总交易数',
+  `day_tx_count` bigint NOT NULL COMMENT '每日交易总数',
+  `rootnet` varchar(255)  NOT NULL COMMENT '网络名',
+  `chain_name` varchar(255)  NOT NULL COMMENT '链名',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4;
+
+
+CREATE TABLE `t_xuper_node`  (
+  `rootnet` varchar(255)  NOT NULL COMMENT '网络名。唯一',
+  `node` varchar(255)  NULL DEFAULT NULL COMMENT 'ip:端口',
+  PRIMARY KEY (`rootnet`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4;

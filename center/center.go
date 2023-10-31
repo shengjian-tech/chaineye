@@ -25,6 +25,7 @@ import (
 	"github.com/ccfos/nightingale/v6/pushgw/writer"
 	"github.com/ccfos/nightingale/v6/storage"
 	"github.com/ccfos/nightingale/v6/tdengine"
+	"github.com/ccfos/nightingale/v6/xuper_chain"
 
 	alertrt "github.com/ccfos/nightingale/v6/alert/router"
 	centerrt "github.com/ccfos/nightingale/v6/center/router"
@@ -109,6 +110,12 @@ func Initialize(configDir string, cryptoKey string) (func(), error) {
 	alertrtRouter.Config(r)
 	pushgwRouter.Config(r)
 	dumper.ConfigRouter(r)
+
+	// init sync xuper height
+	go xuper_chain.SyncXuperBlockTimer(config.HTTP.XuperSdkYmlPath)
+
+	// delete old xuper height data
+	go xuper_chain.DeleteXuperDataTimer()
 
 	httpClean := httpx.Init(config.HTTP, r)
 

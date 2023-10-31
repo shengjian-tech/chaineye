@@ -45,6 +45,9 @@ WriteTimeout = 40
 # http server idle timeout, unit: s
 IdleTimeout = 120
 
+## XuperChain
+XuperSdkYmlPath =  "./etc/sdk.yaml"
+
 [HTTP.ShowCaptcha]
 Enable = false 
 
@@ -131,7 +134,7 @@ MetricsYamlFile = "./etc/metrics.yaml"
 I18NHeaderKey = "X-Language"
 
 ## 外部加载 pub 
-#UseFileAssets = true
+UseFileAssets = true
 
 [Center.AnonymousAccess]
 PromQuerier = true

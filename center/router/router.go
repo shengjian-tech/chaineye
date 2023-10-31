@@ -410,6 +410,20 @@ func (rt *Router) Config(r *gin.Engine) {
 		pages.GET("/config", rt.auth(), rt.admin(), rt.configGetByKey)
 		pages.PUT("/config", rt.auth(), rt.admin(), rt.configPutByKey)
 
+		/*
+			pages.POST("/xuperchain/xuper/node", rt.auth(), syncXuperNode)
+			pages.GET("/xuperchain/contract/count", rt.auth(), getXuperChainContractCount)
+			pages.GET("/xuperchain/tx/query", rt.auth(), getXuperChainTx)
+			pages.GET("/xuperchain/tx/line/chart", rt.auth(), getXuperChainTxLineChart)
+			pages.GET("/xuperchain/tx/history", rt.auth(), getTxHistory)
+		*/
+		pages.POST("/xuperchain/xuper/node", rt.auth(), rt.syncXuperNode)
+		pages.GET("/xuperchain/xuper/nodes", rt.getXuperNodes)
+		pages.GET("/xuperchain/contract/count", rt.getXuperChainContractCount)
+		pages.GET("/xuperchain/tx/query", rt.getXuperChainTx)
+		pages.GET("/xuperchain/tx/line/chart", rt.getXuperChainTxLineChart)
+		pages.GET("/xuperchain/tx/history", rt.getTxHistory)
+
 	}
 
 	r.GET("/api/n9e/versions", func(c *gin.Context) {
