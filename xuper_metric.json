@@ -1,2598 +1,1077 @@
 {
-  "annotations": {
-    "list": [
-      {
-        "builtIn": 1,
-        "datasource": "-- Grafana --",
-        "enable": true,
-        "hide": true,
-        "iconColor": "rgba(0, 211, 255, 1)",
-        "name": "Annotations & Alerts",
-        "type": "dashboard"
-      }
-    ]
-  },
-  "editable": true,
-  "gnetId": null,
-  "graphTooltip": 0,
-  "id": 3,
-  "links": [],
-  "panels": [
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 0
-      },
-      "hiddenSeries": false,
-      "id": 2,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "sum(rate(grpc_server_started_total{job=\"rootnet\",grpc_method=~\"PostTx|PreExecWithSelectUTXO|BatchPostTx\"}[10s])) by (instance, grpc_method)",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
+  "name": "opennet",
+  "tags": "",
+  "ident": "",
+  "configs": {
+      "version": "3.0.0",
+      "links": [],
+      "var": [
+          {
+              "name": "datasource",
+              "type": "datasource",
+              "definition": "prometheus",
+              "defaultValue": 1
+          }
       ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "交易TPS",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:773",
-          "format": "reqps",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:774",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "hiddenSeries": false,
-      "id": 4,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "histogram_quantile(0.80,sum(rate(grpc_server_handling_seconds_bucket{job=\"rootnet\",grpc_method=~\"PostTx|PreExecWithSelectUTXO|BatchPostTx\"}[10s])) by (instance,grpc_method,le))",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "交易耗时",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:971",
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:972",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 8
-      },
-      "hiddenSeries": false,
-      "id": 38,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "sum(rate(xuperos_common_call_method_total{job=\"rootnet\",method=\"SubmitTx\",code!=\"OK\"}[10s])) by (instance,method)\n / \nsum(rate(xuperos_common_call_method_total{job=\"rootnet\",method=\"SubmitTx\"}[10s])) by (instance,method)\n * 100.0",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "处理广播消息错误率",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:3385",
-          "format": "percent",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:3386",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 8
-      },
-      "hiddenSeries": false,
-      "id": 44,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "rate(xuperos_ledger_confirmed_tx_total{job=\"rootnet\"}[10s])/rate(xuperos_ledger_height_total{job=\"rootnet\"}[10s])",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "tx_per_block",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:2326",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:2327",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": true,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 16
-      },
-      "hiddenSeries": false,
-      "id": 62,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": false,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "xuperos_ledger_height_total{job=\"rootnet\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "高度",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:158",
-          "format": "string",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:159",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": true,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 16
-      },
-      "hiddenSeries": false,
-      "id": 42,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": false,
-      "linewidth": 0,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "xuperos_ledger_height_total{job=\"rootnet\"}",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        },
-        {
-          "exemplar": true,
-          "expr": "rate(xuperos_ledger_height_total{job=\"rootnet\"}[30s])",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "出块率",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:4384",
-          "decimals": null,
-          "format": "none",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:4385",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 24
-      },
-      "hiddenSeries": false,
-      "id": 60,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "histogram_quantile(0.3, sum(rate(xuperos_common_call_method_seconds_bucket{ job=\"rootnet\", module=\"miner\"}[30s])) by (instance,method,le))",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "exemplar": true,
-          "expr": "rate(xuperos_common_call_method_seconds_sum{ job=\"rootnet\", module=\"miner\"}[10s]) / rate(xuperos_common_call_method_seconds_count{ job=\"rootnet\", module=\"miner\"}[10s])",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "出块耗时",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:3065",
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:3066",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 24
-      },
-      "hiddenSeries": false,
-      "id": 63,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "rate(xuperos_common_call_method_seconds_sum{ job=\"rootnet\", module=\"sync\"}[10s]) / rate(xuperos_common_call_method_seconds_count{job=\"rootnet\", module=\"sync\"}[10s])",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "块追耗时",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:3065",
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:3066",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 32
-      },
-      "hiddenSeries": false,
-      "id": 10,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "xuperos_state_unconfirmed_tx_gauge{job=\"rootnet\"}",
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "未确认交易量",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "max": null,
-        "min": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:136",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:137",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 32
-      },
-      "hiddenSeries": false,
-      "id": 12,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "sum(rate(xuperos_ledger_confirmed_tx_total{job=\"rootnet\"}[10s])) by (instance, bcname)",
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "上链交易量",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:173",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:174",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 40
-      },
-      "hiddenSeries": false,
-      "id": 20,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "sum(rate(xuperos_network_msg_send_total{job=\"rootnet\"}[10s])) by (instance,message)",
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "发送网络消息TPS",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1141",
-          "format": "reqps",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1142",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 40
-      },
-      "hiddenSeries": false,
-      "id": 22,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "sum(rate(xuperos_network_msg_received_total{job=\"rootnet\"}[10s])) by (instance,message)",
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "接收网络消息TPS",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1178",
-          "format": "reqps",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1179",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 48
-      },
-      "hiddenSeries": false,
-      "id": 24,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "sum(rate(xuperos_network_msg_send_bytes{job=\"rootnet\"}[30s])) by (instance,message)",
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "发送消息字节量",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1215",
-          "format": "decbytes",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1216",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 48
-      },
-      "hiddenSeries": false,
-      "id": 26,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "sum(rate(xuperos_network_msg_received_bytes{job=\"rootnet\"}[10s])) by (instance,message)",
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "接收消息字节量",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1252",
-          "format": "decbytes",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1253",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 56
-      },
-      "hiddenSeries": false,
-      "id": 28,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "histogram_quantile(0.95, sum(rate(xuperos_network_client_handled_seconds_bucket{job=\"rootnet\"}[10s])) by (instance,message,le))",
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "发送消息耗时",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1289",
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1290",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 56
-      },
-      "hiddenSeries": false,
-      "id": 30,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "histogram_quantile(0.95, sum(rate(xuperos_network_server_handled_seconds_bucket{job=\"rootnet\"}[10s])) by (instance,message,le))",
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "接收消息耗时",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1326",
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1327",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 64
-      },
-      "hiddenSeries": false,
-      "id": 32,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "rate(process_cpu_seconds_total{job=\"rootnet\"}[30s])",
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "CPU",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1741",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1742",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 64
-      },
-      "hiddenSeries": false,
-      "id": 34,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "process_resident_memory_bytes{job=\"rootnet\"}",
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "MEM",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:2615",
-          "format": "bytes",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:2616",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 72
-      },
-      "hiddenSeries": false,
-      "id": 46,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "go_goroutines{job=\"rootnet\"}",
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "goroutines",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:2760",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:2761",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 72
-      },
-      "hiddenSeries": false,
-      "id": 48,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "process_open_fds{job=\"rootnet\"}",
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "open_fds",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:2789",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:2790",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 80
-      },
-      "hiddenSeries": false,
-      "id": 58,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "sum(rate(xuperos_common_call_method_total{job=\"rootnet\", module=\"levelDB\"}[10s])) by (instance, method)",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "levelDB请求量",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1665",
-          "format": "reqps",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1666",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 80
-      },
-      "hiddenSeries": false,
-      "id": 56,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "sum(rate(xuperos_common_handle_bytes{job=\"rootnet\"}[10s])) by (method, handle, instance)",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "levelDB bytes",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1632",
-          "format": "decbytes",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1633",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 88
-      },
-      "hiddenSeries": false,
-      "id": 40,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "rate(grpc_server_handling_seconds_sum{job=\"rootnet\", grpc_method=~\"PostTx|PreExecWithSelectUTXO\"}[10s])\n/\nrate(grpc_server_handling_seconds_count{job=\"rootnet\", grpc_method=~\"PostTx|PreExecWithSelectUTXO\"}[10s])",
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "平均响应时间",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:3422",
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:3423",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 88
-      },
-      "hiddenSeries": false,
-      "id": 36,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "histogram_quantile(0.95, sum(rate(xuperos_common_call_method_seconds_bucket{job=\"rootnet\", method=~\"SENDBLOCK|POSTTX\"}[1h])) by (instance,method,le))",
-          "interval": "",
-          "legendFormat": "",
-          "queryType": "randomWalk",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "广播消息处理耗时",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:2783",
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:2784",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 96
-      },
-      "hiddenSeries": false,
-      "id": 52,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "xuperos_common_concurrent_requests_total{job=\"rootnet\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "并发访问量",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1397",
-          "format": "reqps",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1398",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 96
-      },
-      "hiddenSeries": false,
-      "id": 50,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "histogram_quantile(0.95, sum(rate(xuperos_common_call_method_seconds_bucket{job=\"rootnet\", method=~\"doTxLock|doTxInternal|batchWrite|cacheFiller|xmodelDoTx|ImmediateVerifyTx\"}[10s])) by (instance,method,le))",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "exemplar": true,
-          "expr": "histogram_quantile(0.95,sum(rate(grpc_server_handling_seconds_bucket{job=\"rootnet\", grpc_method=\"PostTx\"}[10s])) by (instance,grpc_method,le))",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        },
-        {
-          "exemplar": true,
-          "expr": "histogram_quantile(0.85, sum(rate(xuperos_common_call_method_seconds_bucket{job=\"rootnet\", module=\"posttx\"}[10s])) by (instance,method,le))",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "PostTx耗时细分项",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1013",
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1014",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    }
-  ],
-  "refresh": "5s",
-  "schemaVersion": 27,
-  "style": "dark",
-  "tags": [],
-  "templating": {
-    "list": []
-  },
-  "time": {
-    "from": "now-5m",
-    "to": "now"
-  },
-  "timepicker": {},
-  "timezone": "",
-  "title": "rootnet",
-  "uid": "oQLFbpjGz",
-  "version": 10
+      "panels": [
+          {
+              "version": "2.0.0",
+              "id": "fa783b02-ec24-4055-9f54-0893fd03e46e",
+              "type": "timeseries",
+              "name": "交易TPS",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 0,
+                  "i": "fa783b02-ec24-4055-9f54-0893fd03e46e",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "sum(rate(grpc_server_started_total{job=\"opennet\",grpc_method=~\"PostTx|PreExecWithSelectUTXO|BatchPostTx\"}[10s])) by (instance, grpc_method)",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "c258e59a-03c0-4138-a4e8-b33f149c47cd",
+              "type": "timeseries",
+              "name": "高度",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 0,
+                  "i": "c258e59a-03c0-4138-a4e8-b33f149c47cd",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "xuperos_ledger_height_total{job=\"opennet\"}",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "a213afe1-b196-4cb2-b8fa-b902e543010b",
+              "type": "timeseries",
+              "name": "出块耗时",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 8,
+                  "i": "a213afe1-b196-4cb2-b8fa-b902e543010b",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "B",
+                      "expr": "rate(xuperos_common_call_method_seconds_sum{ job=\"opennet\", module=\"miner\"}[10s]) / rate(xuperos_common_call_method_seconds_count{ job=\"opennet\", module=\"miner\"}[10s])",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "81f6bc59-fe6d-4092-96ae-8dba7f21da49",
+              "type": "timeseries",
+              "name": "tx_per_block",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 8,
+                  "i": "81f6bc59-fe6d-4092-96ae-8dba7f21da49",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "B",
+                      "expr": "rate(xuperos_ledger_confirmed_tx_total{job=\"opennet\"}[10s])/rate(xuperos_ledger_height_total{job=\"opennet\"}[10s])",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "e389f238-172f-4451-b79f-108d8fa74bc8",
+              "type": "timeseries",
+              "name": "处理广播消息错误率",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 16,
+                  "i": "e389f238-172f-4451-b79f-108d8fa74bc8",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "sum(rate(xuperos_common_call_method_total{job=\"opennet\",method=\"SubmitTx\",code!=\"OK\"}[10s])) by (instance,method)\n / \nsum(rate(xuperos_common_call_method_total{job=\"opennet\",method=\"SubmitTx\"}[10s])) by (instance,method)\n * 100.0",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "12213a6d-af30-4417-b73b-bd2097af9507",
+              "type": "timeseries",
+              "name": "交易耗时",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 16,
+                  "i": "12213a6d-af30-4417-b73b-bd2097af9507",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "histogram_quantile(0.80,sum(rate(grpc_server_handling_seconds_bucket{job=\"opennet\",grpc_method=~\"PostTx|PreExecWithSelectUTXO|BatchPostTx\"}[10s])) by (instance,grpc_method,le))",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "1c35fca8-56c6-40d5-aa7a-e84ff1c5cd40",
+              "type": "timeseries",
+              "name": "未确认交易量",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 24,
+                  "i": "1c35fca8-56c6-40d5-aa7a-e84ff1c5cd40",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "xuperos_state_unconfirmed_tx_gauge{job=\"opennet\"}",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "06451816-ed12-484c-a327-eb901d02abc1",
+              "type": "timeseries",
+              "name": "出块率",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 24,
+                  "i": "06451816-ed12-484c-a327-eb901d02abc1",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "B",
+                      "expr": "rate(xuperos_ledger_height_total{job=\"opennet\"}[30s])",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "46603030-6c66-4edb-8f44-9eed43bed1e3",
+              "type": "timeseries",
+              "name": "发送网络消息TPS",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 32,
+                  "i": "46603030-6c66-4edb-8f44-9eed43bed1e3",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "sum(rate(xuperos_network_msg_send_total{job=\"opennet\"}[10s])) by (instance,message)",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "cccc8581-a9df-492f-8f02-5254a21e988c",
+              "type": "timeseries",
+              "name": "块追耗时",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 32,
+                  "i": "cccc8581-a9df-492f-8f02-5254a21e988c",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "B",
+                      "expr": "rate(xuperos_common_call_method_seconds_sum{ job=\"opennet\", module=\"sync\"}[10s]) / rate(xuperos_common_call_method_seconds_count{job=\"opennet\", module=\"sync\"}[10s])",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "9afe2ae2-96e5-4d98-b9df-f17055578d74",
+              "type": "timeseries",
+              "name": "发送消息耗时",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 40,
+                  "i": "9afe2ae2-96e5-4d98-b9df-f17055578d74",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "histogram_quantile(0.95, sum(rate(xuperos_network_client_handled_seconds_bucket{job=\"opennet\"}[10s])) by (instance,message,le))",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "b5f6cddd-81e9-4422-831b-125f0a7588e4",
+              "type": "timeseries",
+              "name": "接收网络消息TPS",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 40,
+                  "i": "b5f6cddd-81e9-4422-831b-125f0a7588e4",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "sum(rate(xuperos_network_msg_received_total{job=\"opennet\"}[10s])) by (instance,message)",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "3cc7641d-10c7-43f6-9042-76f953752570",
+              "type": "timeseries",
+              "name": "发送消息字节量",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 48,
+                  "i": "3cc7641d-10c7-43f6-9042-76f953752570",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "sum(rate(xuperos_network_msg_send_bytes{job=\"opennet\"}[30s])) by (instance,message)",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "f9c7853f-5711-495f-ba55-dfe88cd22874",
+              "type": "timeseries",
+              "name": "接收消息字节量",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 48,
+                  "i": "f9c7853f-5711-495f-ba55-dfe88cd22874",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "sum(rate(xuperos_network_msg_received_bytes{job=\"opennet\"}[10s])) by (instance,message)",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "b30a92fa-f448-4830-8b52-f1f3bc80c309",
+              "type": "timeseries",
+              "name": "CPU",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 56,
+                  "i": "b30a92fa-f448-4830-8b52-f1f3bc80c309",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "rate(process_cpu_seconds_total{job=\"opennet\"}[30s])",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "45b22364-e078-4ac7-8c01-bc642f7e23c1",
+              "type": "timeseries",
+              "name": "上链交易量",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 56,
+                  "i": "45b22364-e078-4ac7-8c01-bc642f7e23c1",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "sum(rate(xuperos_ledger_confirmed_tx_total{job=\"opennet\"}[10s])) by (instance, bcname)",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "bdd24c8b-dec9-499a-afc5-818c279df086",
+              "type": "timeseries",
+              "name": "goroutines",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 64,
+                  "i": "bdd24c8b-dec9-499a-afc5-818c279df086",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "go_goroutines{job=\"opennet\"}",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "bc95f781-85dd-409a-aae6-20dba8292e97",
+              "type": "timeseries",
+              "name": "MEM",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 64,
+                  "i": "bc95f781-85dd-409a-aae6-20dba8292e97",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "process_resident_memory_bytes{job=\"opennet\"}",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "6a61c1f2-4675-4855-85b1-42fc2be71c0e",
+              "type": "timeseries",
+              "name": "接收消息耗时",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 72,
+                  "i": "6a61c1f2-4675-4855-85b1-42fc2be71c0e",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "histogram_quantile(0.95, sum(rate(xuperos_network_server_handled_seconds_bucket{job=\"opennet\"}[10s])) by (instance,message,le))",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "189dbbda-c930-4cf2-9951-db8f0a104d59",
+              "type": "timeseries",
+              "name": "levelDB请求量",
+              "links": [],
+              "layout": {
+                  "h": 7,
+                  "w": 24,
+                  "x": 0,
+                  "y": 80,
+                  "i": "189dbbda-c930-4cf2-9951-db8f0a104d59",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "sum(rate(xuperos_common_call_method_total{job=\"opennet\", module=\"levelDB\"}[10s])) by (instance, method)",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "98374c7f-909e-45f1-8128-4e81f9a54a73",
+              "type": "timeseries",
+              "name": "平均响应时间",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 87,
+                  "i": "98374c7f-909e-45f1-8128-4e81f9a54a73",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "rate(grpc_server_handling_seconds_sum{job=\"opennet\", grpc_method=~\"PostTx|PreExecWithSelectUTXO\"}[10s])\n/\nrate(grpc_server_handling_seconds_count{job=\"opennet\", grpc_method=~\"PostTx|PreExecWithSelectUTXO\"}[10s])",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "412fc3e3-8f79-4f04-8e3f-1c49df04c0c3",
+              "type": "timeseries",
+              "name": "open_fds",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 87,
+                  "i": "412fc3e3-8f79-4f04-8e3f-1c49df04c0c3",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "process_open_fds{job=\"opennet\"}",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "b4cfb025-c12c-4089-a878-1f71ec867bd1",
+              "type": "timeseries",
+              "name": "并发访问量",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 95,
+                  "i": "b4cfb025-c12c-4089-a878-1f71ec867bd1",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "xuperos_common_concurrent_requests_total{job=\"opennet\"}",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "60093859-7dea-48e2-8e99-f1b833a797f4",
+              "type": "timeseries",
+              "name": "levelDB bytes",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 95,
+                  "i": "60093859-7dea-48e2-8e99-f1b833a797f4",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "sum(rate(xuperos_common_handle_bytes{job=\"opennet\"}[10s])) by (method, handle, instance)",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "7a5ff9d6-29fd-4b58-9933-13a26e070ad6",
+              "type": "timeseries",
+              "name": "广播消息处理耗时",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 103,
+                  "i": "7a5ff9d6-29fd-4b58-9933-13a26e070ad6",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "histogram_quantile(0.95, sum(rate(xuperos_common_call_method_seconds_bucket{job=\"opennet\", method=~\"SENDBLOCK|POSTTX\"}[1h])) by (instance,method,le))",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "version": "2.0.0",
+              "id": "21da3344-a7b3-482a-9274-a0c2d68bdcaa",
+              "type": "timeseries",
+              "name": "PostTx耗时细分项",
+              "links": [],
+              "layout": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 111,
+                  "i": "21da3344-a7b3-482a-9274-a0c2d68bdcaa",
+                  "isResizable": true
+              },
+              "targets": [
+                  {
+                      "refId": "A",
+                      "expr": "histogram_quantile(0.95, sum(rate(xuperos_common_call_method_seconds_bucket{job=\"opennet\", method=~\"doTxLock|doTxInternal|batchWrite|cacheFiller|xmodelDoTx|ImmediateVerifyTx\"}[10s])) by (instance,method,le))",
+                      "legend": ""
+                  },
+                  {
+                      "refId": "C",
+                      "expr": "histogram_quantile(0.85, sum(rate(xuperos_common_call_method_seconds_bucket{job=\"opennet\", module=\"posttx\"}[10s])) by (instance,method,le))",
+                      "legend": ""
+                  }
+              ],
+              "options": {
+                  "tooltip": {
+                      "mode": "all",
+                      "sort": "none"
+                  },
+                  "legend": {
+                      "displayMode": "hidden"
+                  }
+              },
+              "custom": {
+                  "version": "2.0.0",
+                  "drawStyle": "lines",
+                  "lineInterpolation": "linear",
+                  "fillOpacity": 0.5,
+                  "stack": "off"
+              },
+              "datasourceCate": "prometheus",
+              "datasourceValue": "${datasource}"
+          },
+          {
+              "type": "row",
+              "id": "c584f1a8-74b5-4c75-bb04-0a34c6438e25",
+              "name": "分组",
+              "collapsed": true,
+              "layout": {
+                  "x": 0,
+                  "y": 119,
+                  "w": 24,
+                  "h": 1,
+                  "i": "c584f1a8-74b5-4c75-bb04-0a34c6438e25"
+              }
+          }
+      ]
+  }
 }
