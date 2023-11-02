@@ -134,7 +134,7 @@ MetricsYamlFile = "./etc/metrics.yaml"
 I18NHeaderKey = "X-Language"
 
 ## 外部加载 pub 
-UseFileAssets = true
+#UseFileAssets = true
 
 [Center.AnonymousAccess]
 PromQuerier = true
