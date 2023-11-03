@@ -70,6 +70,9 @@ AccessExpired = 1500
 RefreshExpired = 10080
 RedisKeyPrefix = "/jwt/"
 
+# Rsa公钥配置,仅用于第三方集成
+#RsaPublickey = ""
+
 [HTTP.ProxyAuth]
 # if proxy auth enabled, jwt auth is disabled
 Enable = false

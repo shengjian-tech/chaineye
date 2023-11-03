@@ -72,6 +72,7 @@ type JWTAuth struct {
 	AccessExpired  int64
 	RefreshExpired int64
 	RedisKeyPrefix string
+	RsaPublickey   string
 }
 
 func GinEngine(mode string, cfg Config) *gin.Engine {

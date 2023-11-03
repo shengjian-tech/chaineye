@@ -25,3 +25,105 @@
 ## 鸣谢
 [夜莺nightingale](https://github.com/ccfos/nightingale)  
 [XuperChain](https://github.com/xuperchain/xuperchain)
+
+
+
+## 第三方集成
+修改此文件 [router_mw.go](./center/router/router_mw.go) 中方法jwtAuth()
+```go
+func (rt *Router) jwtAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		tok := c.Request.Header.Get("Authorization")
+		tokenRsa := ""
+		if len(tok) > 6 && strings.ToUpper(tok[0:7]) == "BEARER " {
+			tokenRsa = tok[7:]
+		} else {
+			ginx.Bomb(http.StatusUnauthorized, "unauthorized")
+		}
+		if len(tokenRsa) < 1 {
+			ginx.Bomb(http.StatusUnauthorized, "unauthorized")
+		}
+
+		token, err := rt.parseRSAToken(tokenRsa)
+
+		if err != nil || token == "" {
+			ginx.Bomb(http.StatusUnauthorized, "unauthorized")
+		}
+		seg := strings.Split(token, ".")[1]
+		result, err := base64.RawURLEncoding.DecodeString(seg)
+
+		if err != nil {
+			ginx.Bomb(http.StatusUnauthorized, "unauthorized")
+		}
+		var tmp = make(map[string]interface{})
+		err = json.Unmarshal(result, &tmp)
+		if err != nil {
+			ginx.Bomb(http.StatusUnauthorized, "unauthorized")
+		}
+		userId := tmp["userId"].(string)
+
+		jwtSecret := getJwtSecret(userId, rt.HTTP.JWTAuth.SigningKey)
+
+		userId, err = userIdByToken(token, jwtSecret)
+		if err != nil || userId == "" {
+			ginx.Bomb(http.StatusUnauthorized, "unauthorized")
+		}
+
+		c.Set("userid", int64(1))
+		c.Set("username", "root")
+		c.Next()
+	}
+}
+
+
+```
+
+在此文件 [router_mw.go](./center/router/router_mw.go) 末尾添加如下方法
+
+```go
+
+// parseRSAToken 用公钥解密 RSA 私钥加密的方法
+func (rt *Router) parseRSAToken(token string) (string, error) {
+	token = fmt.Sprintf("%x", token)
+	resultToken, err := gorsa.PublicDecrypt(token, rt.HTTP.JWTAuth.RsaPublickey)
+	if err != nil {
+		return "", err
+	}
+	return resultToken, nil
+}
+
+// getJwtSecret 获取加密字符串
+func getJwtSecret(userId string, jwtSecret string) string {
+	h := md5.New()
+	h.Write([]byte(userId + jwtSecret))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+// userIdByToken 校验token是否有效
+func userIdByToken(tokenString string, jwtSecret string) (string, error) {
+	if tokenString == "" {
+		return "", errors.New("token不能为空")
+	}
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtSecret), nil
+	})
+	if !token.Valid {
+		return "", errors.New("token is not valid")
+	} else if errors.Is(err, jwt.ErrTokenMalformed) {
+		return "", fmt.Errorf("that's not even a token:%w", err)
+	} else if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenNotValidYet) {
+		return "", fmt.Errorf("timing is everything:%w", err)
+	} else if err != nil {
+		return "", fmt.Errorf("couldn't handle this token:%w", err)
+	}
+
+	mapClaims, ok := token.Claims.(jwt.MapClaims)
+	if ok && token.Valid {
+		userId := mapClaims["userId"].(string)
+		return userId, nil
+	}
+	return "", errors.New("token错误或过期")
+}
+```
