@@ -20,7 +20,7 @@ type AlertHisEvent struct {
 	Cate               string            `json:"cate" column:"cate"`
 	IsRecovered        int               `json:"is_recovered" column:"is_recovered"`
 	DatasourceId       int64             `json:"datasource_id" column:"datasource_id"`
-	Cluster            string            `json:"cluster" column:"cluster"`
+	Cluster            string            `json:"cluster" column:"cluster_name"`
 	GroupId            int64             `json:"group_id" column:"group_id"`
 	GroupName          string            `json:"group_name" column:"group_name"` // busi group name
 	Hash               string            `json:"hash" column:"hash"`
@@ -306,7 +306,6 @@ func EventPersist(ctx *ctx.Context, event *AlertCurEvent) error {
 	}
 
 	his := event.ToHis(ctx)
-
 	// 不管是告警还是恢复，全量告警里都要记录
 	if err := his.Add(ctx); err != nil {
 		return fmt.Errorf("add his event error:%v", err)

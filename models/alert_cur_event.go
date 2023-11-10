@@ -25,7 +25,7 @@ type AlertCurEvent struct {
 	zorm.EntityStruct
 	Id                       int64             `json:"id" column:"id"`
 	Cate                     string            `json:"cate" column:"cate"`
-	Cluster                  string            `json:"cluster" column:"cluster"`
+	Cluster                  string            `json:"cluster" column:"cluster_name"`
 	DatasourceId             int64             `json:"datasource_id" column:"datasource_id"`
 	GroupId                  int64             `json:"group_id" column:"group_id"`     // busi group id
 	GroupName                string            `json:"group_name" column:"group_name"` // busi group name
@@ -357,9 +357,10 @@ func AlertCurEventTotal(ctx *ctx.Context, prods []string, bgid, stime, etime int
 
 func AlertCurEventGets(ctx *ctx.Context, prods []string, bgid, stime, etime int64, severity int, dsIds []int64, cates []string, query string, limit, offset int) ([]AlertCurEvent, error) {
 	finder := zorm.NewSelectFinder(AlertCurEventTableName)
-	finder.Append("WHERE trigger_time between ? and ?", stime, etime)
-	//session := DB(ctx).Where("trigger_time between ? and ?", stime, etime)
-
+	if stime != 0 && etime != 0 {
+		finder.Append("WHERE trigger_time between ? and ?", stime, etime)
+		//session := DB(ctx).Where("trigger_time between ? and ?", stime, etime)
+	}
 	if len(prods) != 0 {
 		//session = session.Where("rule_prod in ?", prods)
 		finder.Append("and rule_prod in (?)", prods)

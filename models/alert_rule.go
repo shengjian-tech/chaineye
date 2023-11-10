@@ -36,7 +36,7 @@ type AlertRule struct {
 	Cate                  string            `json:"cate" column:"cate"`                             // alert rule cate (prometheus|elasticsearch)
 	DatasourceIds         string            `json:"-" column:"datasource_ids"`                      // datasource ids
 	DatasourceIdsJson     []int64           `json:"datasource_ids"`                                 // for fe
-	Cluster               string            `json:"cluster" column:"cluster"`                       // take effect by clusters, seperated by space
+	Cluster               string            `json:"cluster" column:"cluster_name"`                  // take effect by clusters, seperated by space
 	Name                  string            `json:"name" column:"name"`                             // rule name
 	Note                  string            `json:"note" column:"note"`                             // will sent in notify
 	Prod                  string            `json:"prod" column:"prod"`                             // product empty means n9e

@@ -11,7 +11,7 @@ type ChartShare struct {
 	// 引入默认的struct,隔离IEntityStruct的方法改动
 	zorm.EntityStruct
 	Id           int64  `json:"id" column:"id"`
-	Cluster      string `json:"cluster" column:"cluster"`
+	Cluster      string `json:"cluster" column:"cluster_name"`
 	DatasourceId int64  `json:"datasource_id" column:"datasource_id"`
 	Configs      string `json:"configs" column:"configs"`
 	CreateBy     string `json:"create_by" column:"create_by"`

@@ -58,7 +58,7 @@ func (rt *Router) userAddPost(c *gin.Context) {
 	}
 
 	user := c.MustGet("user").(*models.User)
-
+	contacts, _ := f.Contacts.MarshalJSON()
 	u := models.User{
 		Username: f.Username,
 		Password: password,
@@ -67,7 +67,8 @@ func (rt *Router) userAddPost(c *gin.Context) {
 		Email:    f.Email,
 		Portrait: f.Portrait,
 		Roles:    strings.Join(f.Roles, " "),
-		Contacts: f.Contacts,
+		// Contacts: f.Contacts,
+		Contacts: string(contacts),
 		CreateBy: user.Username,
 		UpdateBy: user.Username,
 	}
@@ -101,7 +102,9 @@ func (rt *Router) userProfilePut(c *gin.Context) {
 	target.Phone = f.Phone
 	target.Email = f.Email
 	target.Roles = strings.Join(f.Roles, " ")
-	target.Contacts = f.Contacts
+	// target.Contacts = f.Contacts
+	contacts, _ := f.Contacts.MarshalJSON()
+	target.Contacts = string(contacts)
 	target.UpdateBy = c.MustGet("username").(string)
 
 	ginx.NewRender(c).Message(target.UpdateAllFields(rt.Ctx))
