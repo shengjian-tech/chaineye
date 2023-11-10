@@ -750,7 +750,7 @@ func AlertRulesGetsBy(ctx *ctx.Context, prods []string, query, algorithm, cluste
 
 	if cluster != "" {
 		//session = session.Where("cluster like ?", "%"+cluster+"%")
-		finder.Append("and cluster like ?", "%"+cluster+"%")
+		finder.Append("and cluster_name like ?", "%"+cluster+"%")
 	}
 
 	if len(cates) != 0 {
