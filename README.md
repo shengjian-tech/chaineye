@@ -123,3 +123,9 @@ go build -ldflags "-w -s" -o n9e ./cmd/center/main.go
 
 ## 前端访问 http://127.0.0.1:17000   账号:root 密码:root.2020
 ```
+## ClickHouse / Doris
+维护一套数据库的成本是巨大的,最好复用现有的业务大数据库.    
+- https://github.com/jamessanford/remote-tsdb-clickhouse  
+
+## 不兼容说明  
+https://gitee.com/chunanyong/owl/commit/fc6460913b5f12ee08bf7442f0207f454ea71a7e  
