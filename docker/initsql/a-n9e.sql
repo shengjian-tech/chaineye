@@ -154,6 +154,7 @@ INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/recordi
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/alert-mutes/put');
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/log/index-patterns');
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/help/variable-configs');
+INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/ibex-settings');
 
 -- for alert_rule | collect_rule | mute | dashboard grouping
 CREATE TABLE `busi_group`  (
@@ -344,6 +345,7 @@ CREATE TABLE `alert_subscribe`  (
   `extra_config` text  NULL,
   `redefine_webhooks` tinyint(1) NULL DEFAULT 0,
   `for_duration` bigint NOT NULL DEFAULT 0,
+  `note` varchar(1024) NULL DEFAULT '' COMMENT 'note',
   `create_at` bigint NOT NULL DEFAULT 0,
   `create_by` varchar(64)  NOT NULL DEFAULT '',
   `update_at` bigint NOT NULL DEFAULT 0,

@@ -188,6 +188,7 @@ INSERT INTO "N9E_V6"."ROLE_OPERATION"(id, role_name, operation) VALUES (64, 'Sta
 INSERT INTO "N9E_V6"."ROLE_OPERATION"(id, role_name, operation) VALUES (65, 'Standard', '/alert-mutes/put');
 INSERT INTO "N9E_V6"."ROLE_OPERATION"(id, role_name, operation) VALUES (66, 'Standard', '/log/index-patterns');
 INSERT INTO "N9E_V6"."ROLE_OPERATION"(id, role_name, operation) VALUES (67, 'Standard', '/help/variable-configs');
+INSERT INTO "N9E_V6"."ROLE_OPERATION"(id, role_name, operation) VALUES (67, 'Standard', '/ibex-settings');
 
 -- for alert_rule | collect_rule | mute | dashboard grouping
 drop table if exists "N9E_V6"."BUSI_GROUP" cascade;
@@ -449,6 +450,7 @@ CREATE TABLE "N9E_V6"."ALERT_SUBSCRIBE"
 "EXTRA_CONFIG" TEXT NOT NULL,
 "REDEFINE_WEBHOOKS" TINYINT DEFAULT 0,
 "FOR_DURATION" BIGINT DEFAULT 0 NOT NULL,
+"NOTE" VARCHAR(1024) DEFAULT '',
 "CREATE_AT" BIGINT DEFAULT 0 NOT NULL,
 "CREATE_BY" VARCHAR(64) DEFAULT '' NOT NULL,
 "UPDATE_AT" BIGINT DEFAULT 0 NOT NULL,
@@ -465,7 +467,7 @@ COMMENT ON COLUMN "N9E_V6"."ALERT_SUBSCRIBE"."NEW_SEVERITY" IS '0:Emergency 1:Wa
 COMMENT ON COLUMN "N9E_V6"."ALERT_SUBSCRIBE"."REDEFINE_CHANNELS" IS 'is redefine channels?';
 COMMENT ON COLUMN "N9E_V6"."ALERT_SUBSCRIBE"."NEW_CHANNELS" IS 'split by space: sms voice email dingtalk wecom';
 COMMENT ON COLUMN "N9E_V6"."ALERT_SUBSCRIBE"."USER_GROUP_IDS" IS 'split by space 1 34 5, notify cc to user_group_ids';
-
+COMMENT ON COLUMN "N9E_V6"."ALERT_SUBSCRIBE"."NOTE" IS 'note';
 
 CREATE  INDEX "INDEX100020372398800" ON "N9E_V6"."ALERT_SUBSCRIBE"("GROUP_ID" ASC) STORAGE(ON "N9E_V6", CLUSTERBTR) ;
 CREATE  INDEX "INDEX100020436016700" ON "N9E_V6"."ALERT_SUBSCRIBE"("UPDATE_AT" ASC) STORAGE(ON "N9E_V6", CLUSTERBTR) ;

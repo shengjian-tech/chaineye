@@ -3,7 +3,7 @@ module github.com/ccfos/nightingale/v6
 go 1.20
 
 require (
-	gitee.com/chunanyong/dm v1.8.12
+	gitee.com/chunanyong/dm v1.8.13
 	gitee.com/chunanyong/zorm v1.7.3
 	github.com/BurntSushi/toml v1.3.2
 	github.com/ClickHouse/clickhouse-go/v2 v2.15.0
@@ -14,7 +14,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-ldap/ldap/v3 v3.4.6
 	github.com/go-sql-driver/mysql v1.7.1
-	github.com/golang-jwt/jwt/v5 v5.0.0
+	github.com/golang-jwt/jwt/v5 v5.1.0
 	github.com/golang/snappy v0.0.4
 	github.com/google/uuid v1.4.0
 	github.com/koding/multiconfig v0.0.0-20171124222453-69c27309b2d7
@@ -27,12 +27,12 @@ require (
 	github.com/prometheus/common v0.45.0
 	github.com/prometheus/prometheus v0.47.2
 	github.com/rakyll/statik v0.1.7
-	github.com/redis/go-redis/v9 v9.2.1
-	github.com/sijms/go-ora/v2 v2.7.19
+	github.com/redis/go-redis/v9 v9.3.0
+	github.com/sijms/go-ora/v2 v2.7.20
 	github.com/spaolacci/murmur3 v1.1.0
 	github.com/taosdata/driver-go/v3 v3.5.0
 	github.com/toolkits/pkg v1.3.5
-	golang.org/x/oauth2 v0.13.0
+	golang.org/x/oauth2 v0.14.0
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/yaml.v2 v2.4.0
@@ -84,11 +84,11 @@ require (
 	go.opentelemetry.io/otel/trace v1.19.0 // indirect
 	go.uber.org/automaxprocs v1.5.2 // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/crypto v0.14.0 // indirect
+	golang.org/x/crypto v0.15.0 // indirect
 	golang.org/x/image v0.0.0-20190501045829-6d32002ffd75 // indirect
-	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/net v0.18.0 // indirect
+	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
