@@ -188,7 +188,7 @@ INSERT INTO "N9E_V6"."ROLE_OPERATION"(id, role_name, operation) VALUES (64, 'Sta
 INSERT INTO "N9E_V6"."ROLE_OPERATION"(id, role_name, operation) VALUES (65, 'Standard', '/alert-mutes/put');
 INSERT INTO "N9E_V6"."ROLE_OPERATION"(id, role_name, operation) VALUES (66, 'Standard', '/log/index-patterns');
 INSERT INTO "N9E_V6"."ROLE_OPERATION"(id, role_name, operation) VALUES (67, 'Standard', '/help/variable-configs');
-INSERT INTO "N9E_V6"."ROLE_OPERATION"(id, role_name, operation) VALUES (67, 'Standard', '/ibex-settings');
+INSERT INTO "N9E_V6"."ROLE_OPERATION"(id, role_name, operation) VALUES (68, 'Standard', '/ibex-settings');
 
 -- for alert_rule | collect_rule | mute | dashboard grouping
 drop table if exists "N9E_V6"."BUSI_GROUP" cascade;
