@@ -33,7 +33,9 @@ func (rt *Router) selfProfilePut(c *gin.Context) {
 	user.Phone = f.Phone
 	user.Email = f.Email
 	user.Portrait = f.Portrait
-	user.Contacts = f.Contacts
+	contacts, _ := f.Contacts.MarshalJSON()
+	user.Contacts = string(contacts)
+	// user.Contacts = f.Contacts
 	user.UpdateBy = user.Username
 
 	ginx.NewRender(c).Message(user.UpdateAllFields(rt.Ctx))

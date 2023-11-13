@@ -36,7 +36,7 @@ type AlertRule struct {
 	Cate                  string            `json:"cate" column:"cate"`                             // alert rule cate (prometheus|elasticsearch)
 	DatasourceIds         string            `json:"-" column:"datasource_ids"`                      // datasource ids
 	DatasourceIdsJson     []int64           `json:"datasource_ids"`                                 // for fe
-	Cluster               string            `json:"cluster" column:"cluster"`                       // take effect by clusters, seperated by space
+	Cluster               string            `json:"cluster" column:"cluster_name"`                  // take effect by clusters, seperated by space
 	Name                  string            `json:"name" column:"name"`                             // rule name
 	Note                  string            `json:"note" column:"note"`                             // will sent in notify
 	Prod                  string            `json:"prod" column:"prod"`                             // product empty means n9e
@@ -168,8 +168,20 @@ func GetHostsQuery(queries []HostQuery) []map[string]interface{} {
 			}
 			if q.Op == "==" {
 				m["ident in (?)"] = lst
-			} else {
+			} else if q.Op == "!=" {
 				m["ident not in (?)"] = lst
+			} else if q.Op == "=~" {
+				blank := " "
+				for _, host := range lst {
+					m["ident like ?"+blank] = strings.ReplaceAll(host, "*", "%")
+					blank += " "
+				}
+			} else if q.Op == "!~" {
+				blank := " "
+				for _, host := range lst {
+					m["ident not like ?"+blank] = strings.ReplaceAll(host, "*", "%")
+					blank += " "
+				}
 			}
 		}
 		query = append(query, m)
@@ -750,7 +762,7 @@ func AlertRulesGetsBy(ctx *ctx.Context, prods []string, query, algorithm, cluste
 
 	if cluster != "" {
 		//session = session.Where("cluster like ?", "%"+cluster+"%")
-		finder.Append("and cluster like ?", "%"+cluster+"%")
+		finder.Append("and cluster_name like ?", "%"+cluster+"%")
 	}
 
 	if len(cates) != 0 {

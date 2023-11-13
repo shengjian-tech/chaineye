@@ -27,7 +27,7 @@ type Board struct {
 	UpdateAt int64  `json:"update_at" column:"update_at"`
 	UpdateBy string `json:"update_by" column:"update_by"`
 	Configs  string `json:"configs"`
-	Public   int    `json:"public" column:"public"`     // 0: false, 1: true
+	Public   int    `json:"public" column:"is_public"`  // 0: false, 1: true
 	BuiltIn  int    `json:"built_in" column:"built_in"` // 0: false, 1: true
 	Hide     int    `json:"hide" column:"hide"`         // 0: false, 1: true
 }

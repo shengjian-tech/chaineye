@@ -27,7 +27,7 @@ type RecordingRule struct {
 	GroupId           int64         `json:"group_id" column:"group_id"`                     // busi group id
 	DatasourceIds     string        `json:"-" column:"datasource_ids"`                      // datasource ids
 	DatasourceIdsJson []int64       `json:"datasource_ids"`                                 // for fe
-	Cluster           string        `json:"cluster" column:"cluster"`                       // take effect by cluster, seperated by space
+	Cluster           string        `json:"cluster" column:"cluster_name"`                  // take effect by cluster, seperated by space
 	Name              string        `json:"name" column:"name"`                             // new metric name
 	Disabled          int           `json:"disabled" column:"disabled"`                     // 0: enabled, 1: disabled
 	PromQl            string        `json:"prom_ql" column:"prom_ql"`                       // just one ql for promql

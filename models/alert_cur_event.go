@@ -23,53 +23,53 @@ const AlertCurEventTableName = "alert_cur_event"
 
 type AlertCurEvent struct {
 	zorm.EntityStruct
-	Id                       int64             `json:"id" column:"id"`
-	Cate                     string            `json:"cate" column:"cate"`
-	Cluster                  string            `json:"cluster" column:"cluster"`
-	DatasourceId             int64             `json:"datasource_id" column:"datasource_id"`
-	GroupId                  int64             `json:"group_id" column:"group_id"`     // busi group id
-	GroupName                string            `json:"group_name" column:"group_name"` // busi group name
-	Hash                     string            `json:"hash" column:"hash"`             // rule_id + vector_key
-	RuleId                   int64             `json:"rule_id" column:"rule_id"`
-	RuleName                 string            `json:"rule_name" column:"rule_name"`
-	RuleNote                 string            `json:"rule_note" column:"rule_note"`
-	RuleProd                 string            `json:"rule_prod" column:"rule_prod"`
-	RuleAlgo                 string            `json:"rule_algo" column:"rule_algo"`
-	Severity                 int               `json:"severity" column:"severity"`
-	PromForDuration          int               `json:"prom_for_duration" column:"prom_for_duration"`
-	PromQl                   string            `json:"prom_ql" column:"prom_ql"`
-	RuleConfig               string            `json:"-" column:"rule_config"` // rule config
-	RuleConfigJson           interface{}       `json:"rule_config"`            // rule config for fe
-	PromEvalInterval         int               `json:"prom_eval_interval" column:"prom_eval_interval"`
-	Callbacks                string            `json:"-" column:"callbacks"` // for db
-	CallbacksJSON            []string          `json:"callbacks"`            // for fe
-	RunbookUrl               string            `json:"runbook_url" column:"runbook_url"`
-	NotifyRecovered          int               `json:"notify_recovered" column:"notify_recovered"`
-	NotifyChannels           string            `json:"-" column:"notify_channels"` // for db
-	NotifyChannelsJSON       []string          `json:"notify_channels"`            // for fe
-	NotifyGroups             string            `json:"-" column:"notify_groups"`   // for db
-	NotifyGroupsJSON         []string          `json:"notify_groups"`              // for fe
-	NotifyGroupsObj          []*UserGroup      `json:"notify_groups_obj"`          // for fe
-	TargetIdent              string            `json:"target_ident" column:"target_ident"`
-	TargetNote               string            `json:"target_note" column:"target_note"`
-	TriggerTime              int64             `json:"trigger_time" column:"trigger_time"`
-	TriggerValue             string            `json:"trigger_value" column:"trigger_value"`
-	Tags                     string            `json:"-" column:"tags"`        // for db
-	TagsJSON                 []string          `json:"tags"`                   // for fe
-	TagsMap                  map[string]string `json:"tags_map"`               // for internal usage
-	Annotations              string            `json:"-" column:"annotations"` //
-	AnnotationsJSON          map[string]string `json:"annotations"`            // for fe
-	IsRecovered              bool              `json:"is_recovered"`           // for notify.py
-	NotifyUsersObj           []*User           `json:"notify_users_obj"`       // for notify.py
-	LastEvalTime             int64             `json:"last_eval_time"`         // for notify.py 上次计算的时间
-	LastEscalationNotifyTime int64             `json:"last_escalation_notify_time"`
-	LastSentTime             int64             `json:"last_sent_time"`                                 // 上次发送时间
-	NotifyCurNumber          int               `json:"notify_cur_number" column:"notify_cur_number"`   // notify: current number
-	FirstTriggerTime         int64             `json:"first_trigger_time" column:"first_trigger_time"` // 连续告警的首次告警时间
-	ExtraConfig              interface{}       `json:"extra_config"`
-	Status                   int               `json:"status"`
-	Claimant                 string            `json:"claimant"`
-	SubRuleId                int64             `json:"sub_rule_id"`
+	Id                 int64             `json:"id" column:"id"`
+	Cate               string            `json:"cate" column:"cate"`
+	Cluster            string            `json:"cluster" column:"cluster_name"`
+	DatasourceId       int64             `json:"datasource_id" column:"datasource_id"`
+	GroupId            int64             `json:"group_id" column:"group_id"`     // busi group id
+	GroupName          string            `json:"group_name" column:"group_name"` // busi group name
+	Hash               string            `json:"hash" column:"hash"`             // rule_id + vector_key
+	RuleId             int64             `json:"rule_id" column:"rule_id"`
+	RuleName           string            `json:"rule_name" column:"rule_name"`
+	RuleNote           string            `json:"rule_note" column:"rule_note"`
+	RuleProd           string            `json:"rule_prod" column:"rule_prod"`
+	RuleAlgo           string            `json:"rule_algo" column:"rule_algo"`
+	Severity           int               `json:"severity" column:"severity"`
+	PromForDuration    int               `json:"prom_for_duration" column:"prom_for_duration"`
+	PromQl             string            `json:"prom_ql" column:"prom_ql"`
+	RuleConfig         string            `json:"-" column:"rule_config"` // rule config
+	RuleConfigJson     interface{}       `json:"rule_config"`            // rule config for fe
+	PromEvalInterval   int               `json:"prom_eval_interval" column:"prom_eval_interval"`
+	Callbacks          string            `json:"-" column:"callbacks"` // for db
+	CallbacksJSON      []string          `json:"callbacks"`            // for fe
+	RunbookUrl         string            `json:"runbook_url" column:"runbook_url"`
+	NotifyRecovered    int               `json:"notify_recovered" column:"notify_recovered"`
+	NotifyChannels     string            `json:"-" column:"notify_channels"` // for db
+	NotifyChannelsJSON []string          `json:"notify_channels"`            // for fe
+	NotifyGroups       string            `json:"-" column:"notify_groups"`   // for db
+	NotifyGroupsJSON   []string          `json:"notify_groups"`              // for fe
+	NotifyGroupsObj    []*UserGroup      `json:"notify_groups_obj"`          // for fe
+	TargetIdent        string            `json:"target_ident" column:"target_ident"`
+	TargetNote         string            `json:"target_note" column:"target_note"`
+	TriggerTime        int64             `json:"trigger_time" column:"trigger_time"`
+	TriggerValue       string            `json:"trigger_value" column:"trigger_value"`
+	Tags               string            `json:"-" column:"tags"`                                // for db
+	TagsJSON           []string          `json:"tags"`                                           // for fe
+	TagsMap            map[string]string `json:"tags_map"`                                       // for internal usage
+	Annotations        string            `json:"-" column:"annotations"`                         //
+	AnnotationsJSON    map[string]string `json:"annotations"`                                    // for fe
+	IsRecovered        bool              `json:"is_recovered"`                                   // for notify.py
+	NotifyUsersObj     []*User           `json:"notify_users_obj"`                               // for notify.py
+	LastEvalTime       int64             `json:"last_eval_time"`                                 // for notify.py 上次计算的时间
+	LastSentTime       int64             `json:"last_sent_time"`                                 // 上次发送时间
+	NotifyCurNumber    int               `json:"notify_cur_number" column:"notify_cur_number"`   // notify: current number
+	FirstTriggerTime   int64             `json:"first_trigger_time" column:"first_trigger_time"` // 连续告警的首次告警时间
+	ExtraConfig        interface{}       `json:"extra_config"`
+	Status             int               `json:"status"`
+	Claimant           string            `json:"claimant"`
+	SubRuleId          int64             `json:"sub_rule_id"`
+	ExtraInfo          []string          `json:"extra_info"`
 }
 
 func (e *AlertCurEvent) GetTableName() string {
@@ -357,9 +357,10 @@ func AlertCurEventTotal(ctx *ctx.Context, prods []string, bgid, stime, etime int
 
 func AlertCurEventGets(ctx *ctx.Context, prods []string, bgid, stime, etime int64, severity int, dsIds []int64, cates []string, query string, limit, offset int) ([]AlertCurEvent, error) {
 	finder := zorm.NewSelectFinder(AlertCurEventTableName)
-	finder.Append("WHERE trigger_time between ? and ?", stime, etime)
-	//session := DB(ctx).Where("trigger_time between ? and ?", stime, etime)
-
+	if stime != 0 && etime != 0 {
+		finder.Append("WHERE trigger_time between ? and ?", stime, etime)
+		//session := DB(ctx).Where("trigger_time between ? and ?", stime, etime)
+	}
 	if len(prods) != 0 {
 		//session = session.Where("rule_prod in ?", prods)
 		finder.Append("and rule_prod in (?)", prods)

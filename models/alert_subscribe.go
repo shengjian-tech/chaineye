@@ -25,9 +25,9 @@ type AlertSubscribe struct {
 	GroupId           int64        `json:"group_id" column:"group_id"`
 	Prod              string       `json:"prod" column:"prod"`
 	Cate              string       `json:"cate" column:"cate"`
-	DatasourceIds     string       `json:"-" column:"datasource_ids"` // datasource ids
-	DatasourceIdsJson []int64      `json:"datasource_ids"`            // for fe
-	Cluster           string       `json:"cluster" column:"cluster"`  // take effect by clusters, seperated by space
+	DatasourceIds     string       `json:"-" column:"datasource_ids"`     // datasource ids
+	DatasourceIdsJson []int64      `json:"datasource_ids"`                // for fe
+	Cluster           string       `json:"cluster" column:"cluster_name"` // take effect by clusters, seperated by space
 	RuleId            int64        `json:"rule_id" column:"rule_id"`
 	Severities        string       `json:"-" column:"severities"`              // sub severity
 	SeveritiesJson    []int        `json:"severities"`                         // for fe
@@ -45,6 +45,7 @@ type AlertSubscribe struct {
 	WebhooksJson      []string     `json:"webhooks"`
 	ExtraConfig       string       `json:"-" column:"extra_config"`
 	ExtraConfigJson   interface{}  `json:"extra_config"` // for fe
+	Note              string       `json:"note" column:"note"`
 	CreateBy          string       `json:"create_by" column:"create_by"`
 	CreateAt          int64        `json:"create_at" column:"create_at"`
 	UpdateBy          string       `json:"update_by" column:"update_by"`

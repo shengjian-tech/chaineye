@@ -11,6 +11,28 @@ import (
 	"github.com/toolkits/pkg/ginx"
 )
 
+func (rt *Router) userBusiGroupsGets(c *gin.Context) {
+	userid := ginx.QueryInt64(c, "userid", 0)
+	username := ginx.QueryStr(c, "username", "")
+
+	if userid == 0 && username == "" {
+		ginx.Bomb(http.StatusBadRequest, "userid or username required")
+	}
+
+	var user *models.User
+	var err error
+	if userid > 0 {
+		user, err = models.UserGetById(rt.Ctx, userid)
+	} else {
+		user, err = models.UserGetByUsername(rt.Ctx, username)
+	}
+
+	ginx.Dangerous(err)
+
+	groups, err := user.BusiGroups(rt.Ctx, 10000, "")
+	ginx.NewRender(c).Data(groups, err)
+}
+
 func (rt *Router) userFindAll(c *gin.Context) {
 	list, err := models.UserGetAll(rt.Ctx)
 	ginx.NewRender(c).Data(list, err)
@@ -58,7 +80,7 @@ func (rt *Router) userAddPost(c *gin.Context) {
 	}
 
 	user := c.MustGet("user").(*models.User)
-
+	contacts, _ := f.Contacts.MarshalJSON()
 	u := models.User{
 		Username: f.Username,
 		Password: password,
@@ -67,7 +89,8 @@ func (rt *Router) userAddPost(c *gin.Context) {
 		Email:    f.Email,
 		Portrait: f.Portrait,
 		Roles:    strings.Join(f.Roles, " "),
-		Contacts: f.Contacts,
+		// Contacts: f.Contacts,
+		Contacts: string(contacts),
 		CreateBy: user.Username,
 		UpdateBy: user.Username,
 	}
@@ -101,7 +124,9 @@ func (rt *Router) userProfilePut(c *gin.Context) {
 	target.Phone = f.Phone
 	target.Email = f.Email
 	target.Roles = strings.Join(f.Roles, " ")
-	target.Contacts = f.Contacts
+	// target.Contacts = f.Contacts
+	contacts, _ := f.Contacts.MarshalJSON()
+	target.Contacts = string(contacts)
 	target.UpdateBy = c.MustGet("username").(string)
 
 	ginx.NewRender(c).Message(target.UpdateAllFields(rt.Ctx))

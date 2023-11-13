@@ -154,6 +154,7 @@ INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/recordi
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/alert-mutes/put');
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/log/index-patterns');
 INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/help/variable-configs');
+INSERT INTO `role_operation`(role_name, operation) VALUES ('Standard', '/ibex-settings');
 
 -- for alert_rule | collect_rule | mute | dashboard grouping
 CREATE TABLE `busi_group`  (
@@ -190,7 +191,7 @@ CREATE TABLE `board`  (
   `name` varchar(191)  NOT NULL,
   `ident` varchar(200)  NOT NULL DEFAULT '',
   `tags` varchar(255)  NOT NULL COMMENT 'split by space',
-  `public` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0:false 1:true',
+  `is_public` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0:false 1:true',
   `built_in` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0:false 1:true',
   `hide` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0:false 1:true',
   `create_at` bigint NOT NULL DEFAULT 0,
@@ -247,7 +248,7 @@ CREATE TABLE `chart`  (
 
 CREATE TABLE `chart_share`  (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  `cluster` varchar(128)  NOT NULL,
+  `cluster_name` varchar(128)  NOT NULL,
   `datasource_id` bigint NOT NULL DEFAULT 0 COMMENT 'datasource id',
   `configs` text  NULL,
   `create_at` bigint NOT NULL DEFAULT 0,
@@ -261,7 +262,7 @@ CREATE TABLE `alert_rule`  (
   `group_id` bigint NOT NULL DEFAULT 0 COMMENT 'busi group id',
   `cate` varchar(128)  NOT NULL,
   `datasource_ids` varchar(255)  NOT NULL DEFAULT '' COMMENT 'datasource ids',
-  `cluster` varchar(128)  NOT NULL,
+  `cluster_name` varchar(128)  NOT NULL,
   `name` varchar(255)  NOT NULL,
   `note` varchar(1024)  NOT NULL DEFAULT '',
   `prod` varchar(255)  NOT NULL DEFAULT '',
@@ -304,7 +305,7 @@ CREATE TABLE `alert_mute`  (
   `prod` varchar(255)  NOT NULL DEFAULT '',
   `note` varchar(1024)  NOT NULL DEFAULT '',
   `cate` varchar(128)  NOT NULL,
-  `cluster` varchar(128)  NOT NULL,
+  `cluster_name` varchar(128)  NOT NULL,
   `datasource_ids` varchar(255)  NOT NULL DEFAULT '' COMMENT 'datasource ids',
   `tags` varchar(4096)  NOT NULL DEFAULT '' COMMENT 'json,map,tagkey->regexp|value',
   `cause` varchar(255)  NOT NULL DEFAULT '',
@@ -331,7 +332,7 @@ CREATE TABLE `alert_subscribe`  (
   `prod` varchar(255)  NOT NULL DEFAULT '',
   `cate` varchar(128)  NOT NULL,
   `datasource_ids` varchar(255)  NOT NULL DEFAULT '' COMMENT 'datasource ids',
-  `cluster` varchar(128)  NOT NULL,
+  `cluster_name` varchar(128)  NOT NULL,
   `rule_id` bigint NOT NULL DEFAULT 0,
   `severities` varchar(32)  NOT NULL DEFAULT '',
   `tags` varchar(4096)  NOT NULL DEFAULT '' COMMENT 'json,map,tagkey->regexp|value',
@@ -344,6 +345,7 @@ CREATE TABLE `alert_subscribe`  (
   `extra_config` text  NULL,
   `redefine_webhooks` tinyint(1) NULL DEFAULT 0,
   `for_duration` bigint NOT NULL DEFAULT 0,
+  `note` varchar(1024) NULL DEFAULT '' COMMENT 'note',
   `create_at` bigint NOT NULL DEFAULT 0,
   `create_by` varchar(64)  NOT NULL DEFAULT '',
   `update_at` bigint NOT NULL DEFAULT 0,
@@ -409,7 +411,7 @@ CREATE TABLE `recording_rule`  (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `group_id` bigint NOT NULL DEFAULT 0 COMMENT 'group_id',
   `datasource_ids` varchar(255)  NOT NULL DEFAULT '' COMMENT 'datasource ids',
-  `cluster` varchar(128)  NOT NULL,
+  `cluster_name` varchar(128)  NOT NULL,
   `name` varchar(255)  NOT NULL COMMENT 'new metric name',
   `note` varchar(255)  NOT NULL COMMENT 'rule note',
   `disabled` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0:enabled 1:disabled',
@@ -445,7 +447,7 @@ CREATE TABLE `alert_cur_event`  (
   `id` bigint UNSIGNED NOT NULL COMMENT 'use alert_his_event.id',
   `cate` varchar(128)  NOT NULL,
   `datasource_id` bigint NOT NULL DEFAULT 0 COMMENT 'datasource id',
-  `cluster` varchar(128)  NOT NULL,
+  `cluster_name` varchar(128)  NOT NULL,
   `group_id` bigint UNSIGNED NOT NULL COMMENT 'busi group id of rule',
   `group_name` varchar(255)  NOT NULL DEFAULT '' COMMENT 'busi group name',
   `hash` varchar(64)  NOT NULL COMMENT 'rule_id + vector_pk',
@@ -485,7 +487,7 @@ CREATE TABLE `alert_his_event`  (
   `is_recovered` tinyint(1) NOT NULL,
   `cate` varchar(128)  NOT NULL,
   `datasource_id` bigint NOT NULL DEFAULT 0 COMMENT 'datasource id',
-  `cluster` varchar(128)  NOT NULL,
+  `cluster_name` varchar(128)  NOT NULL,
   `group_id` bigint UNSIGNED NOT NULL COMMENT 'busi group id of rule',
   `group_name` varchar(255)  NOT NULL DEFAULT '' COMMENT 'busi group name',
   `hash` varchar(64)  NOT NULL COMMENT 'rule_id + vector_pk',

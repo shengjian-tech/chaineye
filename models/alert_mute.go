@@ -64,9 +64,9 @@ type AlertMute struct {
 	Note              string         `json:"note" column:"note"`
 	Cate              string         `json:"cate" column:"cate"`
 	Prod              string         `json:"prod" column:"prod"`
-	DatasourceIds     string         `json:"-" column:"datasource_ids"` // datasource ids
-	DatasourceIdsJson []int64        `json:"datasource_ids"`            // for fe
-	Cluster           string         `json:"cluster" column:"cluster"`  // take effect by clusters, seperated by space
+	DatasourceIds     string         `json:"-" column:"datasource_ids"`     // datasource ids
+	DatasourceIdsJson []int64        `json:"datasource_ids"`                // for fe
+	Cluster           string         `json:"cluster" column:"cluster_name"` // take effect by clusters, seperated by space
 	Tags              ormx.JSONArr   `json:"tags" column:"tags"`
 	Cause             string         `json:"cause" column:"cause"`
 	Btime             int64          `json:"btime" column:"btime"`

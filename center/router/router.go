@@ -409,6 +409,8 @@ func (rt *Router) Config(r *gin.Engine) {
 
 		pages.GET("/config", rt.auth(), rt.admin(), rt.configGetByKey)
 		pages.PUT("/config", rt.auth(), rt.admin(), rt.configPutByKey)
+		// for admin api
+		pages.GET("/user/busi-groups", rt.auth(), rt.admin(), rt.userBusiGroupsGets)
 
 		/*
 			pages.POST("/xuperchain/xuper/node", rt.auth(), syncXuperNode)

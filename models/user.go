@@ -47,22 +47,24 @@ const UserTableName = "users"
 type User struct {
 	// 引入默认的struct,隔离IEntityStruct的方法改动
 	zorm.EntityStruct
-	Id         int64        `json:"id" column:"id"`
-	Username   string       `json:"username" column:"username"`
-	Nickname   string       `json:"nickname" column:"nickname"`
-	Password   string       `json:"-" column:"password"`
-	Phone      string       `json:"phone" column:"phone"`
-	Email      string       `json:"email" column:"email"`
-	Portrait   string       `json:"portrait" column:"portrait"`
-	Roles      string       `json:"-" column:"roles"`               // 这个字段写入数据库
-	RolesLst   []string     `json:"roles"`                          // 这个字段和前端交互
-	Contacts   ormx.JSONObj `json:"contacts" column:"contacts"`     // 内容为 map[string]string 结构
-	Maintainer int          `json:"maintainer" column:"maintainer"` // 是否给管理员发消息 0:not send 1:send
-	CreateAt   int64        `json:"create_at" column:"create_at"`
-	CreateBy   string       `json:"create_by" column:"create_by"`
-	UpdateAt   int64        `json:"update_at" column:"update_at"`
-	UpdateBy   string       `json:"update_by" column:"update_by"`
-	Admin      bool         `json:"admin"` // 方便前端使用
+	Id       int64    `json:"id" column:"id"`
+	Username string   `json:"username" column:"username"`
+	Nickname string   `json:"nickname" column:"nickname"`
+	Password string   `json:"-" column:"password"`
+	Phone    string   `json:"phone" column:"phone"`
+	Email    string   `json:"email" column:"email"`
+	Portrait string   `json:"portrait" column:"portrait"`
+	Roles    string   `json:"-" column:"roles"` // 这个字段写入数据库
+	RolesLst []string `json:"roles"`            // 这个字段和前端交互
+	// Contacts   ormx.JSONObj `json:"contacts" column:"contacts"`     // 内容为 map[string]string 结构
+	Contacts     string       `json:"-" column:"contacts"`            // 内容为 map[string]string 结构
+	ContactsJson ormx.JSONObj `json:"contacts"`                       // 内容为 map[string]string 结构
+	Maintainer   int          `json:"maintainer" column:"maintainer"` // 是否给管理员发消息 0:not send 1:send
+	CreateAt     int64        `json:"create_at" column:"create_at"`
+	CreateBy     string       `json:"create_by" column:"create_by"`
+	UpdateAt     int64        `json:"update_at" column:"update_at"`
+	UpdateBy     string       `json:"update_by" column:"update_by"`
+	Admin        bool         `json:"admin"` // 方便前端使用
 }
 
 func (u *User) GetTableName() string {
@@ -74,10 +76,11 @@ func (u *User) DB2FE() error {
 }
 
 func (u *User) String() string {
-	bs, err := u.Contacts.MarshalJSON()
-	if err != nil {
-		return err.Error()
-	}
+	// bs, err := u.Contacts.MarshalJSON()
+	// if err != nil {
+	// 	return err.Error()
+	// }
+	bs := u.Contacts
 
 	return fmt.Sprintf("<id:%d username:%s nickname:%s email:%s phone:%s contacts:%s>", u.Id, u.Username, u.Nickname, u.Email, u.Phone, string(bs))
 }
@@ -222,6 +225,7 @@ func UserGet(ctx *ctx.Context, where string, args ...interface{}) (*User, error)
 
 	lst[0].RolesLst = strings.Fields(lst[0].Roles)
 	lst[0].Admin = lst[0].IsAdmin()
+	lst[0].ContactsJson.Scan(lst[0].Contacts)
 
 	return lst[0], nil
 }
@@ -279,6 +283,8 @@ func PassLogin(ctx *ctx.Context, username, pass string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
+	logger.Infof("loginPass: %s", loginPass)
+	logger.Infof("user.Password: %s", user.Password)
 
 	if loginPass != user.Password {
 		return nil, fmt.Errorf("Username or password invalid")
@@ -342,7 +348,8 @@ func LdapLogin(ctx *ctx.Context, username, pass, roles string, ldap *ldapx.SsoCl
 	user.Password = "******"
 	user.Portrait = ""
 
-	user.Contacts = []byte("{}")
+	// user.Contacts = []byte("{}")
+	user.Contacts = "{}"
 	user.CreateAt = now
 	user.UpdateAt = now
 	user.CreateBy = "ldap"
@@ -394,6 +401,7 @@ func UserGets(ctx *ctx.Context, query string, limit, offset int) ([]User, error)
 		users[i].RolesLst = strings.Fields(users[i].Roles)
 		users[i].Admin = users[i].IsAdmin()
 		users[i].Password = ""
+		users[i].ContactsJson.Scan(users[i].Contacts)
 	}
 
 	return users, nil
@@ -670,11 +678,13 @@ func (u *User) UserGroups(ctx *ctx.Context, limit int, query string) ([]UserGrou
 }
 
 func (u *User) ExtractToken(key string) (string, bool) {
-	bs, err := u.Contacts.MarshalJSON()
-	if err != nil {
-		logger.Errorf("ExtractToken: failed to marshal contacts: %v", err)
-		return "", false
-	}
+	// bs, err := u.Contacts.MarshalJSON()
+	// if err != nil {
+	// 	logger.Errorf("ExtractToken: failed to marshal contacts: %v", err)
+	// 	return "", false
+	// }
+	var err error
+	bs := []byte(u.Contacts)
 
 	jsonMap := make(map[string]string, 0)
 	err = json.Unmarshal(bs, &jsonMap)
