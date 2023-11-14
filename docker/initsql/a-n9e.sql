@@ -652,3 +652,4 @@ CREATE TABLE `es_index_pattern`  (
   PRIMARY KEY (`id`),
   UNIQUE KEY (`datasource_id`, `name`)
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4;
+
