@@ -107,7 +107,7 @@ func LabelAndKeyHasKey(keys []LabelAndKey, key string) bool {
 }
 
 func UpdateFieldsMap(ctx *ctx.Context, entity zorm.IEntityStruct, idValue interface{}, fields map[string]interface{}) error {
-	entityMap := zorm.NewEntityMap(AlertCurEventTableName)
+	entityMap := zorm.NewEntityMap(entity.GetTableName())
 	entityMap.PkColumnName = entity.GetPKColumnName()
 	entityMap.Set(entity.GetPKColumnName(), idValue)
 	for k, v := range fields {
