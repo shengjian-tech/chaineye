@@ -11,7 +11,6 @@ import (
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
 	"github.com/ccfos/nightingale/v6/pkg/secu"
-	"github.com/pkg/errors"
 
 	"github.com/toolkits/pkg/logger"
 	"github.com/toolkits/pkg/runner"
@@ -78,7 +77,8 @@ func InitRSAPassWord(ctx *ctx.Context) (string, error) {
 
 	val, err := ConfigsGet(ctx, RSA_PASSWORD)
 	if err != nil {
-		return "", errors.WithMessage(err, "failed to get rsa password")
+		//return "", errors.WithMessage(err, "failed to get rsa password")
+		return "", fmt.Errorf("failed to get rsa password:%w", err)
 	}
 	if val != "" {
 		return val, nil
@@ -87,7 +87,8 @@ func InitRSAPassWord(ctx *ctx.Context) (string, error) {
 	pwd := str.MD5(content)
 	err = ConfigsSet(ctx, RSA_PASSWORD, pwd)
 	if err != nil {
-		return "", errors.WithMessage(err, "failed to set rsa password")
+		//return "", errors.WithMessage(err, "failed to set rsa password")
+		return "", fmt.Errorf("failed to set rsa password:%w", err)
 	}
 	return pwd, nil
 }

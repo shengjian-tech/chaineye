@@ -1,6 +1,7 @@
 package memsto
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -9,7 +10,6 @@ import (
 	"github.com/ccfos/nightingale/v6/models"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 
-	"github.com/pkg/errors"
 	"github.com/toolkits/pkg/logger"
 )
 
@@ -65,7 +65,8 @@ func (c *ConfigCache) syncConfigs() error {
 	stat, err := models.ConfigsUserVariableStatistics(c.ctx)
 	if err != nil {
 		dumper.PutSyncRecord("user_variables", start.Unix(), -1, -1, "failed to query statistics: "+err.Error())
-		return errors.WithMessage(err, "failed to call userVariables")
+		//return errors.WithMessage(err, "failed to call userVariables")
+		return fmt.Errorf("failed to call userVariables:%w", err)
 	}
 
 	if !c.statChanged(stat.Total, stat.LastUpdated) {
@@ -78,7 +79,8 @@ func (c *ConfigCache) syncConfigs() error {
 	decryptMap, decryptErr := models.ConfigUserVariableGetDecryptMap(c.ctx, c.privateKey, c.passWord)
 	if decryptErr != nil {
 		dumper.PutSyncRecord("user_variables", start.Unix(), -1, -1, "failed to query records: "+err.Error())
-		return errors.WithMessage(err, "failed to call ConfigUserVariableGetDecryptMap")
+		//eturn errors.WithMessage(err, "failed to call ConfigUserVariableGetDecryptMap")
+		return fmt.Errorf("failed to call ConfigUserVariableGetDecryptMap:%w", err)
 	}
 
 	c.Set(decryptMap, stat.Total, stat.LastUpdated)

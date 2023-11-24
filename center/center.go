@@ -35,7 +35,7 @@ import (
 func Initialize(configDir string, cryptoKey string) (func(), error) {
 	config, err := conf.InitConfig(configDir, cryptoKey)
 	if err != nil {
-		return nil, fmt.Errorf("failed to init config: %v", err)
+		return nil, fmt.Errorf("failed to init config: %w", err)
 	}
 
 	cconf.LoadMetricsYaml(configDir, config.Center.MetricsYamlFile)
