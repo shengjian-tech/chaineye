@@ -46,8 +46,8 @@ func (t *TaskTpl) DB2FE() error {
 	return nil
 }
 
-func TaskTplTotal(ctx *ctx.Context, groupId int64, query string) (int64, error) {
-	finder := zorm.NewSelectFinder(TaskTplTableName, "count(*)").Append("WHERE group_id = ?", groupId)
+func TaskTplTotal(ctx *ctx.Context, groupIds []int64, query string) (int64, error) {
+	finder := zorm.NewSelectFinder(TaskTplTableName, "count(*)").Append("WHERE group_id in (?)", groupIds)
 	//session := DB(ctx).Model(&TaskTpl{}).Where("group_id = ?", groupId)
 	if query == "" {
 		return Count(ctx, finder)
@@ -63,9 +63,9 @@ func TaskTplTotal(ctx *ctx.Context, groupId int64, query string) (int64, error) 
 	return Count(ctx, finder)
 }
 
-func TaskTplGets(ctx *ctx.Context, groupId int64, query string, limit, offset int) ([]TaskTpl, error) {
+func TaskTplGets(ctx *ctx.Context, groupIds []int64, query string, limit, offset int) ([]TaskTpl, error) {
 	//session := DB(ctx).Where("group_id = ?", groupId).Order("title").Limit(limit).Offset(offset)
-	finder := zorm.NewSelectFinder(TaskTplTableName).Append("WHERE group_id = ?", groupId)
+	finder := zorm.NewSelectFinder(TaskTplTableName).Append("WHERE group_id in (?) order by title asc ", groupIds)
 
 	tpls := make([]TaskTpl, 0)
 	if query != "" {
