@@ -4,10 +4,10 @@ go 1.20
 
 require (
 	gitee.com/chunanyong/dm v1.8.13
-	gitee.com/chunanyong/zorm v1.7.3
+	gitee.com/chunanyong/zorm v1.7.4
 	github.com/BurntSushi/toml v1.3.2
 	github.com/ClickHouse/clickhouse-go/v2 v2.15.0
-	github.com/coreos/go-oidc/v3 v3.7.0
+	github.com/coreos/go-oidc/v3 v3.8.0
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/denisenkom/go-mssqldb v0.12.3
 	github.com/gin-contrib/pprof v1.4.0
@@ -27,11 +27,11 @@ require (
 	github.com/prometheus/prometheus v0.48.0
 	github.com/rakyll/statik v0.1.7
 	github.com/redis/go-redis/v9 v9.3.0
-	github.com/sijms/go-ora/v2 v2.7.22
+	github.com/sijms/go-ora/v2 v2.7.23
 	github.com/spaolacci/murmur3 v1.1.0
 	github.com/taosdata/driver-go/v3 v3.5.1
-	github.com/toolkits/pkg v1.3.6
-	golang.org/x/oauth2 v0.14.0
+	github.com/toolkits/pkg v1.3.7
+	golang.org/x/oauth2 v0.15.0
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/yaml.v2 v2.4.0
@@ -84,10 +84,10 @@ require (
 	go.opentelemetry.io/otel/trace v1.19.0 // indirect
 	go.uber.org/automaxprocs v1.5.3 // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/crypto v0.15.0 // indirect
+	golang.org/x/crypto v0.16.0 // indirect
 	golang.org/x/image v0.0.0-20190501045829-6d32002ffd75 // indirect
-	golang.org/x/net v0.18.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/net v0.19.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
