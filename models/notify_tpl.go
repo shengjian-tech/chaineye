@@ -21,11 +21,15 @@ const NotifyTplTableName = "notify_tpl"
 type NotifyTpl struct {
 	// 引入默认的struct,隔离IEntityStruct的方法改动
 	zorm.EntityStruct
-	Id      int64  `json:"id" column:"id"`
-	Name    string `json:"name" column:"name"`
-	Channel string `json:"channel" column:"channel"`
-	Content string `json:"content" column:"content"`
-	BuiltIn bool   `json:"built_in"`
+	Id       int64  `json:"id" column:"id"`
+	Name     string `json:"name" column:"name"`
+	Channel  string `json:"channel" column:"channel"`
+	Content  string `json:"content" column:"content"`
+	BuiltIn  bool   `json:"built_in"`
+	CreateAt int64  `json:"create_at" column:"create_at"`
+	CreateBy string `json:"create_by" column:"create_by"`
+	UpdateAt int64  `json:"update_at" column:"update_at"`
+	UpdateBy string `json:"update_by" column:"update_by"`
 }
 
 func (n *NotifyTpl) GetTableName() string {
@@ -41,13 +45,17 @@ func (n *NotifyTpl) Create(c *ctx.Context) error {
 }
 
 func (n *NotifyTpl) UpdateContent(c *ctx.Context) error {
-	return UpdateColumn(c, NotifyTplTableName, n.Id, "content", n.Content)
+	//return UpdateColumn(c, NotifyTplTableName, n.Id, "content", n.Content)
 	//return DB(c).Model(n).Update("content", n.Content).Error
+	finder := zorm.NewUpdateFinder(NotifyTplTableName).Append("content=?,update_at=?,update_by=? WHERE id=?", n.Content, n.UpdateAt, n.UpdateBy, n.Id)
+	return UpdateFinder(c, finder)
 }
 
 func (n *NotifyTpl) Update(c *ctx.Context) error {
-	return UpdateColumn(c, NotifyTplTableName, n.Id, "name", n.Name)
+	//return UpdateColumn(c, NotifyTplTableName, n.Id, "name", n.Name)
 	//return DB(c).Model(n).Select("name").Updates(n).Error
+	finder := zorm.NewUpdateFinder(NotifyTplTableName).Append("name=?,update_at=?,update_by=? WHERE id=?", n.Name, n.UpdateAt, n.UpdateBy, n.Id)
+	return UpdateFinder(c, finder)
 }
 
 func (n *NotifyTpl) CreateIfNotExists(c *ctx.Context, channel string) error {
@@ -113,6 +121,15 @@ func ListTpls(c *ctx.Context) (map[string]*template.Template, error) {
 		tpls[notifyTpl.Channel] = tpl
 	}
 	return tpls, nil
+}
+
+// get notify by id
+func NotifyTplGet(c *ctx.Context, id int64) (*NotifyTpl, error) {
+	var tpl NotifyTpl
+	finder := zorm.NewSelectFinder(NotifyTplTableName).Append("WHERE id=?", id)
+	//err := DB(c).Where("id=?", id).First(&tpl).Error
+	_, err := zorm.QueryRow(c.Ctx, finder, &tpl)
+	return &tpl, err
 }
 
 func InitNotifyConfig(c *ctx.Context, tplDir string) {

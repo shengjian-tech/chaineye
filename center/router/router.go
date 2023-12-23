@@ -248,6 +248,7 @@ func (rt *Router) Config(r *gin.Engine) {
 		pages.GET("/busi-group/:id/perm/:perm", rt.auth(), rt.user(), rt.checkBusiGroupPerm)
 
 		pages.GET("/targets", rt.auth(), rt.user(), rt.targetGets)
+		pages.GET("/target/extra-meta", rt.auth(), rt.user(), rt.targetExtendInfoByIdent)
 		pages.POST("/target/list", rt.auth(), rt.user(), rt.targetGetsByHostFilter)
 		pages.DELETE("/targets", rt.auth(), rt.user(), rt.perm("/targets/del"), rt.targetDel)
 		pages.GET("/targets/tags", rt.auth(), rt.user(), rt.targetGetTags)
@@ -374,11 +375,11 @@ func (rt *Router) Config(r *gin.Engine) {
 		pages.GET("/operation", rt.operations)
 
 		pages.GET("/notify-tpls", rt.auth(), rt.user(), rt.perm("/help/notification-tpls"), rt.notifyTplGets)
-		pages.PUT("/notify-tpl/content", rt.auth(), rt.admin(), rt.notifyTplUpdateContent)
-		pages.PUT("/notify-tpl", rt.auth(), rt.admin(), rt.notifyTplUpdate)
-		pages.POST("/notify-tpl", rt.auth(), rt.admin(), rt.notifyTplAdd)
-		pages.DELETE("/notify-tpl/:id", rt.auth(), rt.admin(), rt.notifyTplDel)
-		pages.POST("/notify-tpl/preview", rt.auth(), rt.admin(), rt.notifyTplPreview)
+		pages.PUT("/notify-tpl/content", rt.auth(), rt.user(), rt.notifyTplUpdateContent)
+		pages.PUT("/notify-tpl", rt.auth(), rt.user(), rt.notifyTplUpdate)
+		pages.POST("/notify-tpl", rt.auth(), rt.user(), rt.notifyTplAdd)
+		pages.DELETE("/notify-tpl/:id", rt.auth(), rt.user(), rt.notifyTplDel)
+		pages.POST("/notify-tpl/preview", rt.auth(), rt.user(), rt.notifyTplPreview)
 
 		pages.GET("/sso-configs", rt.auth(), rt.admin(), rt.ssoConfigGets)
 		pages.PUT("/sso-config", rt.auth(), rt.admin(), rt.ssoConfigUpdate)
@@ -438,6 +439,8 @@ func (rt *Router) Config(r *gin.Engine) {
 		{
 			service.Any("/prometheus/*url", rt.dsProxy)
 			service.POST("/users", rt.userAddPost)
+			service.PUT("/user/:id", rt.userProfilePutByService)
+			service.DELETE("/user/:id", rt.userDel)
 			service.GET("/users", rt.userFindAll)
 
 			service.GET("/user-groups", rt.userGroupGetsByService)
@@ -450,6 +453,7 @@ func (rt *Router) Config(r *gin.Engine) {
 			service.PUT("/targets/note", rt.targetUpdateNoteByService)
 
 			service.POST("/alert-rules", rt.alertRuleAddByService)
+			service.POST("/alert-rule-add", rt.alertRuleAddOneByService)
 			service.DELETE("/alert-rules", rt.alertRuleDelByService)
 			service.PUT("/alert-rule/:arid", rt.alertRulePutByService)
 			service.GET("/alert-rule/:arid", rt.alertRuleGet)

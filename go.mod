@@ -6,33 +6,34 @@ require (
 	gitee.com/chunanyong/dm v1.8.13
 	gitee.com/chunanyong/zorm v1.7.4
 	github.com/BurntSushi/toml v1.3.2
-	github.com/ClickHouse/clickhouse-go/v2 v2.15.0
-	github.com/coreos/go-oidc/v3 v3.8.0
+	github.com/ClickHouse/clickhouse-go/v2 v2.17.0
+	github.com/coreos/go-oidc/v3 v3.9.0
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/denisenkom/go-mssqldb v0.12.3
 	github.com/gin-contrib/pprof v1.4.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-ldap/ldap/v3 v3.4.6
 	github.com/go-sql-driver/mysql v1.7.1
-	github.com/golang-jwt/jwt/v5 v5.1.0
+	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/golang/snappy v0.0.4
-	github.com/google/uuid v1.4.0
+	github.com/google/uuid v1.5.0
 	github.com/koding/multiconfig v0.0.0-20171124222453-69c27309b2d7
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-isatty v0.0.20
-	github.com/mojocn/base64Captcha v1.3.5
-	github.com/pelletier/go-toml/v2 v2.1.0
+	github.com/mojocn/base64Captcha v1.3.6
+	github.com/patrickmn/go-cache v2.1.0+incompatible
+	github.com/pelletier/go-toml/v2 v2.1.1
 	github.com/prometheus/client_golang v1.17.0
 	github.com/prometheus/common v0.45.0
-	github.com/prometheus/prometheus v0.48.0
+	github.com/prometheus/prometheus v0.48.1
 	github.com/rakyll/statik v0.1.7
-	github.com/redis/go-redis/v9 v9.3.0
-	github.com/sijms/go-ora/v2 v2.7.23
+	github.com/redis/go-redis/v9 v9.3.1
+	github.com/sijms/go-ora/v2 v2.8.2
 	github.com/spaolacci/murmur3 v1.1.0
 	github.com/taosdata/driver-go/v3 v3.5.1
 	github.com/toolkits/pkg v1.3.7
 	golang.org/x/oauth2 v0.15.0
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.32.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -53,7 +54,7 @@ require (
 	github.com/go-asn1-ber/asn1-ber v1.5.5 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
 	github.com/go-faster/errors v0.6.1 // indirect
-	github.com/go-jose/go-jose/v3 v3.0.0 // indirect
+	github.com/go-jose/go-jose/v3 v3.0.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.14.0 // indirect
@@ -64,6 +65,7 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/grafana/regexp v0.0.0-20221122212121-6b5c0a4cb7fd // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.17.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
@@ -85,7 +87,7 @@ require (
 	go.uber.org/automaxprocs v1.5.3 // indirect
 	golang.org/x/arch v0.3.0 // indirect
 	golang.org/x/crypto v0.16.0 // indirect
-	golang.org/x/image v0.0.0-20190501045829-6d32002ffd75 // indirect
+	golang.org/x/image v0.13.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect

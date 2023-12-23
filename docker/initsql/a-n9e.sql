@@ -619,6 +619,10 @@ CREATE TABLE `notify_tpl`  (
   `channel` varchar(32)  NOT NULL,
   `name` varchar(255)  NOT NULL,
   `content` text  NOT NULL,
+  `create_at` INT DEFAULT 0 COMMENT 'create_at',
+  `create_by` VARCHAR(64) DEFAULT '' COMMENT 'create_by',
+  `update_at` INT DEFAULT 0 COMMENT 'update_at',
+  `update_by` VARCHAR(64) DEFAULT '' COMMENT 'update_by',
   PRIMARY KEY (`id`),
   UNIQUE KEY (`channel`)
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4;
