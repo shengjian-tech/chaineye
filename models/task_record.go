@@ -44,8 +44,8 @@ func (r *TaskRecord) Add(ctx *ctx.Context) error {
 }
 
 // list task, filter by group_id, create_by
-func TaskRecordTotal(ctx *ctx.Context, bgid, beginTime int64, createBy, query string) (int64, error) {
-	finder := zorm.NewSelectFinder(TaskRecordTableName, "count(*)").Append("WHERE create_at > ? and group_id = ?", beginTime, bgid)
+func TaskRecordTotal(ctx *ctx.Context, bgids []int64, beginTime int64, createBy, query string) (int64, error) {
+	finder := zorm.NewSelectFinder(TaskRecordTableName, "count(*)").Append("WHERE create_at > ? and group_id in (?)", beginTime, bgids)
 	//session := DB(ctx).Model(new(TaskRecord)).Where("create_at > ? and group_id = ?", beginTime, bgid)
 
 	if createBy != "" {
@@ -61,8 +61,8 @@ func TaskRecordTotal(ctx *ctx.Context, bgid, beginTime int64, createBy, query st
 	return Count(ctx, finder)
 }
 
-func TaskRecordGets(ctx *ctx.Context, bgid, beginTime int64, createBy, query string, limit, offset int) ([]*TaskRecord, error) {
-	finder := zorm.NewSelectFinder(TaskRecordTableName).Append("WHERE create_at > ? and group_id = ?", beginTime, bgid)
+func TaskRecordGets(ctx *ctx.Context, bgids []int64, beginTime int64, createBy, query string, limit, offset int) ([]*TaskRecord, error) {
+	finder := zorm.NewSelectFinder(TaskRecordTableName).Append("WHERE create_at > ? and group_id in (?)", beginTime, bgids)
 	//session := DB(ctx).Where("create_at > ? and group_id = ?", beginTime, bgid).Order("create_at desc").Limit(limit).Offset(offset)
 
 	if createBy != "" {

@@ -4,37 +4,38 @@ go 1.20
 
 require (
 	gitee.com/chunanyong/dm v1.8.13
-	gitee.com/chunanyong/zorm v1.7.3
+	gitee.com/chunanyong/zorm v1.7.4
 	github.com/BurntSushi/toml v1.3.2
-	github.com/ClickHouse/clickhouse-go/v2 v2.15.0
-	github.com/coreos/go-oidc/v3 v3.7.0
+	github.com/ClickHouse/clickhouse-go/v2 v2.17.0
+	github.com/coreos/go-oidc/v3 v3.9.0
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/denisenkom/go-mssqldb v0.12.3
 	github.com/gin-contrib/pprof v1.4.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-ldap/ldap/v3 v3.4.6
 	github.com/go-sql-driver/mysql v1.7.1
-	github.com/golang-jwt/jwt/v5 v5.1.0
+	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/golang/snappy v0.0.4
-	github.com/google/uuid v1.4.0
+	github.com/google/uuid v1.5.0
 	github.com/koding/multiconfig v0.0.0-20171124222453-69c27309b2d7
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-isatty v0.0.20
-	github.com/mojocn/base64Captcha v1.3.5
-	github.com/pelletier/go-toml/v2 v2.1.0
+	github.com/mojocn/base64Captcha v1.3.6
+	github.com/patrickmn/go-cache v2.1.0+incompatible
+	github.com/pelletier/go-toml/v2 v2.1.1
 	github.com/prometheus/client_golang v1.17.0
 	github.com/prometheus/common v0.45.0
-	github.com/prometheus/prometheus v0.48.0
+	github.com/prometheus/prometheus v0.48.1
 	github.com/rakyll/statik v0.1.7
-	github.com/redis/go-redis/v9 v9.3.0
-	github.com/sijms/go-ora/v2 v2.7.22
+	github.com/redis/go-redis/v9 v9.3.1
+	github.com/sijms/go-ora/v2 v2.8.3
 	github.com/spaolacci/murmur3 v1.1.0
 	github.com/taosdata/driver-go/v3 v3.5.1
-	github.com/toolkits/pkg v1.3.6
+	github.com/toolkits/pkg v1.3.7
 	github.com/xuperchain/xuper-sdk-go/v2 v2.0.1-0.20231114091031-2801116600a4
 	github.com/xuperchain/xuperchain v0.0.0-20230222031247-c6f8ca1cacff
-	golang.org/x/oauth2 v0.14.0
-	google.golang.org/protobuf v1.31.0
+	golang.org/x/oauth2 v0.15.0
+	google.golang.org/protobuf v1.32.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -65,7 +66,7 @@ require (
 	github.com/go-asn1-ber/asn1-ber v1.5.5 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
 	github.com/go-faster/errors v0.6.1 // indirect
-	github.com/go-jose/go-jose/v3 v3.0.0 // indirect
+	github.com/go-jose/go-jose/v3 v3.0.1 // indirect
 	github.com/go-kit/kit v0.12.0 // indirect
 	github.com/go-kit/log v0.2.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
@@ -80,6 +81,7 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/grafana/regexp v0.0.0-20221122212121-6b5c0a4cb7fd // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
 	github.com/gtank/merlin v0.1.1-0.20191105220539-8318aed1a79f // indirect
 	github.com/gtank/ristretto255 v0.1.2 // indirect
@@ -114,7 +116,6 @@ require (
 	github.com/multiformats/go-multihash v0.0.14 // indirect
 	github.com/multiformats/go-varint v0.0.6 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
-	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/paulmach/orb v0.10.0 // indirect
 	github.com/pelletier/go-toml v1.2.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.18 // indirect
@@ -146,10 +147,10 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.25.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/crypto v0.15.0 // indirect
-	golang.org/x/image v0.0.0-20190802002840-cff245a6509b // indirect
-	golang.org/x/net v0.18.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/crypto v0.16.0 // indirect
+	golang.org/x/image v0.13.0 // indirect
+	golang.org/x/net v0.19.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20231002182017-d307bd883b97 // indirect

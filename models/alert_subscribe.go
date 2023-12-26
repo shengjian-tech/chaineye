@@ -82,6 +82,13 @@ func AlertSubscribeGetsByService(ctx *ctx.Context) ([]AlertSubscribe, error) {
 	return lst, err
 }
 
+func AlertSubscribeGetsByBGIds(ctx *ctx.Context, bgIds []int64) (lst []AlertSubscribe, err error) {
+	//err = DB(ctx).Where("group_id in (?)", bgIds).Order("id desc").Find(&lst).Error
+	finder := zorm.NewSelectFinder(AlertSubscribeTableName).Append("WHERE group_id in (?) order by id desc ", bgIds)
+	err = zorm.Query(ctx.Ctx, finder, &lst, nil)
+	return
+}
+
 func AlertSubscribeGet(ctx *ctx.Context, where string, args ...interface{}) (*AlertSubscribe, error) {
 	lst := make([]AlertSubscribe, 0)
 	finder := zorm.NewSelectFinder(AlertSubscribeTableName)

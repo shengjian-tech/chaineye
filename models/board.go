@@ -208,6 +208,28 @@ func BoardGetsByGroupId(ctx *ctx.Context, groupId int64, query string) ([]Board,
 	return lst, err
 }
 
+func BoardGetsByBGIds(ctx *ctx.Context, gids []int64, query string) ([]Board, error) {
+	//session := DB(ctx).Where("group_id in (?)", gids).Order("name")
+	finder := zorm.NewSelectFinder(BoardTableName).Append("WHERE group_id in (?)", gids)
+	arr := strings.Fields(query)
+	if len(arr) > 0 {
+		for i := 0; i < len(arr); i++ {
+			if strings.HasPrefix(arr[i], "-") {
+				q := "%" + arr[i][1:] + "%"
+				finder.Append("and name not like ? and tags not like ?", q, q)
+			} else {
+				q := "%" + arr[i] + "%"
+				finder.Append("and (name like ? or tags like ?)", q, q)
+			}
+		}
+	}
+	finder.Append("order by name asc")
+	lst := make([]Board, 0)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := session.Find(&objs).Error
+	return lst, err
+}
+
 func BoardGets(ctx *ctx.Context, query, where string, args ...interface{}) ([]Board, error) {
 	finder := zorm.NewSelectFinder(BoardTableName).Append("WHERE 1=1")
 	//session := DB(ctx).Order("name")

@@ -78,8 +78,8 @@ func (c *ConfigCache) syncConfigs() error {
 
 	decryptMap, decryptErr := models.ConfigUserVariableGetDecryptMap(c.ctx, c.privateKey, c.passWord)
 	if decryptErr != nil {
-		dumper.PutSyncRecord("user_variables", start.Unix(), -1, -1, "failed to query records: "+err.Error())
-		//eturn errors.WithMessage(err, "failed to call ConfigUserVariableGetDecryptMap")
+		dumper.PutSyncRecord("user_variables", start.Unix(), -1, -1, "failed to query records: "+decryptErr.Error())
+		//return errors.WithMessage(err, "failed to call ConfigUserVariableGetDecryptMap")
 		return fmt.Errorf("failed to call ConfigUserVariableGetDecryptMap:%w", err)
 	}
 

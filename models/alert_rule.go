@@ -705,6 +705,22 @@ func AlertRuleGets(ctx *ctx.Context, groupId int64) ([]AlertRule, error) {
 	return lst, err
 }
 
+func AlertRuleGetsByBGIds(ctx *ctx.Context, bgids []int64) ([]AlertRule, error) {
+	//session := DB(ctx).Where("group_id in (?)", bgids).Order("name")
+	finder := zorm.NewSelectFinder(AlertRuleTableName).Append("WHERE group_id in (?) order by name asc ", bgids)
+
+	lst := make([]AlertRule, 0)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := session.Find(&lst).Error
+	if err == nil {
+		for i := 0; i < len(lst); i++ {
+			lst[i].DB2FE()
+		}
+	}
+
+	return lst, err
+}
+
 func AlertRuleGetsAll(ctx *ctx.Context) ([]*AlertRule, error) {
 	if !ctx.IsCenter {
 		lst, err := poster.GetByUrls[[]*AlertRule](ctx, "/v1/n9e/alert-rules?disabled=0")

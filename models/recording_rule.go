@@ -230,6 +230,21 @@ func RecordingRuleGets(ctx *ctx.Context, groupId int64) ([]RecordingRule, error)
 	return lst, err
 }
 
+func RecordingRuleGetsByBGIds(ctx *ctx.Context, bgIds []int64) ([]RecordingRule, error) {
+	//session := DB(ctx).Where("group_id in (?)", bgIds).Order("name")
+	finder := zorm.NewSelectFinder(RecordingRuleTableName).Append("WHERE group_id in (?) order by name asc", bgIds)
+	lst := make([]RecordingRule, 0)
+	err := zorm.Query(ctx.Ctx, finder, &lst, nil)
+	//err := session.Find(&lst).Error
+	if err == nil {
+		for i := 0; i < len(lst); i++ {
+			lst[i].DB2FE()
+		}
+	}
+
+	return lst, err
+}
+
 func RecordingRuleGet(ctx *ctx.Context, where string, regs ...interface{}) (*RecordingRule, error) {
 	finder := zorm.NewSelectFinder(RecordingRuleTableName)
 	AppendWhere(finder, where, regs...)

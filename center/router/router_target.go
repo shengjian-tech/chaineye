@@ -15,6 +15,7 @@ import (
 	"github.com/prometheus/common/model"
 	"github.com/toolkits/pkg/ginx"
 	"github.com/toolkits/pkg/logger"
+	"github.com/toolkits/pkg/str"
 )
 
 type TargetQuery struct {
@@ -42,15 +43,14 @@ func (rt *Router) targetGetsByHostFilter(c *gin.Context) {
 }
 
 func (rt *Router) targetGets(c *gin.Context) {
-	bgid := ginx.QueryInt64(c, "bgid", -1)
+	bgids := str.IdsInt64(ginx.QueryStr(c, "gids", ""), ",")
 	query := ginx.QueryStr(c, "query", "")
 	limit := ginx.QueryInt(c, "limit", 30)
 	downtime := ginx.QueryInt64(c, "downtime", 0)
 	dsIds := queryDatasourceIds(c)
 
-	var bgids []int64
 	var err error
-	if bgid == -1 {
+	if len(bgids) == 0 {
 		user := c.MustGet("user").(*models.User)
 		if !user.IsAdmin() {
 			// 如果是非 admin 用户，全部对象的情况，找到用户有权限的业务组
@@ -63,8 +63,6 @@ func (rt *Router) targetGets(c *gin.Context) {
 			// 将未分配业务组的对象也加入到列表中
 			bgids = append(bgids, 0)
 		}
-	} else {
-		bgids = append(bgids, bgid)
 	}
 
 	total, err := models.TargetTotal(rt.Ctx, bgids, dsIds, query, downtime)
@@ -120,6 +118,27 @@ func (rt *Router) targetGets(c *gin.Context) {
 	ginx.NewRender(c).Data(gin.H{
 		"list":  list,
 		"total": total,
+	}, nil)
+}
+
+func (rt *Router) targetExtendInfoByIdent(c *gin.Context) {
+	ident := ginx.QueryStr(c, "ident", "")
+	key := models.WrapExtendIdent(ident)
+	vals := storage.MGet(context.Background(), rt.Redis, []string{key})
+	if len(vals) > 0 {
+		extInfo := string(vals[0])
+		if extInfo == "null" {
+			extInfo = ""
+		}
+		ginx.NewRender(c).Data(gin.H{
+			"extend_info": extInfo,
+			"ident":       ident,
+		}, nil)
+		return
+	}
+	ginx.NewRender(c).Data(gin.H{
+		"extend_info": "",
+		"ident":       ident,
 	}, nil)
 }
 
@@ -315,7 +334,11 @@ func (rt *Router) targetUpdateBgid(c *gin.Context) {
 
 		// 机器里边存在未归组的，登录用户就需要是admin
 		if len(orphans) > 0 && !user.IsAdmin() {
-			ginx.Bomb(http.StatusForbidden, "No permission. Only admin can assign BG")
+			can, err := user.CheckPerm(rt.Ctx, "/targets/bind")
+			ginx.Dangerous(err)
+			if !can {
+				ginx.Bomb(http.StatusForbidden, "No permission. Only admin can assign BG")
+			}
 		}
 
 		reBelongs, err := models.IdentsFilter(rt.Ctx, f.Idents, "group_id > ?", 0)

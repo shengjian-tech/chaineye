@@ -17,25 +17,26 @@ const TargetTableName = "target"
 type Target struct {
 	// 引入默认的struct,隔离IEntityStruct的方法改动
 	zorm.EntityStruct
-	Id         int64             `json:"id" column:"id"`
-	GroupId    int64             `json:"group_id" column:"group_id"`
-	GroupObj   *BusiGroup        `json:"group_obj"`
-	Ident      string            `json:"ident" column:"ident"`
-	Note       string            `json:"note" column:"note"`
-	Tags       string            `json:"-" column:"tags"`
-	TagsJSON   []string          `json:"tags"`
-	TagsMap    map[string]string `json:"tags_maps"` // internal use, append tags to series
-	UpdateAt   int64             `json:"update_at" column:"update_at"`
-	HostIp     string            `json:"host_ip" column:"host_ip"` //ipv4，do not needs range select
-	UnixTime   int64             `json:"unixtime"`
-	Offset     int64             `json:"offset"`
-	TargetUp   float64           `json:"target_up"`
-	MemUtil    float64           `json:"mem_util"`
-	CpuNum     int               `json:"cpu_num"`
-	CpuUtil    float64           `json:"cpu_util"`
-	OS         string            `json:"os"`
-	Arch       string            `json:"arch"`
-	RemoteAddr string            `json:"remote_addr"`
+	Id           int64             `json:"id" column:"id"`
+	GroupId      int64             `json:"group_id" column:"group_id"`
+	GroupObj     *BusiGroup        `json:"group_obj"`
+	Ident        string            `json:"ident" column:"ident"`
+	Note         string            `json:"note" column:"note"`
+	Tags         string            `json:"-" column:"tags"`
+	TagsJSON     []string          `json:"tags"`
+	TagsMap      map[string]string `json:"tags_maps"` // internal use, append tags to series
+	UpdateAt     int64             `json:"update_at" column:"update_at"`
+	HostIp       string            `json:"host_ip" column:"host_ip"` //ipv4，do not needs range select
+	AgentVersion string            `json:"agent_version" column:"agent_version"`
+	UnixTime     int64             `json:"unixtime"`
+	Offset       int64             `json:"offset"`
+	TargetUp     float64           `json:"target_up"`
+	MemUtil      float64           `json:"mem_util"`
+	CpuNum       int               `json:"cpu_num"`
+	CpuUtil      float64           `json:"cpu_util"`
+	OS           string            `json:"os"`
+	Arch         string            `json:"arch"`
+	RemoteAddr   string            `json:"remote_addr"`
 }
 
 func (t *Target) GetTableName() string {
@@ -376,13 +377,16 @@ func (t *Target) DelTags(ctx *ctx.Context, tags []string) error {
 func (t *Target) FillTagsMap() {
 	t.TagsJSON = strings.Fields(t.Tags)
 	t.TagsMap = make(map[string]string)
+	m := make(map[string]string)
 	for _, item := range t.TagsJSON {
 		arr := strings.Split(item, "=")
 		if len(arr) != 2 {
 			continue
 		}
-		t.TagsMap[arr[0]] = arr[1]
+		m[arr[0]] = arr[1]
 	}
+
+	t.TagsMap = m
 }
 
 func (t *Target) FillMeta(meta *HostMeta) {

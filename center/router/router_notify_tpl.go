@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"html/template"
 	"strings"
+	"time"
 
+	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/center/cconf"
 	"github.com/ccfos/nightingale/v6/models"
 	"github.com/ccfos/nightingale/v6/pkg/tplx"
@@ -34,9 +36,21 @@ func (rt *Router) notifyTplGets(c *gin.Context) {
 }
 
 func (rt *Router) notifyTplUpdateContent(c *gin.Context) {
+	user := c.MustGet("user").(*models.User)
+
 	var f models.NotifyTpl
 	ginx.BindJSON(c, &f)
 	ginx.Dangerous(templateValidate(f))
+
+	notifyTpl, err := models.NotifyTplGet(rt.Ctx, f.Id)
+	ginx.Dangerous(err)
+
+	if notifyTpl.CreateBy != user.Username && !user.IsAdmin() {
+		ginx.Bomb(403, "no permission")
+	}
+
+	f.UpdateAt = time.Now().Unix()
+	f.UpdateBy = user.Username
 
 	ginx.NewRender(c).Message(f.UpdateContent(rt.Ctx))
 }
@@ -45,8 +59,29 @@ func (rt *Router) notifyTplUpdate(c *gin.Context) {
 	var f models.NotifyTpl
 	ginx.BindJSON(c, &f)
 	ginx.Dangerous(templateValidate(f))
+	user := c.MustGet("user").(*models.User)
 
-	ginx.NewRender(c).Message(f.Update(rt.Ctx))
+	notifyTpl, err := models.NotifyTplGet(rt.Ctx, f.Id)
+	ginx.Dangerous(err)
+
+	if notifyTpl.CreateBy != user.Username && !user.IsAdmin() {
+		ginx.Bomb(403, "no permission")
+	}
+
+	// get the count of the same channel and name but different id
+	finder := zorm.NewSelectFinder(models.NotifyTplTableName, "COUNT(*)").Append("WHERE channel = ? or name = ? and id <> ?", f.Channel, f.Name, f.Id)
+	count, err := models.Count(rt.Ctx, finder)
+	//count, err := models.Count(models.DB(rt.Ctx).Model(&models.NotifyTpl{}).Where("channel = ? or name = ? and id <> ?", f.Channel, f.Name, f.Id))
+	ginx.Dangerous(err)
+	if count != 0 {
+		ginx.Bomb(200, "Refuse to create duplicate channel or name")
+	}
+
+	notifyTpl.UpdateAt = time.Now().Unix()
+	notifyTpl.UpdateBy = user.Username
+	notifyTpl.Name = f.Name
+
+	ginx.NewRender(c).Message(notifyTpl.Update(rt.Ctx))
 }
 
 func templateValidate(f models.NotifyTpl) error {
@@ -132,7 +167,9 @@ func (rt *Router) notifyTplAdd(c *gin.Context) {
 	f.Channel = strings.TrimSpace(f.Channel)
 	ginx.Dangerous(templateValidate(f))
 
-	count, err := models.NotifyTplCountByChannel(rt.Ctx, f.Channel)
+	finder := zorm.NewSelectFinder(models.NotifyTplTableName, "COUNT(*)").Append("WHERE channel = ? or name = ?", f.Channel, f.Name)
+	count, err := models.Count(rt.Ctx, finder)
+	//count, err := models.Count(models.DB(rt.Ctx).Model(&models.NotifyTpl{}).Where("channel = ? or name = ?", f.Channel, f.Name))
 	ginx.Dangerous(err)
 	if count != 0 {
 		ginx.Bomb(200, "Refuse to create duplicate channel(unique)")
@@ -144,5 +181,14 @@ func (rt *Router) notifyTplAdd(c *gin.Context) {
 func (rt *Router) notifyTplDel(c *gin.Context) {
 	f := new(models.NotifyTpl)
 	id := ginx.UrlParamInt64(c, "id")
+	user := c.MustGet("user").(*models.User)
+
+	notifyTpl, err := models.NotifyTplGet(rt.Ctx, id)
+	ginx.Dangerous(err)
+
+	if notifyTpl.CreateBy != user.Username && !user.IsAdmin() {
+		ginx.Bomb(403, "no permission")
+	}
+
 	ginx.NewRender(c).Message(f.NotifyTplDelete(rt.Ctx, id))
 }

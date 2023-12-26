@@ -9,6 +9,7 @@ import (
 
 	"gitee.com/chunanyong/zorm"
 	"github.com/ccfos/nightingale/v6/alert/aconf"
+	"github.com/ccfos/nightingale/v6/alert/astats"
 	"github.com/ccfos/nightingale/v6/models"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/poster"
@@ -19,12 +20,14 @@ import (
 type Naming struct {
 	ctx             *ctx.Context
 	heartbeatConfig aconf.HeartbeatConfig
+	astats          *astats.Stats
 }
 
-func NewNaming(ctx *ctx.Context, heartbeat aconf.HeartbeatConfig) *Naming {
+func NewNaming(ctx *ctx.Context, heartbeat aconf.HeartbeatConfig, alertStats *astats.Stats) *Naming {
 	naming := &Naming{
 		ctx:             ctx,
 		heartbeatConfig: heartbeat,
+		astats:          alertStats,
 	}
 	naming.Heartbeats()
 	return naming
@@ -93,12 +96,14 @@ func (n *Naming) heartbeat() error {
 		err := models.AlertingEngineHeartbeatWithCluster(n.ctx, n.heartbeatConfig.Endpoint, n.heartbeatConfig.EngineName, 0)
 		if err != nil {
 			logger.Warningf("heartbeat with cluster %s err:%v", "", err)
+			n.astats.CounterHeartbeatErrorTotal.WithLabelValues().Inc()
 		}
 	} else {
 		for i := 0; i < len(datasourceIds); i++ {
 			err := models.AlertingEngineHeartbeatWithCluster(n.ctx, n.heartbeatConfig.Endpoint, n.heartbeatConfig.EngineName, datasourceIds[i])
 			if err != nil {
 				logger.Warningf("heartbeat with cluster %d err:%v", datasourceIds[i], err)
+				n.astats.CounterHeartbeatErrorTotal.WithLabelValues().Inc()
 			}
 		}
 	}
@@ -117,6 +122,7 @@ func (n *Naming) heartbeat() error {
 		servers, err := n.ActiveServers(datasourceIds[i])
 		if err != nil {
 			logger.Warningf("hearbeat %d get active server err:%v", datasourceIds[i], err)
+			n.astats.CounterHeartbeatErrorTotal.WithLabelValues().Inc()
 			continue
 		}
 
@@ -138,11 +144,13 @@ func (n *Naming) heartbeat() error {
 		err := models.AlertingEngineHeartbeatWithCluster(n.ctx, n.heartbeatConfig.Endpoint, n.heartbeatConfig.EngineName, HostDatasource)
 		if err != nil {
 			logger.Warningf("heartbeat with cluster %s err:%v", "", err)
+			n.astats.CounterHeartbeatErrorTotal.WithLabelValues().Inc()
 		}
 
 		servers, err := n.ActiveServers(HostDatasource)
 		if err != nil {
 			logger.Warningf("hearbeat %d get active server err:%v", HostDatasource, err)
+			n.astats.CounterHeartbeatErrorTotal.WithLabelValues().Inc()
 			return nil
 		}
 

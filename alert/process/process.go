@@ -18,7 +18,6 @@ import (
 	"github.com/ccfos/nightingale/v6/models"
 	"github.com/ccfos/nightingale/v6/pkg/ctx"
 	"github.com/ccfos/nightingale/v6/pkg/tplx"
-	"github.com/ccfos/nightingale/v6/prom"
 	"github.com/toolkits/pkg/logger"
 	"github.com/toolkits/pkg/str"
 )
@@ -67,9 +66,8 @@ type Processor struct {
 	alertMuteCache  *memsto.AlertMuteCacheType
 	datasourceCache *memsto.DatasourceCacheType
 
-	promClients *prom.PromClientMap
-	ctx         *ctx.Context
-	Stats       *astats.Stats
+	ctx   *ctx.Context
+	Stats *astats.Stats
 
 	HandleFireEventHook    HandleEventFunc
 	HandleRecoverEventHook HandleEventFunc
@@ -127,8 +125,10 @@ func (p *Processor) Handle(anomalyPoints []common.AnomalyPoint, from string, inh
 	cachedRule := p.atertRuleCache.Get(p.rule.Id)
 	if cachedRule == nil {
 		logger.Errorf("rule not found %+v", anomalyPoints)
+		p.Stats.CounterRuleEvalErrorTotal.WithLabelValues(fmt.Sprintf("%v", p.DatasourceId()), "handle_event").Inc()
 		return
 	}
+
 	p.rule = cachedRule
 	now := time.Now().Unix()
 	alertingKeys := map[string]struct{}{}
@@ -147,6 +147,8 @@ func (p *Processor) Handle(anomalyPoints []common.AnomalyPoint, from string, inh
 		}
 
 		if p.EventMuteHook(event) {
+			p.Stats.CounterMuteTotal.WithLabelValues(event.GroupName).Inc()
+			logger.Debugf("rule_eval:%s event:%v is muted by hook", p.Key(), event)
 			continue
 		}
 
@@ -171,6 +173,8 @@ func (p *Processor) BuildEvent(anomalyPoint common.AnomalyPoint, from string, no
 		dsName = ds.Name
 	}
 
+	bg := p.BusiGroupCache.GetByBusiGroupId(p.rule.GroupId)
+
 	event := p.rule.GenerateNewEvent(p.ctx)
 	event.TriggerTime = anomalyPoint.Timestamp
 	event.TagsMap = p.tagsMap
@@ -181,7 +185,7 @@ func (p *Processor) BuildEvent(anomalyPoint common.AnomalyPoint, from string, no
 	event.TargetNote = p.targetNote
 	event.TriggerValue = anomalyPoint.ReadableValue()
 	event.TagsJSON = p.tagsArr
-	event.GroupName = p.groupName
+	event.GroupName = bg.Name
 	event.Tags = strings.Join(p.tagsArr, ",,")
 	event.IsRecovered = false
 	event.Callbacks = p.rule.Callbacks
@@ -353,6 +357,7 @@ func (p *Processor) pushEventToQueue(e *models.AlertCurEvent) {
 	dispatch.LogEvent(e, "push_queue")
 	if !queue.EventQueue.PushFront(e) {
 		logger.Warningf("event_push_queue: queue is full, event:%+v", e)
+		p.Stats.CounterRuleEvalErrorTotal.WithLabelValues(fmt.Sprintf("%v", p.DatasourceId()), "push_event_queue").Inc()
 	}
 }
 
@@ -362,6 +367,7 @@ func (p *Processor) RecoverAlertCurEventFromDb() {
 	curEvents, err := models.AlertCurEventGetByRuleIdAndDsId(p.ctx, p.rule.Id, p.datasourceId)
 	if err != nil {
 		logger.Errorf("recover event from db for rule:%s failed, err:%s", p.Key(), err)
+		p.Stats.CounterRuleEvalErrorTotal.WithLabelValues(fmt.Sprintf("%v", p.DatasourceId()), "get_recover_event").Inc()
 		p.fires = NewAlertCurEventMap(nil)
 		return
 	}
