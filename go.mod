@@ -6,7 +6,7 @@ require (
 	gitee.com/chunanyong/dm v1.8.13
 	gitee.com/chunanyong/zorm v1.7.4
 	github.com/BurntSushi/toml v1.3.2
-	github.com/ClickHouse/clickhouse-go/v2 v2.17.0
+	github.com/ClickHouse/clickhouse-go/v2 v2.17.1
 	github.com/coreos/go-oidc/v3 v3.9.0
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/denisenkom/go-mssqldb v0.12.3
@@ -23,12 +23,12 @@ require (
 	github.com/mojocn/base64Captcha v1.3.6
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pelletier/go-toml/v2 v2.1.1
-	github.com/prometheus/client_golang v1.17.0
+	github.com/prometheus/client_golang v1.18.0
 	github.com/prometheus/common v0.45.0
 	github.com/prometheus/prometheus v0.48.1
 	github.com/rakyll/statik v0.1.7
 	github.com/redis/go-redis/v9 v9.3.1
-	github.com/sijms/go-ora/v2 v2.8.2
+	github.com/sijms/go-ora/v2 v2.8.3
 	github.com/spaolacci/murmur3 v1.1.0
 	github.com/taosdata/driver-go/v3 v3.5.1
 	github.com/toolkits/pkg v1.3.7
@@ -77,7 +77,7 @@ require (
 	github.com/pierrec/lz4/v4 v4.1.18 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
-	github.com/prometheus/procfs v0.11.1 // indirect
+	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
