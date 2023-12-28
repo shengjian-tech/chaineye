@@ -1,6 +1,6 @@
 package version
 
-var Version = "v6.7.0"
+var Version = "v6.7.2"
 
 /*
 var GithubVersion atomic.Value
