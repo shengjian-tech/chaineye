@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	gitee.com/chunanyong/dm v1.8.13
-	gitee.com/chunanyong/zorm v1.7.4
+	gitee.com/chunanyong/zorm v1.7.5
 	github.com/BurntSushi/toml v1.3.2
 	github.com/ClickHouse/clickhouse-go/v2 v2.17.1
 	github.com/coreos/go-oidc/v3 v3.9.0
