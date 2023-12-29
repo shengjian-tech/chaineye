@@ -3,8 +3,8 @@ cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 gitee.com/chunanyong/dm v1.8.13 h1:X33lDC4YuiWDapr5VMvgrG3XqfF4vfNcYt7c6scx35s=
 gitee.com/chunanyong/dm v1.8.13/go.mod h1:EPRJnuPFgbyOFgJ0TRYCTGzhq+ZT4wdyaj/GW/LLcNg=
-gitee.com/chunanyong/zorm v1.7.4 h1:2483mFEv69E7vtbFwYT5BbtzK5NvTfZFB8nVLHQ/nLk=
-gitee.com/chunanyong/zorm v1.7.4/go.mod h1:Sk+vofBqQXgNrDTe+nWhV6iMXhiBObFHdCo1MfvAdi8=
+gitee.com/chunanyong/zorm v1.7.5 h1:PBGbkAu4pOeEM3zhYpOKkFUjYOx7MlxjYCPoXk9ACj4=
+gitee.com/chunanyong/zorm v1.7.5/go.mod h1:Sk+vofBqQXgNrDTe+nWhV6iMXhiBObFHdCo1MfvAdi8=
 github.com/AndreasBriese/bbloom v0.0.0-20180913140656-343706a395b7/go.mod h1:bOvUY6CB00SOBii9/FifXqc0awNKxLFCL/+pkDPuyl8=
 github.com/AndreasBriese/bbloom v0.0.0-20190306092124-e2d15f34fcf9/go.mod h1:bOvUY6CB00SOBii9/FifXqc0awNKxLFCL/+pkDPuyl8=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v0.19.0/go.mod h1:h6H6c8enJmmocHUbLiiGY6sx7f9i+X3m1CHdd5c6Rdw=
