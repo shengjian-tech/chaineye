@@ -30,6 +30,14 @@
 
 
 ## 第三方集成
+
+### 1.拉取链眼项目
+
+```
+git clone https://github.com/shengjian-tech/chaineye.git
+```
+
+### 2.修改文件 
 修改此文件 [router_mw.go](./center/router/router_mw.go) 中方法jwtAuth()
 ```go
 func (rt *Router) jwtAuth() gin.HandlerFunc {
@@ -128,3 +136,42 @@ func userIdByToken(tokenString string, jwtSecret string) (string, error) {
 	return "", errors.New("token错误或过期")
 }
 ```
+### 3.导入工具包
+
+1.拉取项目改过之后,用go mod tidy下载依赖
+
+2.若是go mod tidy操作之后,如果`router_mw.go`出错,报找不放变量或者方法的错,可以看下导入的包是否正确
+
+`jwt`导入的是`"github.com/golang-jwt/jwt/v5"`.
+
+`gorsa`导入的是`"github.com/wenzhenxi/gorsa"`.
+### 4.修改配置文件
+
+进入到`chaineye/etc/config.toml`,修改配置文件.
+
+1.修改`SigningKey`
+
+`SigningKey = "xxxxxxxxxxxxxxxxxxxxxxxxxx"`,可以去配置文件中找到.
+
+2.修改`RsaPublickey`
+
+```
+# Rsa公钥配置,仅用于第三方集成,必须有-----BEGIN PUBLIC KEY-----\n和\n-----END PUBLIC KEY-----
+
+RsaPublickey = "-----BEGIN PUBLIC KEY-----\n你的项目公钥\n-----END PUBLIC KEY-----"
+
+```
+
+修改完配置文件后,进行编译,运行即可.
+
+## 6.前端适配
+
+进入链眼首页,看到缓冲中主要存入了三个值
+
+```
+curBusiId        #1
+access_token     #和我们项目的token值一样
+refresh_token	 #和我们项目的token值一样
+```
+
+在要集成的前端的缓存中存入这三个值就可以实现单点登录.
