@@ -65,7 +65,7 @@ func TaskTplTotal(ctx *ctx.Context, groupIds []int64, query string) (int64, erro
 
 func TaskTplGets(ctx *ctx.Context, groupIds []int64, query string, limit, offset int) ([]TaskTpl, error) {
 	//session := DB(ctx).Where("group_id = ?", groupId).Order("title").Limit(limit).Offset(offset)
-	finder := zorm.NewSelectFinder(TaskTplTableName).Append("WHERE group_id in (?) order by title asc ", groupIds)
+	finder := zorm.NewSelectFinder(TaskTplTableName).Append("WHERE group_id in (?) ", groupIds)
 
 	tpls := make([]TaskTpl, 0)
 	if query != "" {
